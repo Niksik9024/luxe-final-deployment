@@ -1,4 +1,3 @@
-
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -18,8 +17,15 @@ const firebaseConfig = {
   appId: "1:564643255112:web:6b4471069350181d94197d"
 };
 
-// Initialize Firebase
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+// Initialize Firebase for client-side usage
+// This pattern prevents re-initializing the app on every render in Next.js
+let app;
+if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+} else {
+    app = getApp();
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
