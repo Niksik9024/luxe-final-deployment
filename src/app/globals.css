@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%; /* True Black for deep immersion */
+    --foreground: 0 0% 98%; /* White text for high contrast */
+    
+    --card: 0 0% 4%; /* Near-black for cards */
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Primary is used for secondary buttons, outlines etc */
+    --primary: 340 82% 37%;   
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 63.9%;
+
+    /* A deep, warm, luxurious red for accents */
+    --accent: 340 82% 37%; /* #900C3F */
+    --accent-foreground: 0 0% 98%; /* White text on accent elements */
+
+    /* A slightly brighter red for destructive actions to distinguish them */
+    --destructive: 347 90% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 340 82% 37%; /* Red for focus rings */
+    
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-playfair), serif;
+  }
+}
+
+/* All custom carousel styles have been removed from this global file.
+  The styles are now properly encapsulated within the herocarousel.tsx component,
+  preventing conflicts.
+*/
