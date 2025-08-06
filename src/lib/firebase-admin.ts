@@ -6,42 +6,30 @@ import { getFirestore } from 'firebase-admin/firestore';
 // This is a robust pattern for initializing the Firebase Admin SDK in a Next.js environment.
 // It ensures that initialization happens only once.
 
-let adminApp: App;
-let adminDb: ReturnType<typeof getFirestore>;
+let adminApp: App | undefined;
+let adminDb: ReturnType<typeof getFirestore> | undefined;
 
-const serviceAccount = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-};
+try {
+    const serviceAccount = {
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    };
 
-// Check if all required service account details are present
-const hasServiceAccount = serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail;
-
-if (hasServiceAccount) {
-    try {
-        if (getApps().length > 0) {
-            adminApp = getApps()[0];
-        } else {
+    if (serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
+        if (!getApps().length) {
             adminApp = initializeApp({
                 credential: admin.credential.cert(serviceAccount),
             });
+        } else {
+            adminApp = getApps()[0];
         }
         adminDb = getFirestore(adminApp);
-    } catch (error: any) {
-        console.error("Firebase Admin Initialization Error:", error.message);
-        // Fallback to dummy objects if initialization fails
-        if (!adminApp!) {
-            adminApp = {} as App;
-        }
-        // @ts-ignore
-        adminDb = {};
+    } else {
+        console.warn("Firebase Admin credentials not provided in environment variables. Server-side Firestore operations will be disabled.");
     }
-} else {
-    console.warn("Firebase Admin credentials not provided in environment variables. Server-side Firestore operations will be disabled.");
-    // @ts-ignore
-    adminDb = {};
-    adminApp = {} as App;
+} catch (error: any) {
+    console.error("Firebase Admin Initialization Error:", error.message);
 }
 
 

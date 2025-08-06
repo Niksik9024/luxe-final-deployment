@@ -30,6 +30,16 @@ function shuffle(array: any[]) {
 
 
 async function getHomePageData() {
+    if (!adminDb) {
+        return { 
+            topVideos: [],
+            latestVideos: [],
+            promoImage: null,
+            upcomingVideo: null,
+            models: [],
+            randomizedImages: [],
+        };
+    }
     // Fetch published videos, ordered by date
     const videosQuery = adminDb.collection('videos')
         .where('status', '==', 'Published')
