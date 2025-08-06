@@ -42,5 +42,3 @@ export const PhotoCard = ({ photo, onImageClick }: PhotoCardProps) => {
     </Card>
   );
 };
-
-

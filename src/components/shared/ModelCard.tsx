@@ -59,4 +59,3 @@ ModelCard.Skeleton = function ModelCardSkeleton() {
         </div>
     )
 }
-

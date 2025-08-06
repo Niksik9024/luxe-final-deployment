@@ -151,5 +151,3 @@ export const ContentCard = ({
     </Card>
   );
 };
-
-      
