@@ -1,41 +1,72 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 0%; /* True Black for deep immersion */
-    --foreground: 0 0% 98%; /* White text for high contrast */
+    --background: 240 10% 3.9%; /* Dark Blue-Gray */
+    --foreground: 0 0% 98%; /* White text */
     
-    --card: 0 0% 4%; /* Near-black for cards */
+    --card: 240 4.8% 12%; /* Slightly lighter card background */
     --card-foreground: 0 0% 98%;
     
-    --popover: 0 0% 0%;
+    --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
     
-    /* Primary is used for secondary buttons, outlines etc */
-    --primary: 340 82% 37%;   
+    /* Primary is a vibrant, sophisticated purple */
+    --primary: 262.1 83.3% 57.8%;   
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 14.9%;
+    --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 63.9%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-    /* A deep, warm, luxurious red for accents */
-    --accent: 340 82% 37%; /* #900C3F */
-    --accent-foreground: 0 0% 98%; /* White text on accent elements */
+    /* Accent is a warm, luxurious gold/amber */
+    --accent: 35.1 91.2% 52.5%;
+    --accent-foreground: 240 10% 3.9%; /* Dark text on accent */
 
-    /* A slightly brighter red for destructive actions to distinguish them */
-    --destructive: 347 90% 55%;
+    /* Destructive remains a clear red */
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 340 82% 37%; /* Red for focus rings */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 262.1 83.3% 57.8%; /* Purple for focus rings */
     
     --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    
+    --card: 240 4.8% 12%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 0 0% 98%;
+    
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    
+    --accent: 35.1 91.2% 52.5%;
+    --accent-foreground: 240 10% 3.9%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 262.1 83.3% 57.8%;
   }
 }
 
@@ -50,8 +81,3 @@
     font-family: var(--font-playfair), serif;
   }
 }
-
-/* All custom carousel styles have been removed from this global file.
-  The styles are now properly encapsulated within the herocarousel.tsx component,
-  preventing conflicts.
-*/
