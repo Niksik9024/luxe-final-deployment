@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -17,49 +16,56 @@ import type { Metadata } from 'next';
 export const revalidate = 300;
 
 async function getVideoAndRelated(id: string): Promise<{ video: Video; models: Model[]; relatedVideos: Video[] } | null> {
-    const videoRef = adminDb.collection('videos').doc(id);
-    const videoSnap = await videoRef.get();
+    if (!adminDb) return null;
 
-    if (!videoSnap.exists || videoSnap.data()?.status !== 'Published') {
+    try {
+        const videoRef = adminDb.collection('videos').doc(id);
+        const videoSnap = await videoRef.get();
+
+        if (!videoSnap.exists || videoSnap.data()?.status !== 'Published') {
+            return null;
+        }
+
+        let video = { id: videoSnap.id, ...videoSnap.data() } as Video;
+        
+        // Fetch all models and all videos for in-code filtering
+        const [modelsSnap, allVideosSnap] = await Promise.all([
+            adminDb.collection('models').get(),
+            adminDb.collection('videos').where('status', '==', 'Published').get()
+        ]);
+        
+        const allModels = modelsSnap.docs.map(d => ({ ...d.data(), id: d.id } as Model));
+        const allPublishedVideos = allVideosSnap.docs.map(d => ({ ...d.data(), id: d.id } as Video));
+        
+        // Find the models for the current video, ensuring they still exist
+        const models = allModels.filter(m => video.models.includes(m.name));
+
+        // Find related videos by tag, excluding the current video
+        let relatedVideos = allPublishedVideos
+            .filter(v => v.id !== id)
+            .filter(v => v.tags.some(tag => video.tags.includes(tag)))
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            .slice(0, 3);
+            
+        // If not enough related videos by tag, fill with the latest videos
+        if (relatedVideos.length < 3) {
+            const existingIds = new Set(relatedVideos.map(v => v.id));
+            existingIds.add(id);
+
+            const latestVideos = allPublishedVideos
+                .filter(v => !existingIds.has(v.id))
+                .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            
+            const needed = 3 - relatedVideos.length;
+            relatedVideos.push(...latestVideos.slice(0, needed));
+        }
+
+
+        return { video, models, relatedVideos };
+    } catch(error) {
+        console.error("Error fetching video data:", error);
         return null;
     }
-
-    let video = { id: videoSnap.id, ...videoSnap.data() } as Video;
-    
-    // Fetch all models and all videos for in-code filtering
-    const [modelsSnap, allVideosSnap] = await Promise.all([
-        adminDb.collection('models').get(),
-        adminDb.collection('videos').where('status', '==', 'Published').get()
-    ]);
-    
-    const allModels = modelsSnap.docs.map(d => ({ ...d.data(), id: d.id } as Model));
-    const allPublishedVideos = allVideosSnap.docs.map(d => ({ ...d.data(), id: d.id } as Video));
-    
-    // Find the models for the current video, ensuring they still exist
-    const models = allModels.filter(m => video.models.includes(m.name));
-
-    // Find related videos by tag, excluding the current video
-    let relatedVideos = allPublishedVideos
-        .filter(v => v.id !== id)
-        .filter(v => v.tags.some(tag => video.tags.includes(tag)))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 3);
-        
-    // If not enough related videos by tag, fill with the latest videos
-    if (relatedVideos.length < 3) {
-        const existingIds = new Set(relatedVideos.map(v => v.id));
-        existingIds.add(id);
-
-        const latestVideos = allPublishedVideos
-            .filter(v => !existingIds.has(v.id))
-            .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        
-        const needed = 3 - relatedVideos.length;
-        relatedVideos.push(...latestVideos.slice(0, needed));
-    }
-
-
-    return { video, models, relatedVideos };
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {

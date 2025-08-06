@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -14,49 +13,55 @@ import type { Metadata } from 'next';
 export const revalidate = 300;
 
 async function getGalleryAndRelated(id: string): Promise<{ gallery: Gallery; models: Model[]; relatedGalleries: Gallery[] } | null> {
-    const galleryRef = adminDb.collection('galleries').doc(id);
-    const gallerySnap = await galleryRef.get();
+    if (!adminDb) return null;
+    try {
+        const galleryRef = adminDb.collection('galleries').doc(id);
+        const gallerySnap = await galleryRef.get();
 
-    if (!gallerySnap.exists || gallerySnap.data()?.status !== 'Published') {
+        if (!gallerySnap.exists || gallerySnap.data()?.status !== 'Published') {
+            return null;
+        }
+
+        const gallery = { id: gallerySnap.id, ...gallerySnap.data() } as Gallery;
+
+        // Fetch all models and all galleries for in-code filtering
+        const [modelsSnap, allGalleriesSnap] = await Promise.all([
+            adminDb.collection('models').get(),
+            adminDb.collection('galleries').where('status', '==', 'Published').get()
+        ]);
+
+        const allModels = modelsSnap.docs.map(d => ({ ...d.data(), id: d.id } as Model));
+        const allPublishedGalleries = allGalleriesSnap.docs.map(d => ({ ...d.data(), id: d.id } as Gallery));
+
+        // Find models for the current gallery, ensuring they still exist
+        const models = allModels.filter(m => gallery.models.includes(m.name));
+
+        // Find related galleries
+        const relatedGalleries = allPublishedGalleries
+            .filter(g => g.id !== id) // Exclude current gallery
+            .filter(g => g.tags.some(tag => gallery.tags.includes(tag))) // Match by tag
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by date
+            .slice(0, 10); // Take top 10 for carousel
+            
+        // If not enough related by tag, fill with latest galleries
+        if (relatedGalleries.length < 10) {
+            const relatedIds = new Set(relatedGalleries.map(g => g.id));
+            relatedIds.add(id);
+
+            const latestGalleries = allPublishedGalleries
+                .filter(g => !relatedIds.has(g.id))
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            
+            const needed = 10 - relatedGalleries.length;
+            relatedGalleries.push(...latestGalleries.slice(0, needed));
+        }
+
+
+        return { gallery, models, relatedGalleries };
+    } catch (error) {
+        console.error("Error fetching gallery data:", error);
         return null;
     }
-
-    const gallery = { id: gallerySnap.id, ...gallerySnap.data() } as Gallery;
-
-    // Fetch all models and all galleries for in-code filtering
-    const [modelsSnap, allGalleriesSnap] = await Promise.all([
-        adminDb.collection('models').get(),
-        adminDb.collection('galleries').where('status', '==', 'Published').get()
-    ]);
-
-    const allModels = modelsSnap.docs.map(d => ({ ...d.data(), id: d.id } as Model));
-    const allPublishedGalleries = allGalleriesSnap.docs.map(d => ({ ...d.data(), id: d.id } as Gallery));
-
-    // Find models for the current gallery, ensuring they still exist
-    const models = allModels.filter(m => gallery.models.includes(m.name));
-
-    // Find related galleries
-    const relatedGalleries = allPublishedGalleries
-        .filter(g => g.id !== id) // Exclude current gallery
-        .filter(g => g.tags.some(tag => gallery.tags.includes(tag))) // Match by tag
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) // Sort by date
-        .slice(0, 10); // Take top 10 for carousel
-        
-    // If not enough related by tag, fill with latest galleries
-    if (relatedGalleries.length < 10) {
-        const relatedIds = new Set(relatedGalleries.map(g => g.id));
-        relatedIds.add(id);
-
-        const latestGalleries = allPublishedGalleries
-            .filter(g => !relatedIds.has(g.id))
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        
-        const needed = 10 - relatedGalleries.length;
-        relatedGalleries.push(...latestGalleries.slice(0, needed));
-    }
-
-
-    return { gallery, models, relatedGalleries };
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {

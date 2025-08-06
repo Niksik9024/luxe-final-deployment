@@ -1,5 +1,4 @@
 
-
 import React, { Suspense } from 'react';
 import { ModelCard } from '@/components/shared/ModelCard';
 import { PaginationControls } from '@/components/shared/PaginationControls';
@@ -13,23 +12,29 @@ export const revalidate = 300;
 const MODELS_PER_PAGE = 18;
 
 async function getModels(page: number): Promise<{ models: Model[], totalPages: number}> {
-    const modelsRef = adminDb.collection("models");
-    
-    // Optimized Count Query
-    const countSnap = await modelsRef.count().get();
-    const totalCount = countSnap.data().count;
-    const totalPages = Math.ceil(totalCount / MODELS_PER_PAGE);
+    if (!adminDb) return { models: [], totalPages: 0 };
+    try {
+        const modelsRef = adminDb.collection("models");
+        
+        // Optimized Count Query
+        const countSnap = await modelsRef.count().get();
+        const totalCount = countSnap.data().count;
+        const totalPages = Math.ceil(totalCount / MODELS_PER_PAGE);
 
-    // Optimized Data Query with pagination
-    const modelsSnap = await modelsRef
-        .orderBy("name")
-        .limit(MODELS_PER_PAGE)
-        .offset((page - 1) * MODELS_PER_PAGE)
-        .get();
+        // Optimized Data Query with pagination
+        const modelsSnap = await modelsRef
+            .orderBy("name")
+            .limit(MODELS_PER_PAGE)
+            .offset((page - 1) * MODELS_PER_PAGE)
+            .get();
 
-    const models = modelsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Model));
-    
-    return { models, totalPages };
+        const models = modelsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Model));
+        
+        return { models, totalPages };
+    } catch(error) {
+        console.error("Error fetching models:", error);
+        return { models: [], totalPages: 0 };
+    }
 }
 
 function ModelsGridSkeleton() {

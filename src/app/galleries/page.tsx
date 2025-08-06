@@ -1,5 +1,4 @@
 
-
 import React, { Suspense } from 'react';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Gallery } from '@/lib/types';
@@ -12,33 +11,39 @@ export const revalidate = 300;
 const GALLERIES_PER_PAGE = 18;
 
 async function getGalleries(page: number): Promise<{ galleries: Gallery[], totalPages: number }> {
-    const galleriesRef = adminDb.collection("galleries");
-    
-    // Optimized Query: Filter by status in Firestore
-    const publishedQuery = galleriesRef.where('status', '==', 'Published');
+    if (!adminDb) return { galleries: [], totalPages: 0 };
+    try {
+        const galleriesRef = adminDb.collection("galleries");
+        
+        // Optimized Query: Filter by status in Firestore
+        const publishedQuery = galleriesRef.where('status', '==', 'Published');
 
-    // Get the total count for pagination
-    const countSnapshot = await publishedQuery.count().get();
-    const totalCount = countSnapshot.data().count;
-    const totalPages = Math.ceil(totalCount / GALLERIES_PER_PAGE);
+        // Get the total count for pagination
+        const countSnapshot = await publishedQuery.count().get();
+        const totalCount = countSnapshot.data().count;
+        const totalPages = Math.ceil(totalCount / GALLERIES_PER_PAGE);
 
-    // Fetch only the documents for the current page
-    const querySnapshot = await publishedQuery
-        .orderBy('date', 'desc')
-        .limit(GALLERIES_PER_PAGE)
-        .offset((page - 1) * GALLERIES_PER_PAGE)
-        .get();
+        // Fetch only the documents for the current page
+        const querySnapshot = await publishedQuery
+            .orderBy('date', 'desc')
+            .limit(GALLERIES_PER_PAGE)
+            .offset((page - 1) * GALLERIES_PER_PAGE)
+            .get();
 
-    const galleries = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return { 
-            id: doc.id, 
-            ...data,
-            date: (data.date?.toDate ? data.date.toDate() : new Date(data.date)).toISOString(),
-        } as Gallery
-    });
+        const galleries = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return { 
+                id: doc.id, 
+                ...data,
+                date: (data.date?.toDate ? data.date.toDate() : new Date(data.date)).toISOString(),
+            } as Gallery
+        });
 
-    return { galleries, totalPages };
+        return { galleries, totalPages };
+    } catch(error) {
+        console.error("Error fetching galleries:", error);
+        return { galleries: [], totalPages: 0 };
+    }
 }
 
 function GalleriesPageSkeleton() {

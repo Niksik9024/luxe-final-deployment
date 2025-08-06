@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -16,37 +15,44 @@ import DOMPurify from 'isomorphic-dompurify';
 export const revalidate = 300;
 
 async function getModelAndContent(id: string): Promise<{ model: Model, videos: Video[], galleries: Gallery[] } | null> {
-    const modelRef = adminDb.collection('models').doc(id);
-    const modelSnap = await modelRef.get();
+    if (!adminDb) return null;
+    
+    try {
+        const modelRef = adminDb.collection('models').doc(id);
+        const modelSnap = await modelRef.get();
 
-    if (!modelSnap.exists) {
+        if (!modelSnap.exists) {
+            return null;
+        }
+
+        const model = { id: modelSnap.id, ...modelSnap.data() } as Model;
+
+        const videosQuery = adminDb.collection('videos')
+            .where('models', 'array-contains', model.name)
+            .where('status', '==', 'Published');
+            
+        const galleriesQuery = adminDb.collection('galleries')
+            .where('models', 'array-contains', model.name)
+            .where('status', '==', 'Published');
+
+        const [videosSnap, galleriesSnap] = await Promise.all([
+            videosQuery.get(),
+            galleriesQuery.get(),
+        ]);
+        
+        const videos = videosSnap.docs
+            .map(d => ({ ...d.data(), id: d.id } as Video))
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        const galleries = galleriesSnap.docs
+            .map(d => ({ ...d.data(), id: d.id } as Gallery))
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        return { model, videos, galleries };
+    } catch(error) {
+        console.error("Error fetching model data:", error);
         return null;
     }
-
-    const model = { id: modelSnap.id, ...modelSnap.data() } as Model;
-
-    const videosQuery = adminDb.collection('videos')
-        .where('models', 'array-contains', model.name)
-        .where('status', '==', 'Published');
-        
-    const galleriesQuery = adminDb.collection('galleries')
-        .where('models', 'array-contains', model.name)
-        .where('status', '==', 'Published');
-
-    const [videosSnap, galleriesSnap] = await Promise.all([
-        videosQuery.get(),
-        galleriesQuery.get(),
-    ]);
-    
-    const videos = videosSnap.docs
-        .map(d => ({ ...d.data(), id: d.id } as Video))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    const galleries = galleriesSnap.docs
-        .map(d => ({ ...d.data(), id: d.id } as Gallery))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    return { model, videos, galleries };
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {

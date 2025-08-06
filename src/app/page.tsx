@@ -39,54 +39,67 @@ async function getHomePageData() {
             randomizedImages: [],
         };
     }
-    // Fetch published videos, ordered by date
-    const videosQuery = adminDb.collection('videos')
-        .where('status', '==', 'Published')
-        .orderBy('date', 'desc');
-    
-    // Fetch published galleries, ordered by date
-    const galleriesQuery = adminDb.collection('galleries')
-        .where('status', '==', 'Published')
-        .orderBy('date', 'desc');
-
-    const modelsQuery = adminDb.collection('models').get();
-
-    const [
-      videosSnap,
-      galleriesSnap,
-      modelsSnap,
-    ] = await Promise.all([
-        videosQuery.get(),
-        galleriesQuery.get(),
-        modelsQuery,
-    ]);
-
-    const allPublishedVideos = videosSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Video));
+    try {
+        // Fetch published videos, ordered by date
+        const videosQuery = adminDb.collection('videos')
+            .where('status', '==', 'Published')
+            .orderBy('date', 'desc');
         
-    const allPublishedGalleries = galleriesSnap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Gallery));
-    
-    const topVideos = allPublishedVideos.slice(0, 3);
-    const latestVideos = allPublishedVideos.slice(0, 6);
-    
-    const promoImage = allPublishedGalleries.length > 0 ? allPublishedGalleries[0] : null;
-    const randomizedImages = allPublishedGalleries.slice(0, 6);
-    
-    const upcomingVideo = allPublishedVideos.find(v => v.id !== (allPublishedVideos.find(v => v.isFeatured) || allPublishedVideos[0])?.id) || (allPublishedVideos.length > 1 ? allPublishedVideos[1] : null);
-    
-    // Fetch and shuffle all models
-    const allModels = modelsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Model));
-    const randomizedModels = shuffle(allModels);
+        // Fetch published galleries, ordered by date
+        const galleriesQuery = adminDb.collection('galleries')
+            .where('status', '==', 'Published')
+            .orderBy('date', 'desc');
 
-    return { 
-        topVideos,
-        latestVideos,
-        promoImage,
-        upcomingVideo,
-        models: randomizedModels, // Pass the shuffled array
-        randomizedImages,
-    };
+        const modelsQuery = adminDb.collection('models').get();
+
+        const [
+          videosSnap,
+          galleriesSnap,
+          modelsSnap,
+        ] = await Promise.all([
+            videosQuery.get(),
+            galleriesQuery.get(),
+            modelsQuery,
+        ]);
+
+        const allPublishedVideos = videosSnap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Video));
+            
+        const allPublishedGalleries = galleriesSnap.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Gallery));
+        
+        const topVideos = allPublishedVideos.slice(0, 3);
+        const latestVideos = allPublishedVideos.slice(0, 6);
+        
+        const promoImage = allPublishedGalleries.length > 0 ? allPublishedGalleries[0] : null;
+        const randomizedImages = allPublishedGalleries.slice(0, 6);
+        
+        const upcomingVideo = allPublishedVideos.find(v => v.id !== (allPublishedVideos.find(v => v.isFeatured) || allPublishedVideos[0])?.id) || (allPublishedVideos.length > 1 ? allPublishedVideos[1] : null);
+        
+        // Fetch and shuffle all models
+        const allModels = modelsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Model));
+        const randomizedModels = shuffle(allModels);
+
+        return { 
+            topVideos,
+            latestVideos,
+            promoImage,
+            upcomingVideo,
+            models: randomizedModels, // Pass the shuffled array
+            randomizedImages,
+        };
+    } catch (error) {
+        console.error("Error fetching homepage data:", error);
+        // Return empty state to prevent crashing the page
+        return { 
+            topVideos: [],
+            latestVideos: [],
+            promoImage: null,
+            upcomingVideo: null,
+            models: [],
+            randomizedImages: [],
+        };
+    }
 }
 
 const PlaceholderCard = ({ text, hint }: { text: string, hint: string }) => (

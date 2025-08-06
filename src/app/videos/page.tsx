@@ -1,5 +1,4 @@
 
-
 import React, { Suspense } from 'react';
 import type { Video } from '@/lib/types';
 import { adminDb } from '@/lib/firebase-admin';
@@ -12,33 +11,39 @@ export const revalidate = 300;
 const VIDEOS_PER_PAGE = 12;
 
 async function getVideos(page: number): Promise<{ videos: Video[], totalPages: number }> {
-    const videosRef = adminDb.collection("videos");
+    if (!adminDb) return { videos: [], totalPages: 0 };
+    try {
+        const videosRef = adminDb.collection("videos");
 
-    // Optimized Query: Filter by status in Firestore
-    const publishedQuery = videosRef.where('status', '==', 'Published');
-    
-    // Get total count for pagination
-    const countSnapshot = await publishedQuery.count().get();
-    const totalCount = countSnapshot.data().count;
-    const totalPages = Math.ceil(totalCount / VIDEOS_PER_PAGE);
+        // Optimized Query: Filter by status in Firestore
+        const publishedQuery = videosRef.where('status', '==', 'Published');
+        
+        // Get total count for pagination
+        const countSnapshot = await publishedQuery.count().get();
+        const totalCount = countSnapshot.data().count;
+        const totalPages = Math.ceil(totalCount / VIDEOS_PER_PAGE);
 
-    // Fetch only the documents for the current page
-    const querySnapshot = await publishedQuery
-        .orderBy('date', 'desc')
-        .limit(VIDEOS_PER_PAGE)
-        .offset((page - 1) * VIDEOS_PER_PAGE)
-        .get();
+        // Fetch only the documents for the current page
+        const querySnapshot = await publishedQuery
+            .orderBy('date', 'desc')
+            .limit(VIDEOS_PER_PAGE)
+            .offset((page - 1) * VIDEOS_PER_PAGE)
+            .get();
 
-    const videos = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return { 
-            id: doc.id, 
-            ...data,
-            date: (data.date.toDate ? data.date.toDate() : new Date(data.date)).toISOString(),
-        } as Video;
-    });
-    
-    return { videos, totalPages };
+        const videos = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return { 
+                id: doc.id, 
+                ...data,
+                date: (data.date.toDate ? data.date.toDate() : new Date(data.date)).toISOString(),
+            } as Video;
+        });
+        
+        return { videos, totalPages };
+    } catch(error) {
+        console.error("Error fetching videos:", error);
+        return { videos: [], totalPages: 0 };
+    }
 }
 
 function VideosPageSkeleton() {
