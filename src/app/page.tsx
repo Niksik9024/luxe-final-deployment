@@ -148,8 +148,8 @@ export default async function Home() {
          ) : (
             <Link href={`/galleries/${promoImage.id}`} className="block w-full h-full group">
                 <Image
-                src={promoImage.image}
-                alt="Promotional banner"
+                src={promoImage.image || 'https://placehold.co/1200x600/000000/FFFFFF/png?text=Luxe'}
+                alt={promoImage.title || 'Promotional banner'}
                 fill
                 className="object-cover"
                 data-ai-hint="luxury product"
