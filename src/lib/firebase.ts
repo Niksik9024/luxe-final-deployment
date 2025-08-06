@@ -12,7 +12,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAHMWZSIOtTWtZ0UENJoOmkankEVop1s1I",
   authDomain: "luxe-cqmea.firebaseapp.com",
   projectId: "luxe-cqmea",
-  storageBucket: "luxe-cqmea.firebasestorage.app",
+  storageBucket: "luxe-cqmea.appspot.com",
   messagingSenderId: "564643255112",
   appId: "1:564643255112:web:6b4471069350181d94197d"
 };
