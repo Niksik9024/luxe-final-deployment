@@ -1,4 +1,5 @@
 
+
 import React, { Suspense } from 'react';
 import { ModelCard } from '@/components/shared/ModelCard';
 import { PaginationControls } from '@/components/shared/PaginationControls';
