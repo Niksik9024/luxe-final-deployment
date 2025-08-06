@@ -3,7 +3,6 @@
 // Flows will be imported for their side effects in this file.
 import './flows/recommend';
 import './flows/generate-description';
-import './flows/generate-fun-facts';
 import './flows/generate-avatar';
 import './flows/util-flows';
 import './flows/perform-search';

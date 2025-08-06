@@ -10,8 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { adminDb } from '@/lib/firebase-admin';
 import { z } from 'genkit';
-import type { ContentCategory } from '@/lib/types'
-import type { SeedDatabaseOutput } from '@/ai/schemas/description';
+import type { SeedDatabaseOutput, ContentCategory } from '@/ai/schemas/description';
 import { SeedDatabaseOutputSchema } from '@/ai/schemas/description';
 
 

@@ -4,6 +4,9 @@
 import { z } from 'genkit';
 import type { Video, Gallery, Photo, Favorite, Model } from '@/lib/types';
 
+export const ContentCategorySchema = z.enum(['fashion', 'nature', 'urban', 'art', 'cinematic', 'lifestyle', 'technology', 'monochrome']);
+export type ContentCategory = z.infer<typeof ContentCategorySchema>;
+
 export const GenerateDescriptionInputSchema = z.object({
     title: z.string().describe('The title of the content.'),
     models: z.array(z.string()).describe('A list of models featured in the content.'),
@@ -63,17 +66,6 @@ export const GenerateAvatarOutputSchema = z.object({
   imageUrl: z.string().url().describe("The data URI of the generated image. Expected format: 'data:image/png;base64,<encoded_data>'."),
 });
 export type GenerateAvatarOutput = z.infer<typeof GenerateAvatarOutputSchema>;
-
-
-export const FunFactsInputSchema = z.object({
-  modelName: z.string().describe('The name of the fashion model.'),
-});
-export type FunFactsInput = z.infer<typeof FunFactsInputSchema>;
-
-export const FunFactsOutputSchema = z.object({
-  facts: z.array(z.string()).describe('An array of 3-4 interesting, flirty, or surprising "fun facts" about the model.'),
-});
-export type FunFactsOutput = z.infer<typeof FunFactsOutputSchema>;
 
 
 export const GetFavoriteDetailsInputSchema = z.object({
