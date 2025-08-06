@@ -1,5 +1,4 @@
 
-'use server';
 
 import admin from 'firebase-admin';
 import { getApps, initializeApp, App } from 'firebase-admin/app';
