@@ -11,21 +11,8 @@ import { ai } from '@/ai/genkit';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Favorite, Video, Gallery, Photo } from '@/lib/types';
 import { z } from 'genkit';
-
-
-const GetFavoriteDetailsInputSchema = z.object({
-  userId: z.string().describe("The ID of the user whose favorites are being fetched."),
-  favorites: z.array(z.custom<Favorite>()).describe("An array of the user's favorite references, containing id and type."),
-});
-
-const FavoriteDetailsSchema = z.object({
-    videos: z.array(z.custom<Video>()),
-    galleries: z.array(z.custom<Gallery>()),
-    photos: z.array(z.custom<Photo>()),
-});
-
-export type GetFavoriteDetailsInput = z.infer<typeof GetFavoriteDetailsInputSchema>;
-export type FavoriteDetails = z.infer<typeof FavoriteDetailsSchema>;
+import type { GetFavoriteDetailsInput, FavoriteDetails } from '@/ai/schemas/description';
+import { GetFavoriteDetailsInputSchema, FavoriteDetailsSchema } from '@/ai/schemas/description';
 
 
 export async function getFavoriteDetails(input: GetFavoriteDetailsInput): Promise<FavoriteDetails> {

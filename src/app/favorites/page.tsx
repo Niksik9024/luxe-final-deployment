@@ -13,7 +13,8 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore'
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoCard } from '@/components/shared/PhotoCard';
-import { getFavoriteDetails, type FavoriteDetails } from '@/ai/flows/get-favorite-details';
+import { getFavoriteDetails } from '@/ai/flows/get-favorite-details';
+import type { FavoriteDetails } from '@/ai/schemas/description';
 
 
 export default function FavoritesPage() {

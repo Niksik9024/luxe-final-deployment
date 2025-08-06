@@ -11,13 +11,9 @@ import { ai } from '@/ai/genkit';
 import { adminDb } from '@/lib/firebase-admin';
 import { z } from 'genkit';
 import type { ContentCategory } from '@/lib/types'
+import type { SeedDatabaseOutput } from '@/ai/schemas/description';
+import { SeedDatabaseOutputSchema } from '@/ai/schemas/description';
 
-const SeedDatabaseOutputSchema = z.object({
-    success: z.boolean(),
-    message: z.string(),
-});
-
-export type SeedDatabaseOutput = z.infer<typeof SeedDatabaseOutputSchema>;
 
 export async function seedDatabase(): Promise<SeedDatabaseOutput> {
     return seedDatabaseFlow(null);
@@ -142,5 +138,3 @@ const seedDatabaseFlow = ai.defineFlow(
         }
     }
 );
-
-      

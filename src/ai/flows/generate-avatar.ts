@@ -10,17 +10,9 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import type { GenerateAvatarInput, GenerateAvatarOutput } from '@/ai/schemas/description';
+import { GenerateAvatarInputSchema, GenerateAvatarOutputSchema } from '@/ai/schemas/description';
 
-const GenerateAvatarInputSchema = z.object({
-  prompt: z.string().describe('A descriptive prompt for generating the model avatar image.'),
-});
-
-const GenerateAvatarOutputSchema = z.object({
-  imageUrl: z.string().url().describe("The data URI of the generated image. Expected format: 'data:image/png;base64,<encoded_data>'."),
-});
-
-export type GenerateAvatarInput = z.infer<typeof GenerateAvatarInputSchema>;
-export type GenerateAvatarOutput = z.infer<typeof GenerateAvatarOutputSchema>;
 
 export async function generateAvatar(input: GenerateAvatarInput): Promise<GenerateAvatarOutput> {
   return generateAvatarFlow(input);

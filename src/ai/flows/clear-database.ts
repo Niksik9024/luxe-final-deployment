@@ -10,13 +10,8 @@
 import { ai } from '@/ai/genkit';
 import { adminDb } from '@/lib/firebase-admin';
 import { z } from 'genkit';
-
-const ClearDatabaseOutputSchema = z.object({
-    success: z.boolean(),
-    message: z.string(),
-});
-
-export type ClearDatabaseOutput = z.infer<typeof ClearDatabaseOutputSchema>;
+import type { ClearDatabaseOutput } from '@/ai/schemas/description';
+import { ClearDatabaseOutputSchema } from '@/ai/schemas/description';
 
 export async function clearDatabase(): Promise<ClearDatabaseOutput> {
     return clearDatabaseFlow(null);

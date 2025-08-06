@@ -9,7 +9,8 @@ import { Search, Sparkles, AlertTriangle, SlidersHorizontal, Loader2 } from 'luc
 import type { Video, Gallery, Model } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { performSearch, PerformSearchOutput } from '@/ai/flows/perform-search';
+import { performSearch } from '@/ai/flows/perform-search';
+import type { PerformSearchOutput } from '@/ai/schemas/description';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from '@/components/ui/separator';
 

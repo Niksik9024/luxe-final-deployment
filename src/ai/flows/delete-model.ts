@@ -13,17 +13,9 @@ import { adminDb } from '@/lib/firebase-admin';
 import type { Video, Gallery } from '@/lib/types';
 import { z } from 'genkit';
 import { FieldValue } from 'firebase-admin/firestore';
+import type { DeleteModelInput, DeleteModelOutput } from '@/ai/schemas/description';
+import { DeleteModelInputSchema, DeleteModelOutputSchema } from '@/ai/schemas/description';
 
-const DeleteModelInputSchema = z.object({
-  modelId: z.string().describe('The ID of the model to be deleted.'),
-});
-export type DeleteModelInput = z.infer<typeof DeleteModelInputSchema>;
-
-const DeleteModelOutputSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
-export type DeleteModelOutput = z.infer<typeof DeleteModelOutputSchema>;
 
 export async function deleteModel(input: DeleteModelInput): Promise<DeleteModelOutput> {
   return deleteModelFlow(input);

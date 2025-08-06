@@ -15,21 +15,9 @@ import { z } from 'genkit';
 import { adminDb } from '@/lib/firebase-admin';
 import type { Video, Gallery, Model } from '@/lib/types';
 import type { Query } from 'firebase-admin/firestore';
+import type { PerformSearchInput, PerformSearchOutput } from '@/ai/schemas/description';
+import { PerformSearchInputSchema, PerformSearchOutputSchema } from '@/ai/schemas/description';
 
-const PerformSearchInputSchema = z.object({
-  query: z.string().optional().describe('The user\'s natural language search query.'),
-  type: z.enum(['all', 'videos', 'galleries', 'models']).optional().describe('The type of content to search for.'),
-  category: z.string().optional().describe('The category to filter content by.'),
-});
-
-const PerformSearchOutputSchema = z.object({
-    videos: z.array(z.custom<Video>()),
-    galleries: z.array(z.custom<Gallery>()),
-    models: z.array(z.custom<Model>()),
-});
-
-export type PerformSearchInput = z.infer<typeof PerformSearchInputSchema>;
-export type PerformSearchOutput = z.infer<typeof PerformSearchOutputSchema>;
 
 export async function performSearch(input: PerformSearchInput): Promise<PerformSearchOutput> {
   return performSearchFlow(input);

@@ -11,24 +11,9 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { Video, Gallery } from '@/lib/types';
+import type { RecommendInput, RecommendOutput } from '@/ai/schemas/description';
+import { RecommendInputSchema, RecommendOutputSchema } from '@/ai/schemas/description';
 
-const BaseContentSchema = z.object({
-    id: z.string(),
-    title: z.string(),
-    description: z.string(),
-    models: z.array(z.string()),
-    tags: z.array(z.string()),
-});
-
-const RecommendInputSchema = z.object({
-  favorites: z.array(BaseContentSchema).describe("A list of the user's favorite content items."),
-  allContent: z.array(BaseContentSchema).describe("A list of all available content items to recommend from."),
-});
-
-const RecommendOutputSchema = z.array(z.string()).describe("An array of content IDs that are recommended for the user.");
-
-export type RecommendInput = z.infer<typeof RecommendInputSchema>;
-export type RecommendOutput = z.infer<typeof RecommendOutputSchema>;
 
 export async function recommend(input: RecommendInput): Promise<RecommendOutput> {
   return recommendFlow(input);

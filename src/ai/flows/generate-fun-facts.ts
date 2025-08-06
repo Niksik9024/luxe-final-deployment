@@ -10,17 +10,9 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import type { FunFactsInput, FunFactsOutput } from '@/ai/schemas/description';
+import { FunFactsInputSchema, FunFactsOutputSchema } from '@/ai/schemas/description';
 
-const FunFactsInputSchema = z.object({
-  modelName: z.string().describe('The name of the fashion model.'),
-});
-
-const FunFactsOutputSchema = z.object({
-  facts: z.array(z.string()).describe('An array of 3-4 interesting, flirty, or surprising "fun facts" about the model.'),
-});
-
-export type FunFactsInput = z.infer<typeof FunFactsInputSchema>;
-export type FunFactsOutput = z.infer<typeof FunFactsOutputSchema>;
 
 export async function generateFunFacts(input: FunFactsInput): Promise<FunFactsOutput> {
   return generateFunFactsFlow(input);
