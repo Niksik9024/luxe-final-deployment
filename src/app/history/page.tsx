@@ -1,15 +1,13 @@
 
-
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { ContentCard } from '@/components/shared/ContentCard';
 import { History as HistoryIcon } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
-import { collection, doc, getDoc, getDocs, query, where, documentId, orderBy } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
 import type { Video, HistoryItem } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getVideos } from '@/lib/localStorage';
 
 export default function WatchHistoryPage() {
     const { currentUser } = useAuth();
@@ -17,36 +15,30 @@ export default function WatchHistoryPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchHistory = async () => {
-            if (!currentUser) {
-                setLoading(false);
-                return;
-            }
-            setLoading(true);
-
-            const userDocRef = doc(db, 'users', currentUser.id);
-            const userDoc = await getDoc(userDocRef);
-            const historyItems = (userDoc.data()?.watchHistory || []) as HistoryItem[];
-            
-            if (historyItems.length === 0) {
-                setWatchedVideos([]);
-                setLoading(false);
-                return;
-            }
-
-            const videoIds = historyItems.map(item => item.id);
-            const videoQuery = query(collection(db, 'videos'), where(documentId(), 'in', videoIds));
-            const videoSnap = await getDocs(videoQuery);
-            const videosData = videoSnap.docs.map(d => ({ ...d.data(), id: d.id } as Video));
-            
-            // Sort videos according to history order
-            const sortedVideos = historyItems.map(item => videosData.find(v => v.id === item.id)).filter((v): v is Video => !!v);
-
-            setWatchedVideos(sortedVideos);
+        if (!currentUser) {
             setLoading(false);
-        };
+            return;
+        }
+        setLoading(true);
 
-        fetchHistory();
+        const historyItems = (currentUser.watchHistory || []) as HistoryItem[];
+        
+        if (historyItems.length === 0) {
+            setWatchedVideos([]);
+            setLoading(false);
+            return;
+        }
+
+        const allVideos = getVideos();
+        const videosData = allVideos.filter(v => historyItems.some(h => h.id === v.id));
+        
+        // Sort videos according to history order
+        const sortedVideos = historyItems
+            .map(item => videosData.find(v => v.id === item.id))
+            .filter((v): v is Video => !!v);
+
+        setWatchedVideos(sortedVideos);
+        setLoading(false);
     }, [currentUser]);
 
   if (loading) {

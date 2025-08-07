@@ -1,41 +1,15 @@
 
-import React, { Suspense } from 'react';
+'use client';
+
+import React, { Suspense, useState, useEffect } from 'react';
 import { ModelCard } from '@/components/shared/ModelCard';
 import { PaginationControls } from '@/components/shared/PaginationControls';
 import { Skeleton } from '@/components/ui/skeleton';
-import { adminDb } from '@/lib/firebase-admin';
 import type { Model } from '@/lib/types';
-
-// Revalidate this page every 5 minutes
-export const revalidate = 300;
+import { getModels } from '@/lib/localStorage';
+import { useSearchParams } from 'next/navigation';
 
 const MODELS_PER_PAGE = 18;
-
-async function getModels(page: number): Promise<{ models: Model[], totalPages: number}> {
-    if (!adminDb) return { models: [], totalPages: 0 };
-    try {
-        const modelsRef = adminDb.collection("models");
-        
-        // Optimized Count Query
-        const countSnap = await modelsRef.count().get();
-        const totalCount = countSnap.data().count;
-        const totalPages = Math.ceil(totalCount / MODELS_PER_PAGE);
-
-        // Optimized Data Query with pagination
-        const modelsSnap = await modelsRef
-            .orderBy("name")
-            .limit(MODELS_PER_PAGE)
-            .offset((page - 1) * MODELS_PER_PAGE)
-            .get();
-
-        const models = modelsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Model));
-        
-        return { models, totalPages };
-    } catch(error) {
-        console.error("Error fetching models:", error);
-        return { models: [], totalPages: 0 };
-    }
-}
 
 function ModelsGridSkeleton() {
     return (
@@ -52,9 +26,31 @@ function ModelsGridSkeleton() {
     );
 }
 
-async function ModelsList({ currentPage }: { currentPage: number }) {
-  const { models, totalPages } = await getModels(currentPage);
-  
+function ModelsListContent() {
+    const searchParams = useSearchParams();
+    const currentPage = Number(searchParams.get('page')) || 1;
+
+    const [models, setModels] = useState<Model[]>([]);
+    const [totalPages, setTotalPages] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setLoading(true);
+        const allModels = getModels();
+        const total = allModels.length;
+        const pages = Math.ceil(total / MODELS_PER_PAGE);
+        const startIndex = (currentPage - 1) * MODELS_PER_PAGE;
+        const endIndex = startIndex + MODELS_PER_PAGE;
+
+        setModels(allModels.slice(startIndex, endIndex));
+        setTotalPages(pages);
+        setLoading(false);
+    }, [currentPage]);
+    
+    if (loading) {
+        return <ModelsGridSkeleton />;
+    }
+
   return (
     <>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12 min-h-[500px]">
@@ -68,13 +64,12 @@ async function ModelsList({ currentPage }: { currentPage: number }) {
 }
 
 
-export default async function ModelsPage({ searchParams }: { searchParams?: { page?: string } }) {
-  const currentPage = Number(searchParams?.page) || 1;
+export default function ModelsPage() {
   return (
     <div className="container mx-auto py-12 px-4">
       <h1 className="text-4xl font-bold mb-8 text-center">Models</h1>
       <Suspense fallback={<ModelsGridSkeleton />}>
-        <ModelsList currentPage={currentPage} />
+        <ModelsListContent />
       </Suspense>
     </div>
   );

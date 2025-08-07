@@ -1,12 +1,9 @@
 
-
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Video, HistoryItem } from '@/lib/types';
+import type { Video, HistoryItem, User } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Play, Pause, Volume2, Volume1, VolumeX, Maximize, Minimize, Loader2, AlertCircle, Settings, PictureInPicture } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
@@ -14,9 +11,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getUserById, getUsers, setUsers } from '@/lib/localStorage';
 
 export const VideoPlayer = ({ video }: { video: Video }) => {
-    const { currentUser } = useAuth();
+    const { currentUser, setCurrentUser } = useAuth() as any; // Using `any` to allow direct state update
     
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -229,30 +227,34 @@ export const VideoPlayer = ({ video }: { video: Video }) => {
     }, [handleKeyboardShortcuts]);
     
     useEffect(() => {
-        const addWatchHistory = async () => {
+        const addWatchHistory = () => {
             if (currentUser && video) {
-                const userRef = doc(db, 'users', currentUser.id);
-                const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) return;
+                const user = getUserById(currentUser.id);
+                if (!user) return;
 
-                const history = (userSnap.data()?.watchHistory || []) as HistoryItem[];
+                const history = (user.watchHistory || []) as HistoryItem[];
                 
-                // Only add to history if it's not already the most recent item
                 if (history.length > 0 && history[0].id === video.id) {
                     return;
                 }
 
                 const newHistoryItem = { id: video.id, type: 'video' as const, viewedAt: new Date().toISOString() };
-                
                 const updatedHistory = [newHistoryItem, ...history.filter((h: any) => h.id !== video.id)].slice(0, 50);
-                await updateDoc(userRef, { watchHistory: updatedHistory });
+                
+                const updatedUser: User = { ...user, watchHistory: updatedHistory };
+                const allUsers = getUsers().map(u => u.id === user.id ? updatedUser : u);
+                setUsers(allUsers);
+                // Also update the context for immediate reflection in the UI
+                if (setCurrentUser) {
+                    setCurrentUser(updatedUser);
+                }
             }
         };
 
         if (isPlaying) {
              addWatchHistory();
         }
-      }, [isPlaying, video, currentUser]);
+      }, [isPlaying, video, currentUser, setCurrentUser]);
 
     return (
         <div 

@@ -1,66 +1,72 @@
 
-
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Rocket, AlertTriangle, PartyPopper, Trash2 } from 'lucide-react';
-import { seedDatabase } from '@/ai/flows/seed-database';
-import { clearDatabase } from '@/ai/flows/clear-database';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { initializeLocalStorage, clearLocalStorage } from '@/lib/localStorage';
 
 export default function SeedDatabasePage() {
     const { toast } = useToast();
-    const [isSeeding, startSeedingTransition] = useTransition();
-    const [isClearing, startClearingTransition] = useTransition();
+    const [isSeeding, setIsSeeding] = useState(false);
+    const [isClearing, setIsClearing] = useState(false);
     const [seedResult, setSeedResult] = useState<{success: boolean; message: string} | null>(null);
     const [clearResult, setClearResult] = useState<{success: boolean; message: string} | null>(null);
     
 
     const handleSeed = () => {
-        startSeedingTransition(async () => {
-            setSeedResult(null);
-            setClearResult(null);
-            const result = await seedDatabase();
-            setSeedResult(result);
-            if (result.success) {
-                toast({
-                    title: 'Database Seeded!',
-                    description: 'Your database has been populated with new content.',
-                });
-            } else {
-                 toast({
-                    title: 'Seeding Failed',
-                    description: result.message,
-                    variant: 'destructive',
-                });
-            }
-        });
+        setIsSeeding(true);
+        setSeedResult(null);
+        setClearResult(null);
+        try {
+            // Force clear and re-seed
+            clearLocalStorage();
+            initializeLocalStorage();
+            setSeedResult({ success: true, message: 'Local storage has been successfully seeded with sample content.'});
+            toast({
+                title: 'Database Seeded!',
+                description: 'Your local storage has been populated with new content.',
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+            setSeedResult({ success: false, message });
+            toast({
+                title: 'Seeding Failed',
+                description: message,
+                variant: 'destructive',
+            });
+        } finally {
+            setIsSeeding(false);
+        }
     };
     
     const handleClear = () => {
-        startClearingTransition(async () => {
-            setSeedResult(null);
-            setClearResult(null);
-            const result = await clearDatabase();
-            setClearResult(result);
-             if (result.success) {
-                toast({
-                    title: 'Database Cleared!',
-                    description: 'All content has been removed from the database.',
-                    variant: 'destructive'
-                });
-            } else {
-                 toast({
-                    title: 'Clearing Failed',
-                    description: result.message,
-                    variant: 'destructive',
-                });
-            }
-        });
+        setIsClearing(true);
+        setSeedResult(null);
+        setClearResult(null);
+        try {
+            clearLocalStorage();
+            setClearResult({ success: true, message: 'All content has been cleared from local storage.' });
+             toast({
+                title: 'Database Cleared!',
+                description: 'All content has been removed from your local storage.',
+                variant: 'destructive'
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+            setClearResult({ success: false, message });
+             toast({
+                title: 'Clearing Failed',
+                description: message,
+                variant: 'destructive',
+            });
+        } finally {
+            setIsClearing(false);
+        }
     }
 
     return (
@@ -69,10 +75,10 @@ export default function SeedDatabasePage() {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Rocket />
-                        Seed Database with Sample Content
+                        Seed Local Storage
                     </CardTitle>
                     <CardDescription>
-                        This action will add 20 models, 20 videos, and 20 galleries to your Firestore database. This is useful for development and testing purposes.
+                        This action will clear and re-populate your browser's local storage with sample data for models, videos, and galleries. This is useful for development and testing purposes.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -97,10 +103,10 @@ export default function SeedDatabasePage() {
                 <CardHeader>
                      <CardTitle className="flex items-center gap-2 text-destructive">
                         <AlertTriangle />
-                        Clear Database
+                        Clear Local Storage
                     </CardTitle>
                     <CardDescription>
-                       This action will permanently delete all content from the `models`, `videos`, `galleries`, and `tags` collections.
+                       This action will permanently delete all content from your browser's local storage for this site.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -126,7 +132,7 @@ export default function SeedDatabasePage() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete all models, videos, and galleries from your database.
+                            This action cannot be undone. This will permanently delete all models, videos, and galleries from your local storage.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

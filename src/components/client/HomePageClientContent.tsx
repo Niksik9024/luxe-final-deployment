@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,76 +6,50 @@ import { Sparkles, Heart } from 'lucide-react';
 import type { Video, Gallery } from '@/lib/types';
 import { ContentCard } from '../shared/ContentCard';
 import { useAuth } from '@/lib/auth';
-import { recommend } from '@/ai/flows/recommend';
-import { getFavoriteDetails } from '@/ai/flows/get-favorite-details';
-import { collection, getDocs, where, query } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { Skeleton } from '../ui/skeleton';
+import { getVideos, getGalleries } from '@/lib/localStorage';
 
 export const HomePageClientContent: React.FC = () => {
     const { currentUser } = useAuth();
     const [recommendations, setRecommendations] = useState<(Video | Gallery)[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        const fetchRecommendations = async () => {
-            if (!currentUser) {
+        const fetchRecommendations = () => {
+            if (!currentUser || !currentUser.favorites || currentUser.favorites.length === 0) {
                 setIsLoading(false);
                 return;
             }
+            setIsLoading(true);
 
-            try {
-                // Fetch user's favorites
-                const favoritesResponse = await getFavoriteDetails({ 
-                    userId: currentUser.id,
-                    favorites: currentUser.favorites || [] 
-                });
-                const favoriteContent = [...favoritesResponse.videos, ...favoritesResponse.galleries];
+            const allVideos = getVideos();
+            const allGalleries = getGalleries();
+            const allContent = [...allVideos, ...allGalleries];
+            
+            // Simple recommendation logic: find content with shared tags from favorites
+            const favoriteTags = new Set<string>();
+            currentUser.favorites.forEach(fav => {
+                const item = fav.type === 'video' 
+                    ? allVideos.find(v => v.id === fav.id)
+                    : allGalleries.find(g => g.id === fav.id);
+                item?.tags.forEach(tag => favoriteTags.add(tag));
+            });
+            
+            const favoriteIds = new Set(currentUser.favorites.map(f => f.id));
 
-                if (favoriteContent.length === 0) {
-                    setIsLoading(false);
-                    return;
-                }
-                
-                // Fetch all published content for the AI to choose from
-                const videosQuery = query(collection(db, 'videos'), where('status', '==', 'Published'));
-                const galleriesQuery = query(collection(db, 'galleries'), where('status', '==', 'Published'));
-
-                const [videosSnap, galleriesSnap] = await Promise.all([
-                    getDocs(videosQuery),
-                    getDocs(galleriesQuery),
-                ]);
-
-                const allPublishedContentForAI = [
-                    ...videosSnap.docs.map(d => ({...d.data(), id: d.id, description: d.data().description || ''} as Video)),
-                    ...galleriesSnap.docs.map(d => ({...d.data(), id: d.id, description: d.data().description || ''} as Gallery)),
-                ];
-                
-                const favoriteContentForAI = favoriteContent.map(c => ({ ...c, description: c.description || ''}));
-
-                const recommendedIds = await recommend({
-                    favorites: favoriteContentForAI,
-                    allContent: allPublishedContentForAI,
-                });
-
-                if (recommendedIds.length > 0) {
-                    const recommendedItems = recommendedIds
-                        .map(id => {
-                            const item = allPublishedContentForAI.find(content => content.id === id);
-                            if (!item) return null;
-                            const type = 'videoUrl' in item ? 'video' : 'gallery';
-                            return { ...item, type };
-                        })
-                        .filter((item): item is (Video & {type: 'video'}) | (Gallery & {type: 'gallery'}) => item !== null);
-
-                    setRecommendations(recommendedItems);
-                }
-
-            } catch(e) {
-                console.error("Failed to fetch recommendations", e);
-            } finally {
-                setIsLoading(false);
-            }
+            const recommendedContent = allContent
+                .filter(item => !favoriteIds.has(item.id)) // Exclude already favorited items
+                .map(item => ({
+                    item,
+                    score: item.tags.reduce((acc, tag) => favoriteTags.has(tag) ? acc + 1 : acc, 0)
+                }))
+                .filter(scoredItem => scoredItem.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .map(scoredItem => ({...scoredItem.item, type: 'videoUrl' in scoredItem.item ? 'video' : 'gallery'} as Video | Gallery))
+                .slice(0, 3);
+            
+            setRecommendations(recommendedContent);
+            setIsLoading(false);
         };
 
         fetchRecommendations();
@@ -84,7 +57,7 @@ export const HomePageClientContent: React.FC = () => {
     }, [currentUser]);
 
     if (!currentUser) {
-        return null; // Don't show this section for logged-out users
+        return null;
     }
 
     if (isLoading) {
@@ -100,21 +73,6 @@ export const HomePageClientContent: React.FC = () => {
         );
     }
     
-    if (recommendations.length === 0 && (currentUser.favorites || []).length > 0) {
-        return (
-            <section className="py-12 md:py-20 px-4 container mx-auto">
-                <h2 className="text-3xl font-bold mb-8 text-center flex items-center justify-center gap-3 uppercase tracking-widest">
-                    <Sparkles className="text-accent" /> For You
-                </h2>
-                <div className="text-center bg-card border border-border rounded-lg p-8 max-w-2xl mx-auto">
-                    <Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-bold mb-2">No New Recommendations</h3>
-                    <p className="text-muted-foreground">You've seen all the content related to your favorites. Discover something new!</p>
-                </div>
-            </section>
-        )
-    }
-
     if (recommendations.length === 0) {
         return (
             <section className="py-12 md:py-20 px-4 container mx-auto">
@@ -140,7 +98,7 @@ export const HomePageClientContent: React.FC = () => {
                     <ContentCard
                         key={item.id}
                         content={item}
-                        type={item.type}
+                        type={'videoUrl' in item ? 'video' : 'gallery'}
                     />
                 ))}
             </div>

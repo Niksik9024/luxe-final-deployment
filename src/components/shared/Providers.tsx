@@ -1,13 +1,15 @@
 
 'use client';
 
-// This will be used for Context Providers in later steps.
-// For now, it just passes children through.
+import { AuthProvider } from "@/lib/auth";
+import { DataSaverProvider } from "@/contexts/DataSaverContext";
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
-        <>
-            {children}
-        </>
+        <AuthProvider>
+            <DataSaverProvider>
+                {children}
+            </DataSaverProvider>
+        </AuthProvider>
     )
 }

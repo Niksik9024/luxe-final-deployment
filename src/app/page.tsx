@@ -1,75 +1,75 @@
 
-import React from 'react';
-import { adminDb } from '@/lib/firebase-admin';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import type { Model, Video, Gallery } from '@/lib/types';
 import { HeroCarousel } from '@/components/client/HeroCarousel';
 import { ContentCard } from '@/components/shared/ContentCard';
 import { ModelCard } from '@/components/shared/ModelCard';
 import { HomePageClientContent } from '@/components/client/HomePageClientContent';
 import { Separator } from '@/components/ui/separator';
+import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Revalidate this page every 5 minutes to fetch fresh content
-export const revalidate = 300; 
-
-async function getHomePageData() {
-    // If adminDb isn't initialized, return empty arrays to prevent crashing
-    if (!adminDb) {
-        return {
-            featuredVideos: [],
-            latestVideos: [],
-            latestGalleries: [],
-            topModels: []
-        };
-    }
-
-    try {
-        // Fetch all published videos and models in parallel
-        const [videosSnap, modelsSnap, galleriesSnap] = await Promise.all([
-            adminDb.collection('videos').where('status', '==', 'Published').orderBy('date', 'desc').get(),
-            adminDb.collection('models').get(),
-            adminDb.collection('galleries').where('status', '==', 'Published').orderBy('date', 'desc').limit(6).get()
-        ]);
-
-        const allVideos = videosSnap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Video));
-        const allModels = modelsSnap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Model));
-        const latestGalleries = galleriesSnap.docs.map(doc => ({ ...doc.data(), id: doc.id } as Gallery));
-
-        // Separate featured videos from the rest
-        const featuredVideos = allVideos.filter(v => v.isFeatured);
-        const latestVideos = allVideos.filter(v => !v.isFeatured).slice(0, 3);
-        
-        return {
-            featuredVideos,
-            latestVideos,
-            latestGalleries,
-            topModels: allModels.slice(0, 10), // Example: first 10 models as "top"
-        };
-    } catch (error) {
-        console.error("Error fetching homepage data:", error);
-        // In case of an error, return empty arrays to prevent a crash
-        return {
-            featuredVideos: [],
-            latestVideos: [],
-            latestGalleries: [],
-            topModels: []
-        };
-    }
+function HomePageSkeleton() {
+    return (
+        <div>
+            <Skeleton className="w-full h-[92vh]" />
+            <div className="py-12 md:py-20 bg-background">
+                <div className="container mx-auto px-4">
+                    <Skeleton className="h-8 w-64 mx-auto mb-8" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <Skeleton className="aspect-video" />
+                        <Skeleton className="aspect-video" />
+                        <Skeleton className="aspect-video" />
+                    </div>
+                </div>
+            </div>
+             <div className="py-12 md:py-20 bg-background">
+                <div className="container mx-auto px-4">
+                    <Skeleton className="h-8 w-64 mx-auto mb-8" />
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                       {Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="aspect-[9/16]" />)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
 }
 
-export default async function Home() {
-  const { featuredVideos, latestVideos, latestGalleries, topModels } = await getHomePageData();
-  
-  // Determine the source for the hero carousel
+
+export default function Home() {
+  const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
+  const [latestVideos, setLatestVideos] = useState<Video[]>([]);
+  const [latestGalleries, setLatestGalleries] = useState<Gallery[]>([]);
+  const [topModels, setTopModels] = useState<Model[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const allVideos = getVideos();
+    const allModels = getModels();
+    const allGalleries = getGalleries();
+    
+    setFeaturedVideos(allVideos.filter(v => v.isFeatured));
+    setLatestVideos(allVideos.filter(v => !v.isFeatured).slice(0, 3));
+    setLatestGalleries(allGalleries.slice(0, 6));
+    setTopModels(allModels.slice(0, 5));
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return <HomePageSkeleton />;
+  }
+
   const heroContentSource = featuredVideos.length > 0 
     ? featuredVideos.map(v => ({ id: v.id, image: v.image, name: v.title })) 
     : topModels.slice(0, 5).map(m => ({ id: m.id, image: m.image, name: m.name }));
 
-  // Create a pseudo-model list for the carousel from videos if needed
   const heroModels: Model[] = heroContentSource.map(item => ({
       id: item.id,
       name: item.name,
       image: item.image,
-      description: '', // Not needed for carousel
+      description: '',
   }));
 
   return (
@@ -113,7 +113,7 @@ export default async function Home() {
                 <div className="container mx-auto px-4">
                      <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">Featured Models</h2>
                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {topModels.slice(0, 5).map((model) => (
+                        {topModels.map((model) => (
                             <ModelCard key={model.id} model={model} />
                         ))}
                     </div>

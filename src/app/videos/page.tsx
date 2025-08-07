@@ -1,50 +1,14 @@
 
-import React, { Suspense } from 'react';
+'use client';
+
+import React, { Suspense, useState, useEffect } from 'react';
 import type { Video } from '@/lib/types';
-import { adminDb } from '@/lib/firebase-admin';
 import { VideosList } from './VideosList';
 import { Skeleton } from '@/components/ui/skeleton';
-
-// Revalidate this page every 5 minutes
-export const revalidate = 300;
+import { getVideos } from '@/lib/localStorage';
+import { useSearchParams } from 'next/navigation';
 
 const VIDEOS_PER_PAGE = 12;
-
-async function getVideos(page: number): Promise<{ videos: Video[], totalPages: number }> {
-    if (!adminDb) return { videos: [], totalPages: 0 };
-    try {
-        const videosRef = adminDb.collection("videos");
-
-        // Optimized Query: Filter by status in Firestore
-        const publishedQuery = videosRef.where('status', '==', 'Published');
-        
-        // Get total count for pagination
-        const countSnapshot = await publishedQuery.count().get();
-        const totalCount = countSnapshot.data().count;
-        const totalPages = Math.ceil(totalCount / VIDEOS_PER_PAGE);
-
-        // Fetch only the documents for the current page
-        const querySnapshot = await publishedQuery
-            .orderBy('date', 'desc')
-            .limit(VIDEOS_PER_PAGE)
-            .offset((page - 1) * VIDEOS_PER_PAGE)
-            .get();
-
-        const videos = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return { 
-                id: doc.id, 
-                ...data,
-                date: (data.date.toDate ? data.date.toDate() : new Date(data.date)).toISOString(),
-            } as Video;
-        });
-        
-        return { videos, totalPages };
-    } catch(error) {
-        console.error("Error fetching videos:", error);
-        return { videos: [], totalPages: 0 };
-    }
-}
 
 function VideosPageSkeleton() {
     return (
@@ -56,19 +20,40 @@ function VideosPageSkeleton() {
     );
 }
 
-async function Videos({ currentPage }: { currentPage: number }) {
-    const { videos, totalPages } = await getVideos(currentPage);
+function VideosContent() {
+    const searchParams = useSearchParams();
+    const currentPage = Number(searchParams.get('page')) || 1;
+
+    const [videos, setVideos] = useState<Video[]>([]);
+    const [totalPages, setTotalPages] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setLoading(true);
+        const allPublishedVideos = getVideos().filter(v => v.status === 'Published');
+        const total = allPublishedVideos.length;
+        const pages = Math.ceil(total / VIDEOS_PER_PAGE);
+        const startIndex = (currentPage - 1) * VIDEOS_PER_PAGE;
+        const endIndex = startIndex + VIDEOS_PER_PAGE;
+        
+        setVideos(allPublishedVideos.slice(startIndex, endIndex));
+        setTotalPages(pages);
+        setLoading(false);
+    }, [currentPage]);
+    
+    if (loading) {
+        return <VideosPageSkeleton />;
+    }
+
     return <VideosList videos={videos} totalPages={totalPages} currentPage={currentPage} />
 }
 
-export default async function VideosPage({ searchParams }: { searchParams?: { page?: string } }) {
-  const currentPage = Number(searchParams?.page) || 1;
-
+export default function VideosPage() {
   return (
     <div className="container mx-auto py-12 px-4">
       <h1 className="text-4xl mb-8 text-center">Videos</h1>
       <Suspense fallback={<VideosPageSkeleton/>}>
-        <Videos currentPage={currentPage} />
+        <VideosContent />
       </Suspense>
     </div>
   );

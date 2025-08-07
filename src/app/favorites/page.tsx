@@ -1,6 +1,5 @@
 
-
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { ContentCard } from '@/components/shared/ContentCard';
@@ -9,52 +8,51 @@ import { Heart } from 'lucide-react';
 import type { Photo, Video, Gallery } from '@/lib/types';
 import { Lightbox } from '@/components/shared/Lightbox';
 import { useAuth } from '@/lib/auth';
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore'
 import { Skeleton } from '@/components/ui/skeleton';
 import { PhotoCard } from '@/components/shared/PhotoCard';
-import { getFavoriteDetails } from '@/ai/flows/get-favorite-details';
-import type { FavoriteDetails } from '@/ai/schemas/description';
-
+import { getVideos, getGalleries } from '@/lib/localStorage';
 
 export default function FavoritesPage() {
     const { currentUser } = useAuth();
-    const [favorites, setFavorites] = useState<FavoriteDetails>({ videos: [], galleries: [], photos: [] });
+    const [favoriteVideos, setFavoriteVideos] = useState<Video[]>([]);
+    const [favoriteGalleries, setFavoriteGalleries] = useState<Gallery[]>([]);
+    const [favoritePhotos, setFavoritePhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxStartIndex, setLightboxStartIndex] = useState(0);
 
     useEffect(() => {
-        const fetchFavorites = async () => {
-            if (!currentUser) {
-                setLoading(false);
-                return;
-            }
-            setLoading(true);
-            try {
-                // The user object from useAuth is now the single source of truth.
-                const favoriteIds = currentUser.favorites || [];
+        if (!currentUser) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        
+        const favoriteIds = currentUser.favorites || [];
+        if (favoriteIds.length > 0) {
+            const allVideos = getVideos();
+            const allGalleries = getGalleries();
+            const allPhotosFromGalleries = allGalleries.flatMap(g => 
+                (g.album || []).map((url, i) => ({
+                    id: `${g.id}-photo-${i}`,
+                    image: url,
+                    title: `${g.title} - Photo ${i+1}`,
+                    galleryId: g.id,
+                    galleryTitle: g.title,
+                }))
+            );
 
-                if (favoriteIds.length > 0) {
-                    // Pass the userId to the flow for potential cleanup
-                    const favoriteDetails = await getFavoriteDetails({ 
-                        userId: currentUser.id, 
-                        favorites: favoriteIds 
-                    });
-                    setFavorites(favoriteDetails);
-                } else {
-                    setFavorites({ videos: [], galleries: [], photos: [] });
-                }
+            setFavoriteVideos(allVideos.filter(v => favoriteIds.some(f => f.id === v.id && f.type === 'video')));
+            setFavoriteGalleries(allGalleries.filter(g => favoriteIds.some(f => f.id === g.id && f.type === 'gallery')));
+            setFavoritePhotos(allPhotosFromGalleries.filter(p => favoriteIds.some(f => f.id === p.id && f.type === 'photo')));
+        } else {
+            setFavoriteVideos([]);
+            setFavoriteGalleries([]);
+            setFavoritePhotos([]);
+        }
 
-            } catch (error) {
-                console.error("Error fetching favorites:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFavorites();
+        setLoading(false);
     }, [currentUser]);
 
     const openLightbox = (index: number) => {
@@ -63,11 +61,11 @@ export default function FavoritesPage() {
     };
     
     const allContentFavorites = [
-        ...favorites.videos.map(v => ({...v, type: 'video' as const})), 
-        ...favorites.galleries.map(g => ({...g, type: 'gallery' as const})),
+        ...favoriteVideos.map(v => ({...v, type: 'video' as const})), 
+        ...favoriteGalleries.map(g => ({...g, type: 'gallery' as const})),
     ];
     
-    const totalFavorites = allContentFavorites.length + favorites.photos.length;
+    const totalFavorites = allContentFavorites.length + favoritePhotos.length;
 
     if (loading) {
         return (
@@ -100,9 +98,9 @@ export default function FavoritesPage() {
                 <div className="flex justify-center mb-8">
                     <TabsList>
                         <TabsTrigger value="all">All ({totalFavorites})</TabsTrigger>
-                        <TabsTrigger value="videos">Videos ({favorites.videos.length})</TabsTrigger>
-                        <TabsTrigger value="galleries">Galleries ({favorites.galleries.length})</TabsTrigger>
-                        <TabsTrigger value="photos">Photos ({favorites.photos.length})</TabsTrigger>
+                        <TabsTrigger value="videos">Videos ({favoriteVideos.length})</TabsTrigger>
+                        <TabsTrigger value="galleries">Galleries ({favoriteGalleries.length})</TabsTrigger>
+                        <TabsTrigger value="photos">Photos ({favoritePhotos.length})</TabsTrigger>
                     </TabsList>
                 </div>
 
@@ -115,7 +113,7 @@ export default function FavoritesPage() {
                                 type={item.type}
                             />
                         ))}
-                         {favorites.photos.map((photo, index) => (
+                         {favoritePhotos.map((photo, index) => (
                              <PhotoCard 
                                 key={photo.id} 
                                 photo={photo} 
@@ -126,21 +124,21 @@ export default function FavoritesPage() {
                 </TabsContent>
                 <TabsContent value="videos">
                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {favorites.videos.map((video) => (
+                        {favoriteVideos.map((video) => (
                             <ContentCard key={video.id} content={video} type="video" />
                         ))}
                     </div>
                 </TabsContent>
                 <TabsContent value="galleries">
                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {favorites.galleries.map((gallery) => (
+                        {favoriteGalleries.map((gallery) => (
                             <ContentCard key={gallery.id} content={gallery} type="gallery" />
                         ))}
                     </div>
                 </TabsContent>
                 <TabsContent value="photos">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {favorites.photos.map((photo, index) => (
+                        {favoritePhotos.map((photo, index) => (
                              <PhotoCard 
                                 key={photo.id} 
                                 photo={photo} 
@@ -153,7 +151,7 @@ export default function FavoritesPage() {
 
             {lightboxOpen && (
                 <Lightbox
-                    images={favorites.photos}
+                    images={favoritePhotos}
                     startIndex={lightboxStartIndex}
                     onClose={() => setLightboxOpen(false)}
                 />

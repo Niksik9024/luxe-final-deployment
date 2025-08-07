@@ -1,4 +1,5 @@
 
+
 export interface Favorite {
     id: string;
     type: 'video' | 'gallery' | 'photo';
@@ -13,6 +14,7 @@ export interface User {
     id: string;
     name: string;
     email: string;
+    password?: string; // Only for local storage simulation
     image: string;
     role: 'user' | 'admin';
     favorites: Favorite[];

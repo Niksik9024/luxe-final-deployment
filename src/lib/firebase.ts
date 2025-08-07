@@ -1,32 +1,4 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For a robust client-side setup, these values are hardcoded.
-// This is a standard and secure practice for public client credentials.
-const firebaseConfig = {
-  apiKey: "AIzaSyAHMWZSIOtTWtZ0UENJoOmkankEVop1s1I",
-  authDomain: "luxe-cqmea.firebaseapp.com",
-  projectId: "luxe-cqmea",
-  storageBucket: "luxe-cqmea.appspot.com",
-  messagingSenderId: "564643255112",
-  appId: "1:564643255112:web:6b4471069350181d94197d"
-};
-
-// Initialize Firebase for client-side usage
-// This pattern prevents re-initializing the app on every render in Next.js
-let app;
-if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-} else {
-    app = getApp();
-}
-
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-export { app, auth, db };
+// This file is intentionally left blank as all Firebase dependencies are being removed.
+// It is kept to prevent import errors in other files that might still reference it temporarily
+// during the migration, but all its content and usage will be removed.

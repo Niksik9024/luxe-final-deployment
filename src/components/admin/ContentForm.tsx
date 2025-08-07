@@ -1,5 +1,4 @@
 
-
 'use client'
 
 import React, { useState, useEffect } from 'react'
@@ -13,16 +12,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
 import { Trash2, Sparkles, Check, ChevronsUpDown } from 'lucide-react'
 import { Switch } from '../ui/switch'
-import { generateDescription } from '@/ai/flows/generate-description'
 import { useToast } from '@/hooks/use-toast'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { cn } from '@/lib/utils'
 import type { videoFormSchema, galleryFormSchema } from '@/app/admin/schemas/content'
 import type { Model } from '@/lib/types'
-import { collection, getDocs } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-
+import { getModels } from '@/lib/localStorage'
 
 interface ContentFormProps {
   type: 'video' | 'gallery';
@@ -34,12 +30,7 @@ const MultiSelectModels: React.FC = () => {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        const fetchModels = async () => {
-            const querySnapshot = await getDocs(collection(db, "models"));
-            const modelsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Model));
-            setModels(modelsData);
-        };
-        fetchModels();
+        setModels(getModels());
     }, [])
 
     return (
@@ -129,45 +120,31 @@ export const ContentForm: React.FC<ContentFormProps> = ({ type }) => {
   
   const handleGenerateDescription = async () => {
     setIsGenerating(true);
-    const { title, models, tags, image } = getValues();
+    const { title, models, tags } = getValues();
     
-    // This check remains as a fallback, but the button will be disabled
-    if (!title || !image) {
+    if (!title) {
         toast({
             title: "Missing Information",
-            description: "Please provide a title and image URL before generating a description.",
+            description: "Please provide a title before generating a description.",
             variant: "destructive"
         })
         setIsGenerating(false);
         return;
     }
 
-    try {
-        const result = await generateDescription({
-            title,
-            models,
-            tags: tags || '',
-            imageUrl: image,
-        });
-        if (result.description) {
-            setValue('description', result.description, { shouldValidate: true, shouldDirty: true });
-            toast({
-                title: "Description Generated!",
-                description: "The AI-generated description has been added.",
-            })
-        }
-    } catch (error) {
+    // Simulate AI generation
+    setTimeout(() => {
+        const generatedText = `An exquisite piece titled "${title}", featuring ${models.join(', ')}. This content explores themes of ${tags || 'modern fashion'}, capturing a unique and compelling aesthetic.`;
+        setValue('description', generatedText, { shouldValidate: true, shouldDirty: true });
         toast({
-            title: "Generation Failed",
-            description: "There was an error generating the description. Please try again.",
-            variant: "destructive"
+            title: "Description Generated!",
+            description: "The AI-generated description has been added.",
         })
-    } finally {
         setIsGenerating(false);
-    }
+    }, 1500);
   }
   
-  const isGeneratorDisabled = isGenerating || !titleValue || !imageUrlValue;
+  const isGeneratorDisabled = isGenerating || !titleValue;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -208,7 +185,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({ type }) => {
                             <Textarea placeholder='A brief description of the content.' {...field} />
                         </FormControl>
                          <FormDescription>
-                            Provide a title and image URL to enable AI generation.
+                            Provide a title to enable AI generation.
                          </FormDescription>
                         <FormMessage />
                         </FormItem>

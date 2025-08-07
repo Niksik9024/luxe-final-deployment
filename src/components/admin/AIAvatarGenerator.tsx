@@ -1,5 +1,4 @@
 
-
 'use client'
 
 import React, { useState } from 'react';
@@ -8,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
-import { generateAvatar } from '@/ai/flows/generate-avatar';
 
 export const AIAvatarGenerator: React.FC<{ onAvatarGenerated: (url: string) => void }> = ({ onAvatarGenerated }) => {
     const [prompt, setPrompt] = useState('');
@@ -22,16 +20,14 @@ export const AIAvatarGenerator: React.FC<{ onAvatarGenerated: (url: string) => v
             return;
         }
         setIsLoading(true);
-        try {
-            const result = await generateAvatar({ prompt });
-            onAvatarGenerated(result.imageUrl);
+        // Simulate AI generation with a placeholder
+        setTimeout(() => {
+            const url = `https://placehold.co/400x600.png?text=${encodeURIComponent(prompt.substring(0, 20))}`;
+            onAvatarGenerated(url);
             toast({ title: "Avatar Generated!", description: "The new avatar has been set." });
             setIsOpen(false);
-        } catch (error) {
-            toast({ title: "Generation Failed", description: "Could not generate an avatar. Please try again.", variant: 'destructive' });
-        } finally {
             setIsLoading(false);
-        }
+        }, 1500);
     };
 
     return (

@@ -1,72 +1,43 @@
 
-import React from 'react';
-import { notFound } from 'next/navigation';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useParams, notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Instagram, Twitter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { adminDb } from '@/lib/firebase-admin';
 import type { Model, Video, Gallery } from '@/lib/types';
 import { ModelPortfolio } from '@/components/client/ModelPortfolio';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Metadata } from 'next';
 import DOMPurify from 'isomorphic-dompurify';
+import { getModelById, getVideos, getGalleries } from '@/lib/localStorage';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Revalidate this page every 5 minutes
-export const revalidate = 300;
-
-async function getModelAndContent(id: string): Promise<{ model: Model, videos: Video[], galleries: Gallery[] } | null> {
-    if (!adminDb) return null;
-    
-    try {
-        const modelRef = adminDb.collection('models').doc(id);
-        const modelSnap = await modelRef.get();
-
-        if (!modelSnap.exists) {
-            return null;
-        }
-
-        const model = { id: modelSnap.id, ...modelSnap.data() } as Model;
-
-        const videosQuery = adminDb.collection('videos')
-            .where('models', 'array-contains', model.name)
-            .where('status', '==', 'Published');
-            
-        const galleriesQuery = adminDb.collection('galleries')
-            .where('models', 'array-contains', model.name)
-            .where('status', '==', 'Published');
-
-        const [videosSnap, galleriesSnap] = await Promise.all([
-            videosQuery.get(),
-            galleriesQuery.get(),
-        ]);
-        
-        const videos = videosSnap.docs
-            .map(d => ({ ...d.data(), id: d.id } as Video))
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-        const galleries = galleriesSnap.docs
-            .map(d => ({ ...d.data(), id: d.id } as Gallery))
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-        return { model, videos, galleries };
-    } catch(error) {
-        console.error("Error fetching model data:", error);
-        return null;
-    }
+function ModelPageSkeleton() {
+    return (
+        <div className="flex flex-col relative bg-background">
+            <div className="relative w-full h-[70vh] min-h-[400px] max-h-[700px]">
+                <Skeleton className="w-full h-full" />
+                 <div className="absolute bottom-0 left-0 p-4 md:p-8">
+                    <Skeleton className="h-16 w-96" />
+                </div>
+            </div>
+            <div className="container mx-auto px-4 py-12 z-10 relative">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+                    <div className="lg:col-span-1 space-y-6">
+                        <Skeleton className="h-32 w-full" />
+                        <Skeleton className="h-24 w-full" />
+                        <Skeleton className="h-24 w-full" />
+                    </div>
+                    <div className="lg:col-span-2">
+                         <Skeleton className="h-96 w-full" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const data = await getModelAndContent(params.id);
-  if (!data) {
-    return {
-      title: 'Model Not Found',
-    }
-  }
-  return {
-    title: `Model: ${data.model.name} | LUXE`,
-    description: data.model.description || `View the portfolio for ${data.model.name}.`,
-  }
-}
 
 const MeasurementCard = ({model}: {model: Model}) => {
     const hasMeasurements = model.height || model.bust || model.waist || model.hips;
@@ -86,22 +57,54 @@ const MeasurementCard = ({model}: {model: Model}) => {
     );
 }
 
-export default async function ModelPage({ params }: { params: { id: string } }) {
-  const data = await getModelAndContent(params.id);
+export default function ModelPage() {
+    const params = useParams();
+    const id = params.id as string;
+    
+    const [model, setModel] = useState<Model | null>(null);
+    const [modelVideos, setModelVideos] = useState<Video[]>([]);
+    const [modelGalleries, setModelGalleries] = useState<Gallery[]>([]);
+    const [loading, setLoading] = useState(true);
 
-  if (!data) {
-    notFound();
-  }
+    useEffect(() => {
+        if (!id) return;
+
+        const modelData = getModelById(id);
+        if (!modelData) {
+            setLoading(false);
+            return;
+        }
+
+        const allVideos = getVideos();
+        const allGalleries = getGalleries();
+        
+        const videosForModel = allVideos
+            .filter(v => v.models.includes(modelData.name) && v.status === 'Published')
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        
+        const galleriesForModel = allGalleries
+            .filter(g => g.models.includes(modelData.name) && g.status === 'Published')
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            
+        setModel(modelData);
+        setModelVideos(videosForModel);
+        setModelGalleries(galleriesForModel);
+        setLoading(false);
+    }, [id]);
+    
+    if (loading) {
+        return <ModelPageSkeleton />;
+    }
+
+    if (!model) {
+        notFound();
+    }
   
-  const { model, videos: modelVideos, galleries: modelGalleries } = data;
-  
-  // Sanitize user-generated content before rendering
   const cleanDescription = model.description ? DOMPurify.sanitize(model.description) : '';
   const cleanFamousFor = model.famousFor ? DOMPurify.sanitize(model.famousFor) : '';
 
   return (
     <div className="flex flex-col relative bg-background">
-      {/* Hero Section */}
       <div className="relative w-full h-[70vh] min-h-[400px] max-h-[700px]">
         <Image
           src={model.image}
@@ -116,11 +119,9 @@ export default async function ModelPage({ params }: { params: { id: string } }) 
         </div>
       </div>
       
-      {/* Content Section */}
       <div className="container mx-auto px-4 py-12 z-10 relative">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
             
-            {/* Left Column: Bio & Socials */}
             <div className="lg:col-span-1 space-y-6">
                  {cleanDescription && <p className="text-muted-foreground text-lg" dangerouslySetInnerHTML={{ __html: cleanDescription }} />}
                  <div className="flex gap-2">
@@ -146,7 +147,6 @@ export default async function ModelPage({ params }: { params: { id: string } }) 
                 )}
             </div>
 
-            {/* Right Column: Portfolio */}
             <div className="lg:col-span-2">
                 <ModelPortfolio videos={modelVideos} galleries={modelGalleries} />
             </div>
