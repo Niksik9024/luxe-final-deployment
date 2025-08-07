@@ -43,7 +43,7 @@ export default function LandingPage({ onAccessGranted }: LandingPageProps) {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: "url('https://placehold.co/1920x1080.png')",
+            backgroundImage: "url('https://images.unsplash.com/photo-1536510344834-4347b744b11e?q=80&w=1920&h=1080&auto=format&fit=crop')",
           }}
           data-ai-hint="luxury dark interior"
         >

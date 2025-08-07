@@ -22,7 +22,8 @@ export const AIAvatarGenerator: React.FC<{ onAvatarGenerated: (url: string) => v
         setIsLoading(true);
         // Simulate AI generation with a placeholder
         setTimeout(() => {
-            const url = `https://placehold.co/400x600.png?text=${encodeURIComponent(prompt.substring(0, 20))}`;
+            const seed = encodeURIComponent(prompt.substring(0, 20));
+            const url = `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&h=600&auto=format&fit=crop&seed=${seed}`;
             onAvatarGenerated(url);
             toast({ title: "Avatar Generated!", description: "The new avatar has been set." });
             setIsOpen(false);
