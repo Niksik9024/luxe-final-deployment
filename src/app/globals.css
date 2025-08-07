@@ -5,17 +5,21 @@
 
 @layer base {
   :root {
-    --background: 0 0% 8%; /* Darker Background */
-    --foreground: 0 0% 98%; /* White text */
-    
-    --card: 0 0% 12%; /* Slightly lighter card background */
+    --background: 0 0% 8%; /* Deep Charcoal */
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 12%; /* Slightly Lighter Charcoal for cards */
     --card-foreground: 0 0% 98%;
-    
+
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
-    
-    /* Primary is a vibrant, sophisticated purple */
-    --primary: 262.1 83.3% 57.8%;   
+
+    /* Accent is a sophisticated, warm gold */
+    --accent: 35.1 91.2% 52.5%;
+    --accent-foreground: 240 10% 3.9%; /* Dark text for contrast on accent */
+
+    /* Primary is a vibrant, elegant purple */
+    --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
@@ -23,18 +27,13 @@
 
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-
-    /* Accent is a warm, luxurious gold/amber */
-    --accent: 35.1 91.2% 52.5%;
-    --accent-foreground: 240 10% 3.9%; /* Dark text on accent */
-
-    /* Destructive remains a clear red */
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 240 3.7% 20%; /* Brighter border for better contrast */
     --input: 240 3.7% 15.9%;
-    --ring: 262.1 83.3% 57.8%; /* Purple for focus rings */
+    --ring: 35.1 91.2% 52.5%; /* Gold for focus rings */
     
     --radius: 0.5rem;
   }
@@ -48,6 +47,9 @@
     
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
+
+    --accent: 35.1 91.2% 52.5%;
+    --accent-foreground: 240 10% 3.9%;
     
     --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 0 0% 98%;
@@ -58,15 +60,12 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
     
-    --accent: 35.1 91.2% 52.5%;
-    --accent-foreground: 240 10% 3.9%;
-    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
     --border: 240 3.7% 20%;
     --input: 240 3.7% 15.9%;
-    --ring: 262.1 83.3% 57.8%;
+    --ring: 35.1 91.2% 52.5%;
   }
 }
 
@@ -78,6 +77,12 @@
     @apply bg-background text-foreground;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-playfair), serif;
+    @apply font-headline tracking-wide;
+  }
+  h1 {
+    @apply text-4xl md:text-5xl font-bold;
+  }
+  h2 {
+    @apply text-3xl md:text-4xl font-bold;
   }
 }

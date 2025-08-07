@@ -78,7 +78,7 @@ export default function Home() {
     setTopVideos(nonFeaturedVideos.slice(0, 3));
     setLatestVideos(nonFeaturedVideos.slice(3, 10)); // fetch more for carousel
     setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 6));
-    setTopModels(allModels.slice(0, 6));
+    setTopModels(allModels.slice(0, 10)); // fetch more for carousel
     setLoading(false);
   }, []);
 
@@ -105,7 +105,7 @@ export default function Home() {
       <div className="space-y-24 md:space-y-32 my-24 md:my-32">
         {topVideos.length > 0 && (
             <section className="container mx-auto px-4">
-                <h2 className="text-4xl font-headline mb-16 text-center tracking-widest">Top Videos</h2>
+                <h2 className="mb-12 text-center">Top Videos</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                   <div className="lg:col-span-1">
                     <ContentCard content={topVideos[0]} type="video" />
@@ -121,12 +121,24 @@ export default function Home() {
 
         {latestVideos.length > 0 && (
              <section className="container mx-auto px-4">
-                <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Latest Videos</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {latestVideos.slice(0,6).map((video) => (
-                        <ContentCard key={video.id} content={video} type="video" />
+                <h2 className="mb-12 text-center">Latest Videos</h2>
+                <Carousel
+                  opts={{
+                    align: "start",
+                    loop: true,
+                  }}
+                  className="w-full"
+                >
+                  <CarouselContent>
+                    {latestVideos.map((video, index) => (
+                      <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                        <ContentCard content={video} type="video" />
+                      </CarouselItem>
                     ))}
-                </div>
+                  </CarouselContent>
+                  <CarouselPrevious className="ml-14"/>
+                  <CarouselNext className="mr-14"/>
+                </Carousel>
                 <div className="text-center mt-12">
                     <Button asChild variant="outline" size="lg">
                         <Link href="/videos">View All Videos</Link>
@@ -137,12 +149,24 @@ export default function Home() {
         
         {latestGalleries.length > 0 && (
             <section className="container mx-auto px-4">
-                <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Galleries</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-                    {latestGalleries.map((gallery) => (
-                        <ContentCard key={gallery.id} content={gallery} type="gallery"/>
+                <h2 className="mb-12 text-center">Galleries</h2>
+                 <Carousel
+                  opts={{
+                    align: "start",
+                    loop: true,
+                  }}
+                  className="w-full"
+                >
+                  <CarouselContent>
+                    {latestGalleries.map((gallery, index) => (
+                       <CarouselItem key={index} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                        <ContentCard content={gallery} type="gallery"/>
+                      </CarouselItem>
                     ))}
-                </div>
+                  </CarouselContent>
+                  <CarouselPrevious className="ml-14"/>
+                  <CarouselNext className="mr-14"/>
+                </Carousel>
                   <div className="flex justify-center mt-12">
                       <Button asChild variant="outline" size="lg">
                           <Link href="/galleries">View All Galleries</Link>
@@ -153,12 +177,25 @@ export default function Home() {
 
         {topModels.length > 0 && (
             <section className="container mx-auto px-4">
-                  <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Models</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-                      {topModels.map((model) => (
-                          <ModelCard key={model.id} model={model} />
-                      ))}
-                  </div>
+                  <h2 className="mb-12 text-center">Models</h2>
+                  <Carousel
+                    opts={{
+                        align: "start",
+                        loop: true,
+                    }}
+                    className="w-full"
+                    >
+                    <CarouselContent>
+                        {topModels.map((model, index) => (
+                        <CarouselItem key={index} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
+                            <ModelCard model={model} />
+                        </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="ml-14" />
+                    <CarouselNext className="mr-14"/>
+                    </Carousel>
+
                   <div className="flex justify-center mt-12">
                       <Button asChild variant="outline" size="lg">
                           <Link href="/models">View All Models</Link>
