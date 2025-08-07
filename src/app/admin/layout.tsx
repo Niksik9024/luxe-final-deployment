@@ -179,14 +179,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [isAdmin, loading, router]);
 
-  React.useEffect(() => {
-    // Add admin-body class to body for admin-specific theme, only on client
-    document.body.classList.add('admin-body');
-    return () => {
-        document.body.classList.remove('admin-body');
-    }
-  }, []);
-
   if (loading) {
     return (
         <div className="flex items-center justify-center min-h-screen">
