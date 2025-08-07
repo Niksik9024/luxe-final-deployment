@@ -118,8 +118,6 @@ export default function Home() {
               </div>
           </section>
       )}
-
-      <Separator />
       
       {latestGalleries.length > 0 && (
           <section className="py-12 md:py-20 bg-background">
@@ -130,13 +128,17 @@ export default function Home() {
                           <ContentCard key={gallery.id} content={gallery} type="gallery"/>
                       ))}
                   </div>
+                   <div className="flex justify-center mt-8">
+                        <Button asChild variant="outline" size="lg">
+                            <Link href="/galleries">View All Galleries</Link>
+                        </Button>
+                    </div>
               </div>
-          </section>      )}
-
-       <Separator />
+          </section>      
+      )}
 
       {topModels.length > 0 && (
-           <section className="py-12 md:py-20 bg-background">
+           <section className="py-12 md:py-20 bg-background/50">
                 <div className="container mx-auto px-4">
                      <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">MODELS</h2>
                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
