@@ -1,49 +1,62 @@
 
 'use client';
 
-import React, { useEffect, useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { ContentCard } from '@/components/shared/ContentCard';
 import { ModelCard } from '@/components/shared/ModelCard';
-import { Search, Sparkles, AlertTriangle, SlidersHorizontal, Loader2 } from 'lucide-react';
+import { Search, SlidersHorizontal, Loader2 } from 'lucide-react';
 import type { Video, Gallery, Model } from '@/lib/types';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { performSearch } from '@/ai/flows/perform-search';
-import type { PerformSearchOutput } from '@/ai/schemas/description';
+import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from '@/components/ui/separator';
 
 const categories = ["all", "fashion", "nature", "urban", "art", "cinematic", "lifestyle", "technology", "monochrome"];
 
-export default function SearchPage() {
+type SearchResults = {
+    videos: Video[];
+    galleries: Gallery[];
+    models: Model[];
+}
+
+function SearchPageComponent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const [searchResults, setSearchResults] = useState<PerformSearchOutput>({ videos: [], galleries: [], models: [] });
-  const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<SearchResults>({ videos: [], galleries: [], models: [] });
 
-  const queryTerm = searchParams.get('q') || '';
+  const queryTerm = searchParams.get('q')?.toLowerCase() || '';
   const typeFilter = searchParams.get('type') || 'all';
   const categoryFilter = searchParams.get('category') || 'all';
 
   useEffect(() => {
-    startTransition(async () => {
-      setError(null);
-      try {
-        const results = await performSearch({ 
-            query: queryTerm,
-            type: typeFilter as any,
-            category: categoryFilter,
-         });
-        setSearchResults(results);
-      } catch (e) {
-        setError("An error occurred while searching. Please try again.");
-        console.error("Search failed:", e);
-        setSearchResults({ videos: [], galleries: [], models: [] });
+    startTransition(() => {
+      const allVideos = getVideos().filter(v => v.status === 'Published');
+      const allGalleries = getGalleries().filter(g => g.status === 'Published');
+      const allModels = getModels();
+
+      let filteredVideos = allVideos;
+      let filteredGalleries = allGalleries;
+      let filteredModels = allModels;
+
+      if (queryTerm) {
+          filteredVideos = allVideos.filter(v => v.keywords.some(k => k.includes(queryTerm)));
+          filteredGalleries = allGalleries.filter(g => g.keywords.some(k => k.includes(queryTerm)));
+          filteredModels = allModels.filter(m => m.name.toLowerCase().includes(queryTerm));
       }
+
+      if (categoryFilter !== 'all') {
+          filteredVideos = filteredVideos.filter(v => v.tags.includes(categoryFilter));
+          filteredGalleries = filteredGalleries.filter(g => g.tags.includes(categoryFilter));
+      }
+
+      setSearchResults({
+          videos: typeFilter === 'all' || typeFilter === 'videos' ? filteredVideos : [],
+          galleries: typeFilter === 'all' || typeFilter === 'galleries' ? filteredGalleries : [],
+          models: typeFilter === 'all' || typeFilter === 'models' ? filteredModels : [],
+      });
     });
   }, [queryTerm, typeFilter, categoryFilter]);
 
@@ -61,7 +74,6 @@ export default function SearchPage() {
 
   const { videos, galleries, models } = searchResults;
   const hasResults = videos.length > 0 || galleries.length > 0 || models.length > 0;
-  const totalResults = videos.length + galleries.length + models.length;
 
   return (
     <div className="container mx-auto py-12 px-4">
@@ -72,7 +84,7 @@ export default function SearchPage() {
                 {isPending 
                     ? <p>Searching for content...</p>
                     : queryTerm
-                        ? <p>Results for <span className="font-bold text-white">"{queryTerm}"</span></p>
+                        ? <p>Results for <span className="font-bold text-white">"{searchParams.get('q')}"</span></p>
                         : <p>Explore all content</p>
                 }
             </div>
@@ -104,14 +116,6 @@ export default function SearchPage() {
       </div>
       <Separator className="mb-8" />
        
-      {error && (
-        <Alert variant="destructive" className="mb-8">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Search Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
       {isPending ? (
         <div className="flex items-center justify-center min-h-[40vh]">
             <Loader2 className="h-12 w-12 text-accent animate-spin" />
@@ -161,4 +165,12 @@ export default function SearchPage() {
       )}
     </div>
   );
+}
+
+export default function SearchPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Loader2 className="h-12 w-12 text-accent animate-spin" /></div>}>
+            <SearchPageComponent />
+        </Suspense>
+    )
 }

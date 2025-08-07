@@ -1,5 +1,4 @@
 
-
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,30 +10,20 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { collection, getDocs, deleteDoc, addDoc, doc, runTransaction, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getVideos, setVideos, getTags, setTags } from '@/lib/localStorage';
 import type { Video } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 export function VideosAdminClient() {
-    const [videos, setVideos] = React.useState<Video[]>([]);
+    const [videos, setLocalVideos] = React.useState<Video[]>([]);
     const [loading, setLoading] = React.useState(true);
     const { toast } = useToast();
     
-    const fetchVideos = React.useCallback(async () => {
+    const fetchVideos = React.useCallback(() => {
         setLoading(true);
-        const q = query(collection(db, "videos"), orderBy("date", "desc"));
-        const querySnapshot = await getDocs(q);
-        const videosData = querySnapshot.docs.map(doc => { 
-            const data = doc.data();
-            return { 
-                id: doc.id, 
-                ...data,
-                date: (data.date?.toDate ? data.date.toDate() : new Date(data.date)).toISOString(),
-            } as Video
-        });
-        setVideos(videosData);
+        const videosData = getVideos().sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setLocalVideos(videosData);
         setLoading(false);
     }, []);
 
@@ -47,30 +36,22 @@ export function VideosAdminClient() {
         if (!videoToDelete) return;
 
         try {
-            const videoRef = doc(db, "videos", id);
-            
-            // First, delete the document itself
-            await deleteDoc(videoRef);
+            const currentVideos = getVideos();
+            const updatedVideos = currentVideos.filter(v => v.id !== id);
+            setVideos(updatedVideos);
 
-            // Then, update the tags count in a transaction
             const tags = videoToDelete.tags || [];
             if (tags.length > 0) {
-                const tagsDocRef = doc(db, 'tags', '--all--');
-                 await runTransaction(db, async (transaction) => {
-                    const tagsDoc = await transaction.get(tagsDocRef);
-                    if (!tagsDoc.exists()) { return; }
-
-                    const tagsData = tagsDoc.data();
-                    tags.forEach(tag => {
-                        if (tagsData[tag] && tagsData[tag] > 0) {
-                            tagsData[tag] -= 1;
+                const allTags = getTags();
+                tags.forEach(tag => {
+                    if (allTags[tag]) {
+                        allTags[tag] -= 1;
+                        if (allTags[tag] <= 0) {
+                            delete allTags[tag];
                         }
-                        if (tagsData[tag] === 0) {
-                            delete tagsData[tag];
-                        }
-                    });
-                    transaction.set(tagsDocRef, tagsData);
+                    }
                 });
+                setTags(allTags);
             }
 
             toast({
@@ -94,34 +75,33 @@ export function VideosAdminClient() {
         if (original) {
             try {
                 const { id: _, ...duplicateData } = original; // remove original id
-                
-                await addDoc(collection(db, "videos"), {
+                const newId = `video_${Date.now()}`;
+                const duplicate: Video = {
                    ...duplicateData,
+                   id: newId,
                    title: `Copy of ${original.title}`,
                    status: 'Draft',
                    isFeatured: false, // Ensure duplicates are not featured
                    date: new Date().toISOString(),
-                });
+                };
+                
+                const currentVideos = getVideos();
+                setVideos([...currentVideos, duplicate]);
 
-                 // After adding the doc, update the tag counts
                  const tagsToUpdate = original.tags || [];
                  if (tagsToUpdate.length > 0) {
-                     const tagsDocRef = doc(db, 'tags', '--all--');
-                     await runTransaction(db, async (transaction) => {
-                         const tagsDoc = await transaction.get(tagsDocRef);
-                         const tagsData = tagsDoc.exists() ? tagsDoc.data() : {};
-                         tagsToUpdate.forEach(tag => {
-                             tagsData[tag] = (tagsData[tag] || 0) + 1;
-                         });
-                         transaction.set(tagsDocRef, tagsData);
+                     const allTags = getTags();
+                     tagsToUpdate.forEach(tag => {
+                         allTags[tag] = (allTags[tag] || 0) + 1;
                      });
+                     setTags(allTags);
                  }
 
                 toast({
                     title: "Video Duplicated",
                     description: `"${original.title}" has been duplicated. The copy is now in drafts.`,
                 });
-                fetchVideos(); // Refresh the list to show the new duplicate
+                fetchVideos(); // Refresh the list
             } catch (error) {
                  toast({
                     title: "Error Duplicating",

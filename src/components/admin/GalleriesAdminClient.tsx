@@ -1,5 +1,4 @@
 
-
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -11,30 +10,20 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { collection, getDocs, deleteDoc, addDoc, doc, runTransaction, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getGalleries, setGalleries, getTags, setTags } from '@/lib/localStorage';
 import type { Gallery } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 export function GalleriesAdminClient() {
-    const [galleries, setGalleries] = React.useState<Gallery[]>([]);
+    const [galleries, setLocalGalleries] = React.useState<Gallery[]>([]);
     const [loading, setLoading] = React.useState(true);
     const { toast } = useToast();
 
-    const fetchGalleries = React.useCallback(async () => {
+    const fetchGalleries = React.useCallback(() => {
         setLoading(true);
-        const q = query(collection(db, "galleries"), orderBy("date", "desc"));
-        const querySnapshot = await getDocs(q);
-        const galleriesData = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return { 
-                id: doc.id, 
-                ...data,
-                date: (data.date?.toDate ? data.date.toDate() : new Date(data.date)).toISOString(),
-            } as Gallery
-        });
-        setGalleries(galleriesData);
+        const galleriesData = getGalleries().sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setLocalGalleries(galleriesData);
         setLoading(false);
     }, []);
 
@@ -47,31 +36,23 @@ export function GalleriesAdminClient() {
         if (!galleryToDelete) return;
 
         try {
-            const galleryRef = doc(db, "galleries", id);
+            const currentGalleries = getGalleries();
+            const updatedGalleries = currentGalleries.filter(g => g.id !== id);
+            setGalleries(updatedGalleries);
             
-            // First, delete the document itself
-            await deleteDoc(galleryRef);
-            
-            // Then, update the tags count in a transaction.
-            // This order is safer in case the tag update fails; the content is already gone.
+            // Update tags count
             const tags = galleryToDelete.tags || [];
             if (tags.length > 0) {
-                const tagsDocRef = doc(db, 'tags', '--all--');
-                await runTransaction(db, async (transaction) => {
-                    const tagsDoc = await transaction.get(tagsDocRef);
-                    if (!tagsDoc.exists()) { return; } // No tags document to update
-                    
-                    const tagsData = tagsDoc.data();
-                    tags.forEach(tag => {
-                        if (tagsData[tag] && tagsData[tag] > 0) {
-                            tagsData[tag] -= 1;
+                const allTags = getTags();
+                tags.forEach(tag => {
+                    if (allTags[tag]) {
+                        allTags[tag] -= 1;
+                        if (allTags[tag] === 0) {
+                            delete allTags[tag];
                         }
-                        if (tagsData[tag] === 0) {
-                            delete tagsData[tag];
-                        }
-                    });
-                    transaction.set(tagsDocRef, tagsData);
+                    }
                 });
+                setTags(allTags);
             }
 
             toast({
@@ -79,7 +60,7 @@ export function GalleriesAdminClient() {
                 description: "The gallery has been permanently deleted.",
                 variant: "destructive"
             });
-            fetchGalleries(); // Refresh the list
+            fetchGalleries();
         } catch (error) {
             console.error("Error deleting gallery:", error);
             toast({
@@ -94,34 +75,33 @@ export function GalleriesAdminClient() {
         const original = galleries.find(p => p.id === id);
         if (original) {
             try {
-                const { id: _, ...duplicateData } = original; // remove original id
-                
-                await addDoc(collection(db, "galleries"), {
+                const { id: _, ...duplicateData } = original;
+                const newId = `gallery_${Date.now()}`;
+                const duplicate: Gallery = {
                    ...duplicateData,
+                   id: newId,
                    title: `Copy of ${original.title}`,
                    status: 'Draft',
                    date: new Date().toISOString(),
-                });
+                };
+                
+                const currentGalleries = getGalleries();
+                setGalleries([...currentGalleries, duplicate]);
 
-                // After adding the doc, update the tag counts
                 const tagsToUpdate = original.tags || [];
                 if (tagsToUpdate.length > 0) {
-                    const tagsDocRef = doc(db, 'tags', '--all--');
-                    await runTransaction(db, async (transaction) => {
-                        const tagsDoc = await transaction.get(tagsDocRef);
-                        const tagsData = tagsDoc.exists() ? tagsDoc.data() : {};
-                        tagsToUpdate.forEach(tag => {
-                            tagsData[tag] = (tagsData[tag] || 0) + 1;
-                        });
-                        transaction.set(tagsDocRef, tagsData);
+                    const allTags = getTags();
+                    tagsToUpdate.forEach(tag => {
+                        allTags[tag] = (allTags[tag] || 0) + 1;
                     });
+                    setTags(allTags);
                 }
                 
                 toast({
                     title: "Gallery Duplicated",
                     description: `"${original.title}" has been duplicated. The copy is now in drafts.`,
                 });
-                fetchGalleries(); // Refresh the list to show the new duplicate
+                fetchGalleries();
             } catch (error) {
                  toast({
                     title: "Error Duplicating",

@@ -1,5 +1,4 @@
 
-
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -12,14 +11,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { collection, getDocs, writeBatch, query, where, doc, updateDoc, deleteField, runTransaction, getDoc, setDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getTags, setTags, getVideos, setVideos, getGalleries, setGalleries } from '@/lib/localStorage'
 import type { Video, Gallery } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function TagsPage() {
   const { toast } = useToast();
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTags, setLocalTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   // State for Rename Dialog
@@ -32,18 +30,12 @@ export default function TagsPage() {
   const [tagToMerge, setTagToMerge] = useState('');
   const [mergeTargetTag, setMergeTargetTag] = useState('');
 
-  const fetchTags = useCallback(async () => {
+  const fetchTags = useCallback(() => {
     setLoading(true);
     try {
-        const tagsDocRef = doc(db, 'tags', '--all--');
-        const tagsDocSnap = await getDoc(tagsDocRef);
-        if (tagsDocSnap.exists()) {
-            const tagsData = tagsDocSnap.data();
-            const uniqueTags = Object.keys(tagsData).sort((a,b) => a.localeCompare(b));
-            setAllTags(uniqueTags);
-        } else {
-            setAllTags([]);
-        }
+        const tagsData = getTags();
+        const uniqueTags = Object.keys(tagsData).sort((a,b) => a.localeCompare(b));
+        setLocalTags(uniqueTags);
     } catch(error) {
         console.error("Error fetching tags:", error);
         toast({ title: 'Error', description: 'Could not fetch tags.', variant: 'destructive'})
@@ -61,73 +53,57 @@ export default function TagsPage() {
     setIsRenameDialogOpen(true);
   };
   
-  const updateDocumentsWithTag = async (oldName: string, newName: string, operation: 'rename' | 'delete' | 'merge', targetTag?: string) => {
-      const batch = writeBatch(db);
-      const collections = ['videos', 'galleries'];
+  const updateDocumentsWithTag = (oldName: string, newName: string, operation: 'rename' | 'delete' | 'merge', targetTag?: string) => {
+      const allVideos = getVideos();
+      const allGalleries = getGalleries();
       
-      for(const coll of collections) {
-          const q = query(collection(db, coll), where("tags", "array-contains", oldName));
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach(docSnap => {
-              const docRef = docSnap.ref;
-              const data = docSnap.data() as Video | Gallery;
-              let newTags = [...data.tags];
-              let newKeywords = [...data.keywords];
+      const updateContent = (content: (Video | Gallery)[]) => {
+          return content.map(item => {
+              if (item.tags.includes(oldName)) {
+                  let newTags = [...item.tags];
+                  let newKeywords = [...item.keywords];
 
-              if (operation === 'delete') {
-                  newTags = newTags.filter(t => t !== oldName);
-                  newKeywords = newKeywords.filter(k => k !== oldName);
-              } else if (operation === 'rename') {
-                  newTags = newTags.map(t => t === oldName ? newName : t);
-                  newKeywords = newKeywords.map(k => k === oldName ? newName : k);
-              } else if (operation === 'merge' && targetTag) {
-                  newTags = newTags.filter(t => t !== oldName);
-                  if (!newTags.includes(targetTag)) {
-                      newTags.push(targetTag);
+                  if (operation === 'delete') {
+                      newTags = newTags.filter(t => t !== oldName);
+                      newKeywords = newKeywords.filter(k => k !== oldName);
+                  } else if (operation === 'rename') {
+                      newTags = newTags.map(t => t === oldName ? newName : t);
+                      newKeywords = newKeywords.map(k => k === oldName ? newName : k);
+                  } else if (operation === 'merge' && targetTag) {
+                      newTags = newTags.filter(t => t !== oldName);
+                      if (!newTags.includes(targetTag)) newTags.push(targetTag);
+                      newKeywords = newKeywords.filter(k => k !== oldName);
+                      if (!newKeywords.includes(targetTag)) newKeywords.push(targetTag);
                   }
-                  newKeywords = newKeywords.filter(k => k !== oldName);
-                   if (!newKeywords.includes(targetTag)) {
-                      newKeywords.push(targetTag);
-                  }
+                  
+                  return { ...item, tags: [...new Set(newTags)], keywords: [...new Set(newKeywords)] };
               }
-              
-              const finalTags = [...new Set(newTags)];
-              const finalKeywords = [...new Set(newKeywords)];
-
-              batch.update(docRef, { tags: finalTags, keywords: finalKeywords });
+              return item;
           });
-      }
-      await batch.commit();
+      };
+      
+      setVideos(updateContent(allVideos) as Video[]);
+      setGalleries(updateContent(allGalleries) as Gallery[]);
 
       // Update the central tags collection
-      const tagsDocRef = doc(db, 'tags', '--all--');
-      await runTransaction(db, async (transaction) => {
-        const tagsDoc = await transaction.get(tagsDocRef);
-        const tagsData = tagsDoc.data() || {};
-        
-        if (operation === 'rename') {
-          if (tagsData[oldName] && oldName !== newName) {
-            const count = tagsData[oldName];
-            const newCount = tagsData[newName] || 0;
-            transaction.update(tagsDocRef, {
-              [newName]: newCount + count,
-              [oldName]: deleteField()
-            });
-          }
-        } else if (operation === 'delete') {
-          transaction.update(tagsDocRef, { [oldName]: deleteField() });
-        } else if (operation === 'merge' && targetTag) {
-            if(tagsData[oldName]) {
-                const count = tagsData[oldName];
-                const targetCount = tagsData[targetTag] || 0;
-                 transaction.update(tagsDocRef, {
-                    [targetTag]: targetCount + count,
-                    [oldName]: deleteField()
-                });
-            }
+      const tagsData = getTags();
+      
+      if (operation === 'rename') {
+        if (tagsData[oldName] && oldName !== newName) {
+          const count = tagsData[oldName];
+          tagsData[newName] = (tagsData[newName] || 0) + count;
+          delete tagsData[oldName];
         }
-      })
-
+      } else if (operation === 'delete') {
+        delete tagsData[oldName];
+      } else if (operation === 'merge' && targetTag) {
+          if(tagsData[oldName]) {
+              const count = tagsData[oldName];
+              tagsData[targetTag] = (tagsData[targetTag] || 0) + count;
+              delete tagsData[oldName];
+          }
+      }
+      setTags(tagsData);
 
       fetchTags();
   };
@@ -139,15 +115,16 @@ export default function TagsPage() {
         setIsRenameDialogOpen(false);
         return;
     }
-    await updateDocumentsWithTag(tagToRename, newTagName.trim().toLowerCase(), 'rename');
-    toast({ title: 'Tag Renamed', description: `"${tagToRename}" has been renamed to "${newTagName}".` });
+    const finalNewName = newTagName.trim().toLowerCase();
+    updateDocumentsWithTag(tagToRename, finalNewName, 'rename');
+    toast({ title: 'Tag Renamed', description: `"${tagToRename}" has been renamed to "${finalNewName}".` });
     setIsRenameDialogOpen(false);
     setTagToRename('');
     setNewTagName('');
   };
 
   const executeDelete = async (tag: string) => {
-    await updateDocumentsWithTag(tag, '', 'delete');
+    updateDocumentsWithTag(tag, '', 'delete');
     toast({ title: 'Tag Deleted', description: `The tag "${tag}" has been deleted from all content.`, variant: 'destructive' });
   };
   
@@ -157,7 +134,7 @@ export default function TagsPage() {
         setIsMergeDialogOpen(false);
         return;
     }
-    await updateDocumentsWithTag(tagToMerge, '', 'merge', mergeTargetTag);
+    updateDocumentsWithTag(tagToMerge, '', 'merge', mergeTargetTag);
     toast({ title: 'Tags Merged', description: `Successfully merged "${tagToMerge}" into "${mergeTargetTag}".` });
     setIsMergeDialogOpen(false);
     setTagToMerge('');

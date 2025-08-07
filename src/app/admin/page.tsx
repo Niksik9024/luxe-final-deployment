@@ -1,22 +1,20 @@
 
-
 'use client';
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Video, ImageIcon, Users, Eye, ArrowUp, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
+import { Video, ImageIcon, Users, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
-import { type Video as VideoType, type Gallery, type Model } from '@/lib/types'
+import { getVideos, getGalleries, getModels } from '@/lib/localStorage'
+import { type Video as VideoType, type Gallery } from '@/lib/types'
 import { Skeleton } from '@/components/ui/skeleton'
 
 type ContentItem = (VideoType | Gallery) & { type: 'video' | 'gallery' };
 
-const StatCard = ({ title, value, icon: Icon, period, trend }: { title: string; value: string; icon: React.ElementType; period?: string, trend?: string }) => (
+const StatCard = ({ title, value, icon: Icon }: { title: string; value: string; icon: React.ElementType; }) => (
     <Card className="bg-card border-border shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
@@ -24,12 +22,6 @@ const StatCard = ({ title, value, icon: Icon, period, trend }: { title: string; 
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        { (trend || period) && 
-            <p className="text-xs text-muted-foreground flex items-center">
-                {trend && <span className="text-green-500 flex items-center mr-2"><ArrowUp className="h-3 w-3 mr-1"/>{trend}</span>}
-                {period}
-            </p>
-        }
       </CardContent>
     </Card>
   );
@@ -67,36 +59,28 @@ export default function AdminDashboard() {
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [videosSnap, galleriesSnap, modelsSnap] = await Promise.all([
-                    getDocs(collection(db, 'videos')),
-                    getDocs(collection(db, 'galleries')),
-                    getDocs(collection(db, 'models')),
-                ]);
+        setLoading(true);
+        try {
+            const videos = getVideos().map(v => ({...v, type: 'video' as const}));
+            const galleries = getGalleries().map(g => ({...g, type: 'gallery' as const}));
+            const models = getModels();
 
-                const videos = videosSnap.docs.map(doc => ({ ...doc.data(), id: doc.id, type: 'video' } as VideoType & { type: 'video'}));
-                const galleries = galleriesSnap.docs.map(doc => ({ ...doc.data(), id: doc.id, type: 'gallery' } as Gallery & { type: 'gallery' }));
+            setStats({
+                videos: videos.length,
+                galleries: galleries.length,
+                models: models.length,
+            });
+            
+            const allContent: ContentItem[] = [...videos, ...galleries];
+            allContent.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            setRecentContent(allContent.slice(0, 5));
+            setChartData(getMonthlyContentData(allContent));
 
-                setStats({
-                    videos: videosSnap.size,
-                    galleries: galleriesSnap.size,
-                    models: modelsSnap.size
-                });
-                
-                const allContent: ContentItem[] = [...videos, ...galleries];
-                allContent.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                setRecentContent(allContent.slice(0, 5));
-                setChartData(getMonthlyContentData(allContent));
-
-            } catch (error) {
-                console.error("Error fetching dashboard data: ", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
+        } catch (error) {
+            console.error("Error fetching dashboard data: ", error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     if (loading) {
@@ -124,9 +108,9 @@ export default function AdminDashboard() {
     <div>
       <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
       <div className="grid gap-6 md:grid-cols-3">
-        <StatCard title="Total Videos" value={String(stats.videos)} icon={Video} trend="+2" period="in the last month" />
-        <StatCard title="Total Galleries" value={String(stats.galleries)} icon={ImageIcon} trend="+5" period="in the last month"/>
-        <StatCard title="Total Models" value={String(stats.models)} icon={Users} trend="+1" period="in the last month"/>
+        <StatCard title="Total Videos" value={String(stats.videos)} icon={Video} />
+        <StatCard title="Total Galleries" value={String(stats.galleries)} icon={ImageIcon} />
+        <StatCard title="Total Models" value={String(stats.models)} icon={Users} />
       </div>
       <div className="grid gap-8 mt-8 lg:grid-cols-3">
         <div className="lg:col-span-2">

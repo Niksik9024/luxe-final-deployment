@@ -15,8 +15,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Instagram, Twitter } from 'lucide-react'
 import Image from 'next/image'
 import { AIAvatarGenerator } from '@/components/admin/AIAvatarGenerator'
-import { collection, addDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getModels, setModels } from '@/lib/localStorage'
+import type { Model } from '@/lib/types'
 
 export const modelSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters."),
@@ -53,13 +53,19 @@ export default function NewModelPage() {
 
   async function onSubmit(values: z.infer<typeof modelSchema>) {
     try {
-        await addDoc(collection(db, "models"), values);
+        const newModel: Model = {
+            id: `model_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            ...values,
+            description: values.description || '', // Ensure description is not undefined
+        };
+        const models = getModels();
+        setModels([...models, newModel]);
+
         toast({
           title: "Model Created",
           description: `The new model "${values.name}" has been successfully created.`,
         })
         router.push('/admin/models')
-        router.refresh()
     } catch (error) {
         toast({
             title: "Error Creating Model",

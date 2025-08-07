@@ -9,9 +9,9 @@ import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { ContentForm } from '@/components/admin/ContentForm'
-import { collection, addDoc, doc, runTransaction } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getGalleries, setGalleries, getTags, setTags } from '@/lib/localStorage'
 import { galleryFormSchema } from '@/app/admin/schemas/content'
+import type { Gallery } from '@/lib/types'
 
 export default function NewGalleryPage() {
   const router = useRouter()
@@ -39,24 +39,24 @@ export default function NewGalleryPage() {
             ...tagsArray
         ]));
 
-        await addDoc(collection(db, 'galleries'), {
+        const newGallery: Gallery = {
+          id: `gallery_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           ...values,
           tags: tagsArray,
           keywords: keywords,
           album: values.album ? values.album.map(item => item.value) : [],
           date: new Date().toISOString(),
-        });
+        };
+
+        const galleries = getGalleries();
+        setGalleries([...galleries, newGallery]);
         
         if (tagsArray.length > 0) {
-            const tagsDocRef = doc(db, 'tags', '--all--');
-            await runTransaction(db, async (transaction) => {
-                const tagsDoc = await transaction.get(tagsDocRef);
-                const tagsData = tagsDoc.exists() ? tagsDoc.data() : {};
-                tagsArray.forEach(tag => {
-                    tagsData[tag] = (tagsData[tag] || 0) + 1;
-                });
-                transaction.set(tagsDocRef, tagsData);
+            const allTags = getTags();
+            tagsArray.forEach(tag => {
+                allTags[tag] = (allTags[tag] || 0) + 1;
             });
+            setTags(allTags);
         }
 
         toast({
@@ -64,7 +64,6 @@ export default function NewGalleryPage() {
           description: `The new gallery "${values.title}" has been successfully created.`,
         })
         router.push('/admin/galleries')
-        router.refresh()
     } catch(error) {
         toast({
             title: "Error Creating Gallery",

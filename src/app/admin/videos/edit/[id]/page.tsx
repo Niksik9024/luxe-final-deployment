@@ -1,8 +1,7 @@
 
-
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,8 +9,7 @@ import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { ContentForm } from '@/components/admin/ContentForm'
-import { doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getVideoById, setVideos, getVideos, getTags, setTags } from '@/lib/localStorage'
 import type { Video } from '@/lib/types'
 import { videoFormSchema } from '@/app/admin/schemas/content'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -22,19 +20,20 @@ export default function EditVideoPage() {
   const { toast } = useToast()
   
   const videoId = params.id as string
-  const [originalTags, setOriginalTags] = React.useState<string[]>([]);
+  const [originalTags, setOriginalTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const form = useForm<z.infer<typeof videoFormSchema>>({
     resolver: zodResolver(videoFormSchema),
-    defaultValues: async () => {
-        if (!videoId) return {};
-        const docRef = doc(db, 'videos', videoId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const video = docSnap.data() as Video;
+  });
+
+  useEffect(() => {
+    if (videoId) {
+        const video = getVideoById(videoId);
+        if (video) {
             const tags = video.tags || [];
             setOriginalTags(tags);
-            return {
+            form.reset({
                 title: video.title || "",
                 description: video.description || "",
                 videoUrl: video.videoUrl || "",
@@ -43,15 +42,21 @@ export default function EditVideoPage() {
                 tags: tags.join(", "),
                 status: video.status || 'Draft',
                 isFeatured: video.isFeatured || false,
-            }
+            });
         }
-        return {};
-    },
-  })
+        setLoading(false);
+    }
+  }, [videoId, form]);
 
   async function onSubmit(values: z.infer<typeof videoFormSchema>) {
     try {
-        const videoRef = doc(db, 'videos', videoId);
+        const videos = getVideos();
+        const videoIndex = videos.findIndex(v => v.id === videoId);
+        if (videoIndex === -1) {
+            toast({ title: "Error", description: "Video not found", variant: "destructive" });
+            return;
+        }
+
         const newTagsArray = values.tags ? values.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(Boolean) : [];
         const keywords = Array.from(new Set([
             ...values.title.toLowerCase().split(' ').filter(Boolean),
@@ -59,48 +64,40 @@ export default function EditVideoPage() {
             ...newTagsArray
         ]));
 
-        await updateDoc(videoRef, {
+        const updatedVideo: Video = {
+            ...videos[videoIndex],
             ...values,
             tags: newTagsArray,
             keywords: keywords,
             isFeatured: values.isFeatured || false,
-        });
+        };
+
+        videos[videoIndex] = updatedVideo;
+        setVideos(videos);
 
         // Update central tags collection
+        const allTags = getTags();
         const tagsAdded = newTagsArray.filter(t => !originalTags.includes(t));
         const tagsRemoved = originalTags.filter(t => !newTagsArray.includes(t));
 
-        if (tagsAdded.length > 0 || tagsRemoved.length > 0) {
-            const tagsDocRef = doc(db, 'tags', '--all--');
-            await runTransaction(db, async (transaction) => {
-                const tagsDoc = await transaction.get(tagsDocRef);
-                const tagsData = tagsDoc.exists() ? tagsDoc.data() : {};
-                tagsAdded.forEach(tag => {
-                    tagsData[tag] = (tagsData[tag] || 0) + 1;
-                });
-                tagsRemoved.forEach(tag => {
-                    if (tagsData[tag]) {
-                        tagsData[tag] -= 1;
-                        if (tagsData[tag] <= 0) {
-                            delete tagsData[tag];
-                        }
-                    }
-                });
-                if (tagsDoc.exists()) {
-                    transaction.update(tagsDocRef, tagsData);
-                } else {
-                    transaction.set(tagsDocRef, tagsData);
+        tagsAdded.forEach(tag => {
+            allTags[tag] = (allTags[tag] || 0) + 1;
+        });
+        tagsRemoved.forEach(tag => {
+            if (allTags[tag]) {
+                allTags[tag] -= 1;
+                if (allTags[tag] <= 0) {
+                    delete allTags[tag];
                 }
-            });
-        }
-
+            }
+        });
+        setTags(allTags);
 
         toast({
           title: "Video Updated",
           description: `The video "${values.title}" has been successfully updated.`,
         })
         router.push('/admin/videos')
-        router.refresh()
 
     } catch (error) {
          toast({
@@ -111,7 +108,7 @@ export default function EditVideoPage() {
     }
   }
 
-  if (form.formState.isLoading) {
+  if (loading) {
     return (
         <div>
             <Skeleton className="h-8 w-1/2 mb-8" />
@@ -129,7 +126,7 @@ export default function EditVideoPage() {
     )
   }
   
-  const title = form.getValues('title');
+  const title = form.watch('title');
 
   return (
     <div>

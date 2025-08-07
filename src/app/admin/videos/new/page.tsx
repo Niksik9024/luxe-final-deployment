@@ -1,5 +1,4 @@
 
-
 'use client'
 
 import React from 'react'
@@ -10,9 +9,9 @@ import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { ContentForm } from '@/components/admin/ContentForm'
-import { collection, addDoc, doc, runTransaction } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getVideos, setVideos, getTags, setTags } from '@/lib/localStorage'
 import { videoFormSchema } from '@/app/admin/schemas/content'
+import type { Video } from '@/lib/types'
 
 export default function NewVideoPage() {
   const router = useRouter()
@@ -41,25 +40,25 @@ export default function NewVideoPage() {
             ...tagsArray
         ]));
         
-        await addDoc(collection(db, 'videos'), {
+        const newVideo: Video = {
+            id: `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             ...values,
             videoUrl: values.videoUrl || '',
             isFeatured: values.isFeatured || false,
             tags: tagsArray,
             keywords: keywords,
             date: new Date().toISOString(),
-        });
+        };
+
+        const videos = getVideos();
+        setVideos([...videos, newVideo]);
 
         if (tagsArray.length > 0) {
-            const tagsDocRef = doc(db, 'tags', '--all--');
-            await runTransaction(db, async (transaction) => {
-                const tagsDoc = await transaction.get(tagsDocRef);
-                const tagsData = tagsDoc.exists() ? tagsDoc.data() : {};
-                tagsArray.forEach(tag => {
-                    tagsData[tag] = (tagsData[tag] || 0) + 1;
-                });
-                transaction.set(tagsDocRef, tagsData);
+            const allTags = getTags();
+            tagsArray.forEach(tag => {
+                allTags[tag] = (allTags[tag] || 0) + 1;
             });
+            setTags(allTags);
         }
         
         toast({
@@ -67,7 +66,6 @@ export default function NewVideoPage() {
           description: `The new video "${values.title}" has been successfully created.`,
         })
         router.push('/admin/videos')
-        router.refresh()
     } catch(error) {
         toast({
             title: "Error Creating Video",

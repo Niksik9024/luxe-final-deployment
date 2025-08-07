@@ -1,8 +1,7 @@
 
-
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,8 +9,7 @@ import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { ContentForm } from '@/components/admin/ContentForm'
-import { doc, getDoc, updateDoc, runTransaction } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getGalleryById, setGalleries, getGalleries, getTags, setTags } from '@/lib/localStorage'
 import type { Gallery } from '@/lib/types'
 import { galleryFormSchema } from '@/app/admin/schemas/content'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -22,35 +20,42 @@ export default function EditGalleryPage() {
   const { toast } = useToast()
   
   const galleryId = params.id as string
-  const [originalTags, setOriginalTags] = React.useState<string[]>([]);
+  const [originalTags, setOriginalTags] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const form = useForm<z.infer<typeof galleryFormSchema>>({
     resolver: zodResolver(galleryFormSchema),
-    defaultValues: async () => {
-        if (!galleryId) return {};
-        const docRef = doc(db, 'galleries', galleryId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const gallery = docSnap.data() as Gallery;
-            const tags = gallery.tags || [];
-            setOriginalTags(tags);
-            return {
-                title: gallery.title || "",
-                description: gallery.description || "",
-                image: gallery.image || "",
-                models: gallery.models || [],
-                tags: tags.join(", "),
-                status: gallery.status || 'Draft',
-                album: (gallery.album || []).map(url => ({ value: url })),
-            }
-        }
-        return {};
-    }
   })
+
+  useEffect(() => {
+    if (galleryId) {
+      const gallery = getGalleryById(galleryId);
+      if (gallery) {
+        const tags = gallery.tags || [];
+        setOriginalTags(tags);
+        form.reset({
+          title: gallery.title || "",
+          description: gallery.description || "",
+          image: gallery.image || "",
+          models: gallery.models || [],
+          tags: tags.join(", "),
+          status: gallery.status || 'Draft',
+          album: (gallery.album || []).map(url => ({ value: url })),
+        });
+      }
+      setLoading(false);
+    }
+  }, [galleryId, form]);
 
   async function onSubmit(values: z.infer<typeof galleryFormSchema>) {
     try {
-        const galleryRef = doc(db, 'galleries', galleryId);
+        const galleries = getGalleries();
+        const galleryIndex = galleries.findIndex(g => g.id === galleryId);
+        if (galleryIndex === -1) {
+            toast({ title: "Error", description: "Gallery not found.", variant: "destructive" });
+            return;
+        }
+
         const newTagsArray = values.tags ? values.tags.split(',').map(tag => tag.trim().toLowerCase()).filter(Boolean) : [];
         const keywords = Array.from(new Set([
             ...values.title.toLowerCase().split(' ').filter(Boolean),
@@ -58,47 +63,40 @@ export default function EditGalleryPage() {
             ...newTagsArray
         ]));
 
-        await updateDoc(galleryRef, {
+        const updatedGallery: Gallery = {
+            ...galleries[galleryIndex],
             ...values,
             tags: newTagsArray,
             keywords: keywords,
             album: values.album ? values.album.map(item => item.value) : [],
-        });
+        };
+        
+        galleries[galleryIndex] = updatedGallery;
+        setGalleries(galleries);
 
         // Update central tags collection
+        const allTags = getTags();
         const tagsAdded = newTagsArray.filter(t => !originalTags.includes(t));
         const tagsRemoved = originalTags.filter(t => !newTagsArray.includes(t));
 
-        if (tagsAdded.length > 0 || tagsRemoved.length > 0) {
-            const tagsDocRef = doc(db, 'tags', '--all--');
-            await runTransaction(db, async (transaction) => {
-                const tagsDoc = await transaction.get(tagsDocRef);
-                const tagsData = tagsDoc.exists() ? tagsDoc.data() : {};
-                tagsAdded.forEach(tag => {
-                    tagsData[tag] = (tagsData[tag] || 0) + 1;
-                });
-                tagsRemoved.forEach(tag => {
-                     if (tagsData[tag]) {
-                        tagsData[tag] -= 1;
-                        if (tagsData[tag] <= 0) {
-                            delete tagsData[tag];
-                        }
-                    }
-                });
-                if (tagsDoc.exists()) {
-                    transaction.update(tagsDocRef, tagsData);
-                } else {
-                    transaction.set(tagsDocRef, tagsData);
+        tagsAdded.forEach(tag => {
+            allTags[tag] = (allTags[tag] || 0) + 1;
+        });
+        tagsRemoved.forEach(tag => {
+            if (allTags[tag]) {
+                allTags[tag] -= 1;
+                if (allTags[tag] <= 0) {
+                    delete allTags[tag];
                 }
-            });
-        }
+            }
+        });
+        setTags(allTags);
         
         toast({
           title: "Gallery Updated",
           description: `The gallery "${values.title}" has been successfully updated.`,
         })
         router.push('/admin/galleries')
-        router.refresh()
     } catch (error) {
          toast({
           title: "Error",
@@ -108,7 +106,7 @@ export default function EditGalleryPage() {
     }
   }
 
-  if (form.formState.isLoading) {
+  if (loading) {
     return (
         <div>
             <Skeleton className="h-8 w-1/2 mb-8" />
@@ -126,7 +124,7 @@ export default function EditGalleryPage() {
     )
   }
   
-  const title = form.getValues('title');
+  const title = form.watch('title');
 
   return (
     <div>

@@ -1,15 +1,11 @@
 
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useTransition } from 'react';
-import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getUsers, setUsers } from '@/lib/localStorage';
 import { useAuth } from '@/lib/auth';
 import type { User } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
-import { deleteUser } from '@/ai/flows/delete-user';
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,16 +37,14 @@ function UserTableSkeleton() {
 export default function ManageUsersPage() {
     const { currentUser: adminUser } = useAuth();
     const { toast } = useToast();
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setLocalUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [isUpdating, startUpdateTransition] = useTransition();
 
-    const fetchUsers = useCallback(async () => {
+    const fetchUsers = useCallback(() => {
         setLoading(true);
-        const usersQuery = query(collection(db, "users"), orderBy("name"));
-        const querySnapshot = await getDocs(usersQuery);
-        const usersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
-        setUsers(usersData);
+        const usersData = getUsers().sort((a,b) => a.name.localeCompare(b.name));
+        setLocalUsers(usersData);
         setLoading(false);
     }, []);
 
@@ -68,13 +62,14 @@ export default function ManageUsersPage() {
             return;
         }
 
-        startUpdateTransition(async () => {
+        startUpdateTransition(() => {
             try {
-                const userRef = doc(db, 'users', userId);
-                await updateDoc(userRef, { role: newRole });
+                const currentUsers = getUsers();
+                const updatedUsers = currentUsers.map(u => u.id === userId ? { ...u, role: newRole } : u);
+                setUsers(updatedUsers);
                 
                 // Update local state for immediate feedback
-                setUsers(prevUsers => prevUsers.map(u => u.id === userId ? { ...u, role: newRole } : u));
+                setLocalUsers(prevUsers => prevUsers.map(u => u.id === userId ? { ...u, role: newRole } : u));
                 
                 toast({
                     title: "Role Updated",
@@ -88,29 +83,26 @@ export default function ManageUsersPage() {
                     description: "Could not update the user's role.",
                     variant: "destructive",
                 });
-                // Optional: Re-fetch to revert optimistic update on failure
                 fetchUsers();
             }
         });
     };
 
-    const handleDeleteUser = async (userId: string, userEmail: string) => {
+    const handleDeleteUser = (userId: string, userEmail: string) => {
         if (userId === adminUser?.id) {
             toast({ title: "Action Forbidden", description: "You cannot delete your own account.", variant: "destructive" });
             return;
         }
 
-        startUpdateTransition(async () => {
+        startUpdateTransition(() => {
             try {
-                const result = await deleteUser({ userId });
-                if (result.success) {
-                    toast({ title: "User Deleted", description: `User ${userEmail} has been permanently deleted.` });
-                    fetchUsers(); // Refresh the user list
-                } else {
-                    throw new Error(result.message);
-                }
+                const currentUsers = getUsers();
+                const updatedUsers = currentUsers.filter(u => u.id !== userId);
+                setUsers(updatedUsers);
+                toast({ title: "User Deleted", description: `User ${userEmail} has been permanently deleted.` });
+                fetchUsers(); // Refresh the user list
             } catch (error: any) {
-                toast({ title: "Deletion Failed", description: error.message, variant: "destructive" });
+                toast({ title: "Deletion Failed", description: "Could not delete user", variant: "destructive" });
             }
         });
     };
@@ -169,7 +161,7 @@ export default function ManageUsersPage() {
                                                     <AlertDialogHeader>
                                                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                                         <AlertDialogDescription>
-                                                            This action cannot be undone. This will permanently delete the user account for <span className="font-bold">{user.email}</span> and all associated data from the authentication system and database.
+                                                            This action cannot be undone. This will permanently delete the user account for <span className="font-bold">{user.email}</span>.
                                                         </AlertDialogDescription>
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>

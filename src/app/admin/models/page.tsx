@@ -1,5 +1,4 @@
 
-
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -10,23 +9,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
 import { useToast } from "@/hooks/use-toast";
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getModels, setModels } from '@/lib/localStorage';
 import type { Model } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { deleteModel } from '@/ai/flows/delete-model';
 
 export default function ManageModelsPage() {
-  const [models, setModels] = React.useState<Model[]>([]);
+  const [models, setLocalModels] = React.useState<Model[]>([]);
   const [loading, setLoading] = React.useState(true);
   const { toast } = useToast();
 
-  const fetchModels = React.useCallback(async () => {
+  const fetchModels = React.useCallback(() => {
     setLoading(true);
-    const modelsQuery = query(collection(db, "models"), orderBy("name"));
-    const querySnapshot = await getDocs(modelsQuery);
-    const modelsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Model));
-    setModels(modelsData);
+    const modelsData = getModels().sort((a,b) => a.name.localeCompare(b.name));
+    setLocalModels(modelsData);
     setLoading(false);
   }, []);
 
@@ -37,20 +32,14 @@ export default function ManageModelsPage() {
 
   const handleDelete = async (id: string) => {
     try {
-        const result = await deleteModel({ modelId: id });
-        if (result.success) {
-            toast({
-                title: "Model Deleted",
-                description: result.message,
-            });
-            fetchModels();
-        } else {
-             toast({
-                title: "Error Deleting Model",
-                description: result.message,
-                variant: "destructive"
-            });
-        }
+        const currentModels = getModels();
+        const updatedModels = currentModels.filter(m => m.id !== id);
+        setModels(updatedModels);
+        toast({
+            title: "Model Deleted",
+            description: "The model has been successfully deleted.",
+        });
+        fetchModels();
     } catch (error) {
          toast({
             title: "Error",

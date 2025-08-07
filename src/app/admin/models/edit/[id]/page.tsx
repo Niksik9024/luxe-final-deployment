@@ -1,16 +1,14 @@
 
-
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { getModelById, setModels, getModels } from '@/lib/localStorage'
 import type { Model } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form"
@@ -40,40 +38,40 @@ export default function EditModelPage() {
   const { toast } = useToast()
   
   const modelId = params.id as string
+  const [loading, setLoading] = useState(true);
 
   const form = useForm<z.infer<typeof modelSchema>>({
     resolver: zodResolver(modelSchema),
-    defaultValues: async () => {
-        const docRef = doc(db, 'models', modelId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return docSnap.data() as Model;
-        }
-        return {};
+  });
+
+  useEffect(() => {
+    if (modelId) {
+      const model = getModelById(modelId);
+      if (model) {
+        form.reset(model);
+      }
+      setLoading(false);
     }
-  })
+  }, [modelId, form]);
 
   async function onSubmit(values: z.infer<typeof modelSchema>) {
     try {
-        const modelRef = doc(db, 'models', modelId);
-        // Create a clean data object, removing any undefined values
-        const dataToUpdate: Partial<Model> = {};
-        Object.keys(values).forEach(key => {
-            const valueKey = key as keyof typeof values;
-            const value = values[valueKey];
-            if (value !== undefined && value !== null) {
-                // @ts-ignore
-                dataToUpdate[key as keyof Model] = value;
-            }
-        });
-        
-        await updateDoc(modelRef, dataToUpdate);
+        const models = getModels();
+        const modelIndex = models.findIndex(m => m.id === modelId);
+        if (modelIndex === -1) {
+            toast({ title: "Error", description: "Model not found.", variant: "destructive" });
+            return;
+        }
+
+        const dataToUpdate: Model = { ...models[modelIndex], ...values };
+        models[modelIndex] = dataToUpdate;
+        setModels(models);
+
         toast({
           title: "Model Updated",
           description: `The model "${values.name}" has been successfully updated.`,
         })
         router.push('/admin/models')
-        router.refresh()
     } catch (error) {
          toast({
             title: "Error Updating Model",
@@ -84,7 +82,7 @@ export default function EditModelPage() {
     }
   }
 
-  if (form.formState.isLoading) {
+  if (loading) {
     return (
         <div>
             <Skeleton className="h-8 w-1/2 mb-8" />
