@@ -3,12 +3,14 @@
 
 import React, { useState, useEffect } from 'react';
 import type { Model, Video, Gallery } from '@/lib/types';
+import Link from 'next/link';
 import { HeroCarousel } from '@/components/client/HeroCarousel';
 import { Separator } from '@/components/ui/separator';
 import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ContentCard } from '@/components/shared/ContentCard';
 import { ModelCard } from '@/components/shared/ModelCard';
+import { Button } from '@/components/ui/button';
 
 function HomePageSkeleton() {
     return (
@@ -62,7 +64,7 @@ export default function Home() {
     setLatestVideos(nonFeaturedVideos.slice(3, 6));
 
     setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 6));
-    setTopModels(allModels.slice(0, 5));
+    setTopModels(allModels.slice(0, 6));
     setLoading(false);
   }, []);
 
@@ -133,10 +135,15 @@ export default function Home() {
            <section className="py-12 md:py-20 bg-background">
                 <div className="container mx-auto px-4">
                      <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">MODELS</h2>
-                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         {topModels.map((model) => (
                             <ModelCard key={model.id} model={model} />
                         ))}
+                    </div>
+                    <div className="flex justify-center mt-8">
+                        <Button asChild variant="outline" size="lg">
+                            <Link href="/models">View All Models</Link>
+                        </Button>
                     </div>
                 </div>
            </section>
