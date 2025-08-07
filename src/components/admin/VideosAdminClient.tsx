@@ -171,11 +171,11 @@ export function VideosAdminClient() {
                             <Copy className="mr-2 h-4 w-4"/> Duplicate
                         </DropdownMenuItem>
                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                           <button className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground'>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                           </button>
-                          </AlertDialogTrigger>
+                            <DropdownMenuItem asChild>
+                               <AlertDialogTrigger className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground'>
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                               </AlertDialogTrigger>
+                            </DropdownMenuItem>
                           <AlertDialogContent className="bg-card border-border text-card-foreground">
                               <AlertDialogHeader>
                                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

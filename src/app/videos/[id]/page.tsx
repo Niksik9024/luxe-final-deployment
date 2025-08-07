@@ -111,7 +111,7 @@ export default function VideoPage() {
         <div className="max-w-4xl mx-auto text-center mb-12">
             <h1 className="text-4xl md:text-5xl mb-4 font-bold">{video.title}</h1>
             
-            <div className="flex items-center justify-center gap-x-4 gap-y-2 text-muted-foreground mb-4 flex-wrap">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-x-4 gap-y-2 text-muted-foreground mb-4 flex-wrap">
                 <div className="flex items-center gap-2">
                     {models.map((model, index) => (
                         <React.Fragment key={model.id}>
