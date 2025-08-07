@@ -86,15 +86,13 @@ export default function Home() {
     return <HomePageSkeleton />;
   }
 
-  const heroContentSource = featuredVideos.length > 0 
-    ? featuredVideos.map(v => ({ id: v.id, image: v.image, name: v.title, type: 'video' as const })) 
-    : topModels.slice(0, 5).map(m => ({ id: m.id, image: m.image, name: m.name, type: 'model' as const }));
+  const heroContentSource = topModels.slice(0, 5).map(m => ({ id: m.id, image: m.image, name: m.name, type: 'model' as const }));
 
   const heroItems = heroContentSource.map(item => ({
       id: item.id,
       img: item.image,
       modelName: item.name,
-      profileUrl: `/${item.type === 'video' ? 'videos' : 'models'}/${item.id}`,
+      profileUrl: `/models/${item.id}`,
       thumbImg: item.image,
   }));
 
