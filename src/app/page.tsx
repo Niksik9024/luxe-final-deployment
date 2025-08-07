@@ -118,34 +118,6 @@ export default function Home() {
                 </div>
             </section>
         )}
-
-        {latestVideos.length > 0 && (
-             <section className="container mx-auto px-4">
-                <h2 className="mb-12 text-center">Latest Videos</h2>
-                <Carousel
-                  opts={{
-                    align: "start",
-                    loop: true,
-                  }}
-                  className="w-full"
-                >
-                  <CarouselContent>
-                    {latestVideos.map((video, index) => (
-                      <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                        <ContentCard content={video} type="video" />
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious className="ml-14"/>
-                  <CarouselNext className="mr-14"/>
-                </Carousel>
-                <div className="text-center mt-12">
-                    <Button asChild variant="outline" size="lg">
-                        <Link href="/videos">View All Videos</Link>
-                    </Button>
-                </div>
-            </section>
-        )}
         
         {latestGalleries.length > 0 && (
             <section className="container mx-auto px-4">
@@ -201,6 +173,34 @@ export default function Home() {
                           <Link href="/models">View All Models</Link>
                       </Button>
                   </div>
+            </section>
+        )}
+
+        {latestVideos.length > 0 && (
+             <section className="container mx-auto px-4">
+                <h2 className="mb-12 text-center">Latest Videos</h2>
+                <Carousel
+                  opts={{
+                    align: "start",
+                    loop: true,
+                  }}
+                  className="w-full"
+                >
+                  <CarouselContent>
+                    {latestVideos.map((video, index) => (
+                      <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                        <ContentCard content={video} type="video" />
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious className="ml-14"/>
+                  <CarouselNext className="mr-14"/>
+                </Carousel>
+                <div className="text-center mt-12">
+                    <Button asChild variant="outline" size="lg">
+                        <Link href="/videos">View All Videos</Link>
+                    </Button>
+                </div>
             </section>
         )}
       </div>
