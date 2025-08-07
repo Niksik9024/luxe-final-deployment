@@ -5,13 +5,13 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%; /* Dark Blue-Gray */
+    --background: 0 0% 8%; /* Darker Background */
     --foreground: 0 0% 98%; /* White text */
     
-    --card: 240 4.8% 12%; /* Slightly lighter card background */
+    --card: 0 0% 12%; /* Slightly lighter card background */
     --card-foreground: 0 0% 98%;
     
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
     
     /* Primary is a vibrant, sophisticated purple */
@@ -32,7 +32,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
+    --border: 240 3.7% 20%; /* Brighter border for better contrast */
     --input: 240 3.7% 15.9%;
     --ring: 262.1 83.3% 57.8%; /* Purple for focus rings */
     
@@ -40,13 +40,13 @@
   }
  
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 8%;
     --foreground: 0 0% 98%;
     
-    --card: 240 4.8% 12%;
+    --card: 0 0% 12%;
     --card-foreground: 0 0% 98%;
     
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 8%;
     --popover-foreground: 0 0% 98%;
     
     --primary: 262.1 83.3% 57.8%;
@@ -64,7 +64,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 240 3.7% 15.9%;
+    --border: 240 3.7% 20%;
     --input: 240 3.7% 15.9%;
     --ring: 262.1 83.3% 57.8%;
   }
