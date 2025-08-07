@@ -120,32 +120,18 @@ export default function Home() {
         )}
 
         {latestVideos.length > 0 && (
-            <section>
-              <div className="container mx-auto px-4">
-                  <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Latest Videos</h2>
-              </div>
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: true,
-                }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-8">
-                  {latestVideos.map((video, index) => (
-                    <CarouselItem key={index} className="pl-8 md:basis-1/2 lg:basis-1/3">
-                      <ContentCard content={video} type="video" />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="ml-20 hidden lg:flex" />
-                <CarouselNext className="mr-20 hidden lg:flex"/>
-              </Carousel>
-              <div className="text-center mt-12">
-                  <Button asChild variant="outline" size="lg">
-                      <Link href="/videos">View All Videos</Link>
-                  </Button>
-              </div>
+             <section className="container mx-auto px-4">
+                <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Latest Videos</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {latestVideos.slice(0,6).map((video) => (
+                        <ContentCard key={video.id} content={video} type="video" />
+                    ))}
+                </div>
+                <div className="text-center mt-12">
+                    <Button asChild variant="outline" size="lg">
+                        <Link href="/videos">View All Videos</Link>
+                    </Button>
+                </div>
             </section>
         )}
         
