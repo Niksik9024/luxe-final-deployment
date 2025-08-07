@@ -39,6 +39,7 @@ function HomePageSkeleton() {
 
 export default function Home() {
   const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
+  const [topVideos, setTopVideos] = useState<Video[]>([]);
   const [latestVideos, setLatestVideos] = useState<Video[]>([]);
   const [latestGalleries, setLatestGalleries] = useState<Gallery[]>([]);
   const [topModels, setTopModels] = useState<Model[]>([]);
@@ -50,7 +51,16 @@ export default function Home() {
     const allGalleries = getGalleries();
     
     setFeaturedVideos(allVideos.filter(v => v.isFeatured && v.status === 'Published'));
-    setLatestVideos(allVideos.filter(v => !v.isFeatured && v.status === 'Published').slice(0, 3));
+    
+    // Get top 3 most recent videos that are not featured
+    const nonFeaturedVideos = allVideos
+        .filter(v => !v.isFeatured && v.status === 'Published')
+        .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    setTopVideos(nonFeaturedVideos.slice(0, 3));
+    
+    setLatestVideos(nonFeaturedVideos.slice(3, 6));
+
     setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 6));
     setTopModels(allModels.slice(0, 5));
     setLoading(false);
@@ -76,8 +86,21 @@ export default function Home() {
     <main>
       <HeroCarousel items={heroItems} />
 
-      {latestVideos.length > 0 && (
+      {topVideos.length > 0 && (
           <section className="py-12 md:py-20 bg-background">
+              <div className="container mx-auto px-4">
+                  <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">Top Videos</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {topVideos.map((video) => (
+                      <ContentCard key={video.id} content={video} type="video" />
+                    ))}
+                  </div>
+              </div>
+          </section>
+      )}
+
+      {latestVideos.length > 0 && (
+          <section className="py-12 md:py-20 bg-background/50">
               <div className="container mx-auto px-4">
                   <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">Latest Scenes</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
