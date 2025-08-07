@@ -110,7 +110,7 @@ const AuthElement = () => {
     return (
         <>
             {currentUser ? <UserMenu /> : (
-                <Button onClick={() => setAuthModalOpen(true)}>
+                <Button onClick={() => setAuthModalOpen(true)} variant="outline">
                     Sign In
                 </Button>
             )}

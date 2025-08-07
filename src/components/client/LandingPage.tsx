@@ -14,7 +14,7 @@ interface LandingPageProps {
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
     <Card className="bg-card/80 border-border/50 backdrop-blur-sm transform hover:-translate-y-2 transition-transform duration-300">
         <CardContent className="p-8 text-center">
-        <div className="w-16 h-16 bg-accent/20 border border-accent/30 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 bg-accent/10 border border-accent/20 rounded-full flex items-center justify-center mx-auto mb-6">
             {icon}
         </div>
         <h3 className="text-white text-xl font-bold mb-4 uppercase tracking-wider">{title}</h3>
