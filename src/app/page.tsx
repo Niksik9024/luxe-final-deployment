@@ -4,12 +4,12 @@
 import React, { useState, useEffect } from 'react';
 import type { Model, Video, Gallery } from '@/lib/types';
 import { HeroCarousel } from '@/components/client/HeroCarousel';
-import { ContentCard } from '@/components/shared/ContentCard';
-import { ModelCard } from '@/components/shared/ModelCard';
 import { HomePageClientContent } from '@/components/client/HomePageClientContent';
 import { Separator } from '@/components/ui/separator';
 import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ContentCard } from '@/components/shared/ContentCard';
+import { ModelCard } from '@/components/shared/ModelCard';
 
 function HomePageSkeleton() {
     return (
