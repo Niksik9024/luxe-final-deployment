@@ -1,5 +1,4 @@
 
-
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Model } from '@/lib/types';
@@ -15,24 +14,15 @@ interface CarouselItem {
 }
 
 interface HeroCarouselProps {
-  models: Model[];
+  items: CarouselItem[];
 }
 
-export const HeroCarousel: React.FC<HeroCarouselProps> = ({ models }) => {
+export const HeroCarousel: React.FC<HeroCarouselProps> = ({ items: initialItems }) => {
   
   // Guard clause to prevent rendering if there are no models
-  if (!models || models.length === 0) {
+  if (!initialItems || initialItems.length === 0) {
     return null; 
   }
-  
-  // Map the models data to the structure required by the carousel
-  const initialItems: CarouselItem[] = models.map(model => ({
-      id: model.id,
-      img: model.image,
-      modelName: model.name,
-      profileUrl: `/models/${model.id}`,
-      thumbImg: model.image,
-  }));
 
   // State to hold the items and the current animation class
   const [items, setItems] = useState(initialItems);

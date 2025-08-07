@@ -50,9 +50,9 @@ export default function Home() {
     const allModels = getModels();
     const allGalleries = getGalleries();
     
-    setFeaturedVideos(allVideos.filter(v => v.isFeatured));
-    setLatestVideos(allVideos.filter(v => !v.isFeatured).slice(0, 3));
-    setLatestGalleries(allGalleries.slice(0, 6));
+    setFeaturedVideos(allVideos.filter(v => v.isFeatured && v.status === 'Published'));
+    setLatestVideos(allVideos.filter(v => !v.isFeatured && v.status === 'Published').slice(0, 3));
+    setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 6));
     setTopModels(allModels.slice(0, 5));
     setLoading(false);
   }, []);
@@ -62,19 +62,20 @@ export default function Home() {
   }
 
   const heroContentSource = featuredVideos.length > 0 
-    ? featuredVideos.map(v => ({ id: v.id, image: v.image, name: v.title })) 
-    : topModels.slice(0, 5).map(m => ({ id: m.id, image: m.image, name: m.name }));
+    ? featuredVideos.map(v => ({ id: v.id, image: v.image, name: v.title, type: 'video' as const })) 
+    : topModels.slice(0, 5).map(m => ({ id: m.id, image: m.image, name: m.name, type: 'model' as const }));
 
-  const heroModels: Model[] = heroContentSource.map(item => ({
+  const heroItems = heroContentSource.map(item => ({
       id: item.id,
-      name: item.name,
-      image: item.image,
-      description: '',
+      img: item.image,
+      modelName: item.name,
+      profileUrl: `/${item.type === 'video' ? 'videos' : 'models'}/${item.id}`,
+      thumbImg: item.image,
   }));
 
   return (
     <main>
-      <HeroCarousel models={heroModels} />
+      <HeroCarousel items={heroItems} />
 
       <HomePageClientContent />
       
