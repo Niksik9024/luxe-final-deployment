@@ -135,7 +135,6 @@ const SearchBar = ({ onSearch, onBlur }: { onSearch: (query: string) => void, on
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onBlur={onBlur}
-          autoFocus
         />
         <Button type="submit" variant="ghost" size="icon" className="absolute right-0 top-0 text-muted-foreground hover:bg-transparent">
           <Search className="h-5 w-5" />
@@ -146,14 +145,12 @@ const SearchBar = ({ onSearch, onBlur }: { onSearch: (query: string) => void, on
   
 
 export const Header = () => {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   const handleSearch = (query: string) => {
     router.push(`/search?q=${encodeURIComponent(query)}`);
-    setIsSearchOpen(false);
     setIsMobileSearchOpen(false);
   };
   
@@ -165,23 +162,14 @@ export const Header = () => {
         {/* Desktop View */}
         <div className="hidden md:flex items-center gap-8">
           <Logo />
+          <NavLinks />
         </div>
-        <div className="hidden md:flex flex-1 items-center justify-center">
-            {isSearchOpen ? (
-               <div className="w-full max-w-md relative flex items-center gap-2">
-                <SearchBar onSearch={handleSearch} onBlur={() => setIsSearchOpen(false)} />
-              </div>
-            ) : (
-               <NavLinks />
-            )}
-        </div>
+        
         <div className="hidden md:flex items-center gap-4">
-          {!isSearchOpen && (
-            <Button variant="ghost" size="icon" className="hover:bg-muted" onClick={() => setIsSearchOpen(true)}>
-                <Search className="h-5 w-5" />
-            </Button>
-          )}
-          <AuthElement />
+            <div className="w-full max-w-xs">
+                <SearchBar onSearch={handleSearch} />
+            </div>
+            <AuthElement />
         </div>
 
         {/* Mobile View */}
