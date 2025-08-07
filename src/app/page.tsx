@@ -117,7 +117,7 @@ export default function Home() {
       {latestGalleries.length > 0 && (
           <section className="py-12 md:py-20 bg-background">
               <div className="container mx-auto px-4">
-                  <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">New Galleries</h2>
+                  <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">GALLERIES</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                       {latestGalleries.map((gallery) => (
                           <ContentCard key={gallery.id} content={gallery} type="gallery"/>
@@ -132,7 +132,7 @@ export default function Home() {
       {topModels.length > 0 && (
            <section className="py-12 md:py-20 bg-background">
                 <div className="container mx-auto px-4">
-                     <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">Featured Models</h2>
+                     <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">MODELS</h2>
                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {topModels.map((model) => (
                             <ModelCard key={model.id} model={model} />
