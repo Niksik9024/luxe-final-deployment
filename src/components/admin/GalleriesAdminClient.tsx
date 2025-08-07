@@ -115,7 +115,7 @@ export function GalleriesAdminClient() {
   return (
     <>
         <div className="flex justify-end mb-8">
-            <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
+            <Button asChild>
               <Link href="/admin/galleries/new">
                 <PlusCircle className="mr-2" />
                 Add New Gallery
@@ -153,7 +153,7 @@ export function GalleriesAdminClient() {
                     <TableCell className="hidden md:table-cell">{gallery.models.join(', ')}</TableCell>
                     <TableCell className="hidden lg:table-cell">{new Date(gallery.date).toLocaleDateString()}</TableCell>
                     <TableCell>
-                    <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className={cn(gallery.status === 'Published' ? 'bg-green-700 hover:bg-green-700/80' : 'bg-gray-600 hover:bg-gray-600/80', "text-white")}>{gallery.status}</Badge>
+                    <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className={cn(gallery.status === 'Published' ? 'bg-primary' : '')}>{gallery.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                     <DropdownMenu>

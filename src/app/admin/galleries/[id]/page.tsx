@@ -109,7 +109,7 @@ export default function EditGalleryPage() {
   if (loading) {
     return (
         <div>
-            <Skeleton className="h-8 w-1/2 mb-8" />
+            <Skeleton className="h-10 w-1/2 mb-8 font-headline" />
              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
                     <Skeleton className="h-64 w-full" />
@@ -128,13 +128,13 @@ export default function EditGalleryPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Edit Gallery: {title}</h1>
+      <h1 className="text-3xl font-headline font-bold mb-8">Edit Gallery: {title}</h1>
        <FormProvider {...form}>
          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <ContentForm type="gallery" />
              <div className="flex justify-end gap-4">
                  <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                <Button type="submit" className="bg-accent hover:bg-accent/90 text-accent-foreground">Save Changes</Button>
+                <Button type="submit">Save Changes</Button>
             </div>
          </form>
        </FormProvider>

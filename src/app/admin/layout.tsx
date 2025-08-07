@@ -28,7 +28,7 @@ const Logo = () => (
         <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
-      <span className="font-bold text-xl uppercase">LUXE CMS</span>
+      <span className="font-bold text-xl uppercase font-headline">LUXE CMS</span>
     </Link>
   );
   
@@ -61,7 +61,7 @@ const AdminSidebar = () => {
                     className={cn(
                         'flex items-center p-2 rounded-md transition-colors',
                         pathname === item.href
-                          ? 'bg-accent text-accent-foreground'
+                          ? 'bg-primary text-primary-foreground'
                           : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       )}
                     >
@@ -79,7 +79,7 @@ const AdminSidebar = () => {
                             className={cn(
                                 'flex items-center p-2 rounded-md transition-colors',
                                 pathname === item.href
-                                  ? 'bg-accent text-accent-foreground'
+                                  ? 'bg-primary text-primary-foreground'
                                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                               )}
                             >
@@ -124,7 +124,7 @@ const MobileAdminSidebar = () => {
                                     href={item.href}
                                     className={cn(
                                         'flex items-center p-2 rounded-md',
-                                        pathname === item.href ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
+                                        pathname === item.href ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
                                     )}
                                 >
                                     <item.icon className="mr-3 h-5 w-5" />
@@ -143,7 +143,7 @@ const MobileAdminSidebar = () => {
                                         href={item.href}
                                         className={cn(
                                             'flex items-center p-2 rounded-md',
-                                            pathname === item.href ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
+                                            pathname === item.href ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
                                         )}
                                     >
                                         <item.icon className="mr-3 h-5 w-5" />
@@ -205,7 +205,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="flex items-center">
                     <MobileAdminSidebar />
                     <div className="hidden md:block">
-                        <h1 className="text-xl font-bold">Admin Panel</h1>
+                        <h1 className="text-xl font-bold font-headline">Admin Panel</h1>
                     </div>
                 </div>
                 
@@ -229,7 +229,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
             </div>
             </header>
-            <main className="flex-1 p-4 md:p-8 bg-background/50">
+            <main className="flex-1 p-4 md:p-8 bg-muted/20">
                 <div className="container mx-auto">
                     {children}
                 </div>

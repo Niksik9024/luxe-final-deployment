@@ -10,27 +10,43 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ContentCard } from '@/components/shared/ContentCard';
 import { ModelCard } from '@/components/shared/ModelCard';
 import { Button } from '@/components/ui/button';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+
 
 function HomePageSkeleton() {
     return (
-        <div>
+        <div className="space-y-24 md:space-y-32">
             <Skeleton className="w-full h-[92vh]" />
-            <div className="py-16 md:py-24">
-                <div className="container mx-auto px-4">
-                    <Skeleton className="h-10 w-72 mx-auto mb-12" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <Skeleton className="aspect-video" />
-                        <Skeleton className="aspect-video" />
-                        <Skeleton className="aspect-video" />
+            <div className="container mx-auto px-4">
+                <Skeleton className="h-10 w-72 mx-auto mb-16" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <Skeleton className="aspect-video" />
+                    <div className="space-y-8">
+                      <Skeleton className="aspect-video" />
+                      <Skeleton className="aspect-video" />
                     </div>
                 </div>
             </div>
-             <div className="py-16 md:py-24 bg-card">
-                <div className="container mx-auto px-4">
-                    <Skeleton className="h-10 w-72 mx-auto mb-12" />
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                       {Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="aspect-[9/16]" />)}
-                    </div>
+             <div className="container mx-auto px-4">
+                <Skeleton className="h-10 w-72 mx-auto mb-16" />
+                <Skeleton className="h-72 w-full" />
+            </div>
+             <div className="container mx-auto px-4">
+                <Skeleton className="h-10 w-72 mx-auto mb-16" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                   {Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="aspect-[9/16]" />)}
+                </div>
+            </div>
+             <div className="container mx-auto px-4">
+                <Skeleton className="h-10 w-72 mx-auto mb-16" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                   {Array.from({length: 6}).map((_, i) => <Skeleton key={i} className="aspect-[9/16]" />)}
                 </div>
             </div>
         </div>
@@ -51,14 +67,16 @@ export default function Home() {
     const allModels = getModels();
     const allGalleries = getGalleries();
     
-    setFeaturedVideos(allVideos.filter(v => v.isFeatured && v.status === 'Published'));
+    const publishedVideos = allVideos.filter(v => v.status === 'Published');
     
-    const nonFeaturedVideos = allVideos
-        .filter(v => !v.isFeatured && v.status === 'Published')
+    setFeaturedVideos(publishedVideos.filter(v => v.isFeatured));
+    
+    const nonFeaturedVideos = publishedVideos
+        .filter(v => !v.isFeatured)
         .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     setTopVideos(nonFeaturedVideos.slice(0, 3));
-    setLatestVideos(nonFeaturedVideos.slice(3, 8));
+    setLatestVideos(nonFeaturedVideos.slice(3, 10)); // fetch more for carousel
     setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 6));
     setTopModels(allModels.slice(0, 6));
     setLoading(false);
@@ -81,75 +99,88 @@ export default function Home() {
   }));
 
   return (
-    <main>
+    <main className="overflow-x-hidden">
       <HeroCarousel items={heroItems} />
 
-      {topVideos.length > 0 && (
-          <section className="py-16 md:py-24 bg-background">
-              <div className="container mx-auto px-4">
-                  <h2 className="text-4xl font-bold mb-12 text-center uppercase tracking-widest">Top Videos</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {topVideos.map((video) => (
+      <div className="space-y-24 md:space-y-32 my-24 md:my-32">
+        {topVideos.length > 0 && (
+            <section className="container mx-auto px-4">
+                <h2 className="text-4xl font-headline mb-16 text-center tracking-widest">Top Videos</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                  <div className="lg:col-span-1">
+                    <ContentCard content={topVideos[0]} type="video" />
+                  </div>
+                  <div className="lg:col-span-1 grid grid-cols-1 gap-8">
+                    {topVideos.slice(1).map((video) => (
                       <ContentCard key={video.id} content={video} type="video" />
                     ))}
                   </div>
-              </div>
-          </section>
-      )}
+                </div>
+            </section>
+        )}
 
-      {latestVideos.length > 0 && (
-          <section className="py-16 md:py-24 bg-card">
+        {latestVideos.length > 0 && (
+            <section>
               <div className="container mx-auto px-4">
-                  <h2 className="text-4xl font-bold mb-12 text-center uppercase tracking-widest">Latest Videos</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-                    {latestVideos.map((video) => (
-                      <ContentCard key={video.id} content={video} type="video" />
-                    ))}
-                  </div>
-                   <div className="flex justify-center mt-12">
-                        <Button asChild variant="outline" size="lg">
-                            <Link href="/videos">View All Videos</Link>
-                        </Button>
-                    </div>
+                  <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Latest Videos</h2>
               </div>
-          </section>
-      )}
-      
-      {latestGalleries.length > 0 && (
-          <section className="py-16 md:py-24 bg-background">
-              <div className="container mx-auto px-4">
-                  <h2 className="text-4xl font-bold mb-12 text-center uppercase tracking-widest">Galleries</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                      {latestGalleries.map((gallery) => (
-                          <ContentCard key={gallery.id} content={gallery} type="gallery"/>
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-8">
+                  {latestVideos.map((video, index) => (
+                    <CarouselItem key={index} className="pl-8 md:basis-1/2 lg:basis-1/3">
+                      <ContentCard content={video} type="video" />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="ml-20 hidden lg:flex" />
+                <CarouselNext className="mr-20 hidden lg:flex"/>
+              </Carousel>
+              <div className="text-center mt-12">
+                  <Button asChild variant="outline" size="lg">
+                      <Link href="/videos">View All Videos</Link>
+                  </Button>
+              </div>
+            </section>
+        )}
+        
+        {latestGalleries.length > 0 && (
+            <section className="container mx-auto px-4">
+                <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Galleries</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+                    {latestGalleries.map((gallery) => (
+                        <ContentCard key={gallery.id} content={gallery} type="gallery"/>
+                    ))}
+                </div>
+                  <div className="flex justify-center mt-12">
+                      <Button asChild variant="outline" size="lg">
+                          <Link href="/galleries">View All Galleries</Link>
+                      </Button>
+                  </div>
+            </section>      
+        )}
+
+        {topModels.length > 0 && (
+            <section className="container mx-auto px-4">
+                  <h2 className="text-4xl font-headline mb-12 text-center tracking-widest">Models</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
+                      {topModels.map((model) => (
+                          <ModelCard key={model.id} model={model} />
                       ))}
                   </div>
-                   <div className="flex justify-center mt-12">
-                        <Button asChild variant="outline" size="lg">
-                            <Link href="/galleries">View All Galleries</Link>
-                        </Button>
-                    </div>
-              </div>
-          </section>      
-      )}
-
-      {topModels.length > 0 && (
-           <section className="py-16 md:py-24 bg-card">
-                <div className="container mx-auto px-4">
-                     <h2 className="text-4xl font-bold mb-12 text-center uppercase tracking-widest">Models</h2>
-                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {topModels.map((model) => (
-                            <ModelCard key={model.id} model={model} />
-                        ))}
-                    </div>
-                    <div className="flex justify-center mt-12">
-                        <Button asChild variant="outline" size="lg">
-                            <Link href="/models">View All Models</Link>
-                        </Button>
-                    </div>
-                </div>
-           </section>
-      )}
+                  <div className="flex justify-center mt-12">
+                      <Button asChild variant="outline" size="lg">
+                          <Link href="/models">View All Models</Link>
+                      </Button>
+                  </div>
+            </section>
+        )}
+      </div>
     </main>
   );
 }

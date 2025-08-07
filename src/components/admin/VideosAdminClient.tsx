@@ -115,7 +115,7 @@ export function VideosAdminClient() {
   return (
     <>
       <div className="flex justify-end mb-8">
-        <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
+        <Button asChild>
           <Link href="/admin/videos/new">
             <PlusCircle className="mr-2" />
             Add New Video
@@ -153,7 +153,7 @@ export function VideosAdminClient() {
                 <TableCell className="hidden md:table-cell">{video.models.join(', ')}</TableCell>
                 <TableCell className="hidden lg:table-cell">{new Date(video.date).toLocaleDateString()}</TableCell>
                 <TableCell>
-                   <Badge variant={video.status === 'Published' ? 'default' : 'secondary'} className={cn(video.status === 'Published' ? 'bg-green-700 hover:bg-green-700/80' : 'bg-gray-600 hover:bg-gray-600/80', "text-white")}>{video.status}</Badge>
+                   <Badge variant={video.status === 'Published' ? 'default' : 'secondary'} className={cn(video.status === 'Published' ? 'bg-primary' : '')}>{video.status}</Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>

@@ -25,12 +25,12 @@ const Logo = () => (
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path fillRule="evenodd" clipRule="evenodd" d="M12 2L2 7V17L12 22L22 17V7L12 2ZM4 8.236L12 13L20 8.236V16L12 20L4 16V8.236Z" fill="currentColor"/>
     </svg>
-    <span className="font-bold text-xl uppercase">LUXE</span>
+    <span className="font-bold text-xl uppercase font-headline">LUXE</span>
   </Link>
 );
 
 const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
-  <nav className="flex flex-col md:flex-row items-start md:items-center gap-6 text-sm font-medium">
+  <nav className="flex flex-col md:flex-row items-start md:items-center gap-6 text-sm font-medium tracking-wider">
     <Link href="/models" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>MODELS</Link>
     <Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>VIDEOS</Link>
     <Link href="/galleries" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>GALLERIES</Link>
@@ -110,7 +110,7 @@ const AuthElement = () => {
     return (
         <>
             {currentUser ? <UserMenu /> : (
-                <Button onClick={() => setAuthModalOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Button onClick={() => setAuthModalOpen(true)}>
                     Sign In
                 </Button>
             )}

@@ -78,7 +78,7 @@ export const ContentCard = ({
     setIsFavoriteLoading(false);
   }
 
-  const cardAspectRatio = isVideo ? 'aspect-[16/9]' : 'aspect-[9/16]';
+  const cardAspectRatio = isVideo ? 'aspect-[16/9]' : 'aspect-[2/3]';
   const pluralType = type === 'gallery' ? 'galleries' : 'videos';
   const linkUrl = `/${pluralType}/${content.id}`;
   const editLinkUrl = `/admin/${pluralType}/edit/${content.id}`;
@@ -86,7 +86,7 @@ export const ContentCard = ({
   return (
     <Card 
       className={cn(
-        "overflow-hidden group relative shadow-lg rounded-lg md:hover:scale-105 md:hover:shadow-2xl w-full bg-card border-border",
+        "overflow-hidden group relative shadow-lg rounded-lg md:hover:scale-105 md:hover:shadow-2xl w-full bg-card border-border transition-transform duration-300",
         cardAspectRatio
       )}
       onMouseEnter={handleMouseEnter}
