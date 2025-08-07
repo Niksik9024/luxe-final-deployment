@@ -2,12 +2,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, notFound, useRouter } from 'next/navigation';
+import { useParams, notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Photo, Gallery, Model } from '@/lib/types';
 import { GalleryClientPage } from '@/components/client/GalleryClientPage';
-import { getGalleryById, getModelById, getGalleries } from '@/lib/localStorage';
+import { getGalleryById, getModels } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function GalleryPageSkeleton() {
@@ -50,7 +50,7 @@ export default function GalleryPage() {
             return;
         }
 
-        const allModels = getModelById('all') as any; // This needs to be fixed to fetch all models
+        const allModels = getModels();
         const modelData = galleryData.models
             .map(name => allModels.find((m: Model) => m.name === name))
             .filter((m): m is Model => !!m);

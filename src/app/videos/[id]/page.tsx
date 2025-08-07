@@ -10,7 +10,7 @@ import type { Video, Model } from '@/lib/types';
 import { VideoPlayer } from '@/components/client/VideoPlayer';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { getVideoById, getModelById, getVideos } from '@/lib/localStorage';
+import { getVideoById, getModels, getVideos } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function VideoPageSkeleton() {
@@ -57,12 +57,11 @@ export default function VideoPage() {
     const videoData = getVideoById(id);
     if (!videoData || videoData.status !== 'Published') {
         setLoading(false);
-        // Will be caught by notFound() call below
         return;
     }
     
+    const allModels = getModels();
     const modelData = videoData.models.map(name => {
-        const allModels = getModelById('all') as unknown as Model[]; // This needs fixing
         return allModels.find(m => m.name === name);
     }).filter((m): m is Model => !!m);
 

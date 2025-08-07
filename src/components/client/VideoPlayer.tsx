@@ -153,6 +153,7 @@ export const VideoPlayer = ({ video }: { video: Video }) => {
             setError(null);
         };
         const handleError = () => {
+            if(!videoElement) return;
             switch (videoElement.error?.code) {
                 case videoElement.error.MEDIA_ERR_ABORTED:
                     setError('Video playback was aborted.');
