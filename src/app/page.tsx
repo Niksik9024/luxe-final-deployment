@@ -63,10 +63,24 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Helper function to shuffle an array
+    const shuffleArray = <T,>(array: T[]): T[] => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    };
+    
     const allVideos = getVideos();
     const allModels = getModels();
     const allGalleries = getGalleries();
     
+    // Shuffle models and galleries
+    const shuffledModels = shuffleArray(allModels);
+    const shuffledGalleries = shuffleArray(allGalleries.filter(g => g.status === 'Published'));
+
     const publishedVideos = allVideos.filter(v => v.status === 'Published');
     
     setFeaturedVideos(publishedVideos.filter(v => v.isFeatured));
@@ -77,8 +91,8 @@ export default function Home() {
 
     setTopVideos(nonFeaturedVideos.slice(0, 3));
     setLatestVideos(nonFeaturedVideos.slice(3, 10)); // fetch more for carousel
-    setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 10));
-    setTopModels(allModels.slice(0, 10)); // fetch more for carousel
+    setLatestGalleries(shuffledGalleries.slice(0, 10));
+    setTopModels(shuffledModels.slice(0, 10)); // fetch more for carousel
     setLoading(false);
   }, []);
 
