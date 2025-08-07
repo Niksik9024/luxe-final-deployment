@@ -61,7 +61,7 @@ export default function Home() {
 
     setTopVideos(nonFeaturedVideos.slice(0, 3));
     
-    setLatestVideos(nonFeaturedVideos.slice(3, 6));
+    setLatestVideos(nonFeaturedVideos.slice(3, 8));
 
     setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 6));
     setTopModels(allModels.slice(0, 6));
@@ -105,11 +105,16 @@ export default function Home() {
           <section className="py-12 md:py-20 bg-background/50">
               <div className="container mx-auto px-4">
                   <h2 className="text-3xl font-bold mb-8 text-center uppercase tracking-widest">Latest Videos</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
                     {latestVideos.map((video) => (
                       <ContentCard key={video.id} content={video} type="video" />
                     ))}
                   </div>
+                   <div className="flex justify-center mt-8">
+                        <Button asChild variant="outline" size="lg">
+                            <Link href="/videos">View All Videos</Link>
+                        </Button>
+                    </div>
               </div>
           </section>
       )}
@@ -126,8 +131,7 @@ export default function Home() {
                       ))}
                   </div>
               </div>
-          </section>
-      )}
+          </section>      )}
 
        <Separator />
 
