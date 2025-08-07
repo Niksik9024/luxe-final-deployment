@@ -22,7 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 
 const Logo = () => (
-    <Link href="/admin" className="flex items-center gap-2 text-white">
+    <Link href="/admin" className="flex items-center gap-2 text-foreground">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -178,11 +178,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!loading && !isAdmin) {
       router.push('/');
     }
+    // Add admin-body class to body for admin-specific theme
+    document.body.classList.add('admin-body');
+    return () => {
+        document.body.classList.remove('admin-body');
+    }
   }, [isAdmin, loading, router]);
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex items-center justify-center min-h-screen">
             <div className="space-y-4 w-full max-w-md">
                 <Skeleton className="h-12 w-full" />
                 <Skeleton className="h-32 w-full" />
@@ -197,7 +202,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
   
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background text-foreground">
         <AdminSidebar />
         <div className="flex-1 flex flex-col">
             <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm border-b border-border">
@@ -229,7 +234,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
             </div>
             </header>
-            <main className="flex-1 p-4 md:p-8 bg-muted/20">
+            <main className="flex-1 p-4 md:p-8 bg-muted/40">
                 <div className="container mx-auto">
                     {children}
                 </div>

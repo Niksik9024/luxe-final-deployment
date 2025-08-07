@@ -77,7 +77,7 @@ export default function Home() {
 
     setTopVideos(nonFeaturedVideos.slice(0, 3));
     setLatestVideos(nonFeaturedVideos.slice(3, 10)); // fetch more for carousel
-    setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 6));
+    setLatestGalleries(allGalleries.filter(g => g.status === 'Published').slice(0, 10));
     setTopModels(allModels.slice(0, 10)); // fetch more for carousel
     setLoading(false);
   }, []);

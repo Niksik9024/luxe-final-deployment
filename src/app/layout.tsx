@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { Providers } from '@/components/shared/Providers';
 import { Header } from '@/components/shared/Header';
 import LandingPage from '@/components/client/LandingPage';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -39,6 +41,7 @@ export default function RootLayout({
 }>) {
   const [isAccessGranted, setIsAccessGranted] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     setIsClient(true);
@@ -61,13 +64,21 @@ export default function RootLayout({
       </div>
   )
 
+  const bodyClasses = cn(
+    'antialiased bg-background font-body', 
+    inter.variable, 
+    playfair.variable,
+    { 'admin-body': pathname.startsWith('/admin') }
+  );
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn('antialiased bg-background font-body', inter.variable, playfair.variable)}>
+      <body className={bodyClasses}>
         <Providers>
           {isClient ? (
-            isAccessGranted ? AppContent : <LandingPage onAccessGranted={handleAccessGranted} />
+            isAccessGranted || pathname.startsWith('/admin') ? AppContent : <LandingPage onAccessGranted={handleAccessGranted} />
           ) : (
+            // Render a basic skeleton or nothing on the server to avoid flash of unstyled content
             null
           )}
           <Toaster />
