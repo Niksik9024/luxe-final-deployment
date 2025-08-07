@@ -40,8 +40,7 @@ const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
 const UserMenu = () => {
     const { currentUser, isAdmin, logout } = useAuth();
     const [changeImageOpen, setChangeImageOpen] = useState(false);
-    const { isDataSaver, toggleDataSaver } = useDataSaver();
-
+    
     if (!currentUser) return null;
 
     return (
@@ -64,18 +63,8 @@ const UserMenu = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <DropdownMenuItem asChild className="cursor-pointer">
-                            <Link href="/favorites"><Heart className="mr-2 h-4 w-4" /><span>Favorites</span></Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="cursor-pointer">
-                            <Link href="/history"><History className="mr-2 h-4 w-4" /><span>Watch History</span></Link>
-                        </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => setChangeImageOpen(true)} className="cursor-pointer">
                            <ImageIconLucide className="mr-2 h-4 w-4" /> <span>Change Avatar</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="flex items-center justify-between cursor-pointer">
-                             <Label htmlFor="data-saver-mode" className="flex items-center gap-2"><Settings className="h-4 w-4"/> <span>Data Saver</span></Label>
-                             <Switch id="data-saver-mode" checked={isDataSaver} onCheckedChange={toggleDataSaver} />
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                      {isAdmin && (
@@ -148,6 +137,8 @@ export const Header = () => {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
+  const { currentUser } = useAuth();
+  const { isDataSaver, toggleDataSaver } = useDataSaver();
 
   const handleSearch = (query: string) => {
     router.push(`/search?q=${encodeURIComponent(query)}`);
@@ -163,12 +154,28 @@ export const Header = () => {
         <div className="hidden md:flex items-center gap-8">
           <Logo />
           <NavLinks />
+           {currentUser && (
+              <nav className="flex items-center gap-6 text-sm font-medium">
+                  <Link href="/favorites" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                      <Heart size={16}/> FAVORITES
+                  </Link>
+                  <Link href="/history" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                      <History size={16}/> HISTORY
+                  </Link>
+              </nav>
+           )}
         </div>
         
         <div className="hidden md:flex items-center gap-4">
             <div className="w-full max-w-xs">
                 <SearchBar onSearch={handleSearch} />
             </div>
+             {currentUser && (
+                <div className="flex items-center gap-2">
+                    <Switch id="data-saver-mode" checked={isDataSaver} onCheckedChange={toggleDataSaver} />
+                    <Label htmlFor="data-saver-mode" className="text-xs text-muted-foreground">DATA SAVER</Label>
+                </div>
+            )}
             <AuthElement />
         </div>
 
@@ -193,6 +200,17 @@ export const Header = () => {
                 </SheetHeader>
                 <div className="flex flex-col h-full p-4 space-y-4 text-lg">
                     <NavLinks onLinkClick={handleCloseMobileMenu} />
+                    {currentUser && (
+                        <>
+                            <Separator />
+                            <Link href="/favorites" className="text-muted-foreground hover:text-foreground transition-colors" onClick={handleCloseMobileMenu}>Favorites</Link>
+                            <Link href="/history" className="text-muted-foreground hover:text-foreground transition-colors" onClick={handleCloseMobileMenu}>Watch History</Link>
+                            <div className="flex items-center justify-between pt-4">
+                               <Label htmlFor="data-saver-mode-mobile">Data Saver</Label>
+                               <Switch id="data-saver-mode-mobile" checked={isDataSaver} onCheckedChange={toggleDataSaver} />
+                            </div>
+                        </>
+                    )}
                 </div>
              </SheetContent>
            </Sheet>
