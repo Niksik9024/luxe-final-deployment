@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Model, Video, Gallery } from '@/lib/types';
 import { HeroCarousel } from '@/components/client/HeroCarousel';
-import { HomePageClientContent } from '@/components/client/HomePageClientContent';
 import { Separator } from '@/components/ui/separator';
 import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -77,8 +76,6 @@ export default function Home() {
     <main>
       <HeroCarousel items={heroItems} />
 
-      <HomePageClientContent />
-      
       {latestVideos.length > 0 && (
           <section className="py-12 md:py-20 bg-background">
               <div className="container mx-auto px-4">
