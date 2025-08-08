@@ -86,8 +86,8 @@ export default function AdminDashboard() {
     if (loading) {
         return (
              <div>
-                <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-                <div className="grid gap-6 md:grid-cols-3">
+                <h1 className="text-3xl font-headline font-bold mb-8">Dashboard</h1>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                    <Skeleton className="h-28 w-full" />
                    <Skeleton className="h-28 w-full" />
                    <Skeleton className="h-28 w-full" />
@@ -106,8 +106,8 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-      <div className="grid gap-6 md:grid-cols-3">
+      <h1 className="text-3xl font-headline font-bold mb-8">Dashboard</h1>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard title="Total Videos" value={String(stats.videos)} icon={Video} />
         <StatCard title="Total Galleries" value={String(stats.galleries)} icon={ImageIcon} />
         <StatCard title="Total Models" value={String(stats.models)} icon={Users} />
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2">
             <Card className="bg-card border-border shadow-lg h-full">
                 <CardHeader>
-                    <CardTitle className="text-xl">Content Growth</CardTitle>
+                    <CardTitle className="text-xl font-headline">Content Growth</CardTitle>
                     <CardDescription>New videos and galleries added in the last 6 months.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -140,7 +140,7 @@ export default function AdminDashboard() {
          <div className="lg:col-span-1">
             <Card className="bg-card border-border shadow-lg h-full">
                 <CardHeader>
-                    <CardTitle className="text-xl">Recent Content</CardTitle>
+                    <CardTitle className="text-xl font-headline">Recent Content</CardTitle>
                     <CardDescription>The latest videos and galleries added.</CardDescription>
                 </CardHeader>
                 <CardContent>

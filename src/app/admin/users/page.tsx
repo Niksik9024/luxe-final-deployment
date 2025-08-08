@@ -18,18 +18,38 @@ import { Trash2 } from 'lucide-react';
 
 function UserTableSkeleton() {
     return (
-        <div className="bg-card border border-border rounded-lg shadow-lg p-4">
-            <div className="space-y-4">
-                 {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex items-center space-x-4">
-                        <Skeleton className="h-12 w-12 rounded-full" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-[250px]" />
-                            <Skeleton className="h-4 w-[200px]" />
-                        </div>
-                    </div>
-                ))}
-            </div>
+        <div className="bg-card border border-border rounded-lg shadow-lg">
+             <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[80px]"><Skeleton className="h-5 w-full" /></TableHead>
+                        <TableHead><Skeleton className="h-5 w-1/2" /></TableHead>
+                        <TableHead className="w-[150px]"><Skeleton className="h-5 w-full" /></TableHead>
+                        <TableHead className="w-[100px] text-right"><Skeleton className="h-5 w-full" /></TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                            <TableCell>
+                                <Skeleton className="h-10 w-10 rounded-full" />
+                            </TableCell>
+                            <TableCell>
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-40" />
+                                    <Skeleton className="h-3 w-48" />
+                                </div>
+                            </TableCell>
+                            <TableCell>
+                                <Skeleton className="h-10 w-full" />
+                            </TableCell>
+                             <TableCell className="text-right">
+                                <Skeleton className="h-8 w-8 ml-auto" />
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
         </div>
     );
 }
@@ -68,8 +88,8 @@ export default function ManageUsersPage() {
                 const updatedUsers = currentUsers.map(u => u.id === userId ? { ...u, role: newRole } : u);
                 setUsers(updatedUsers); // Persist changes to localStorage
                 
-                // Update local state for immediate feedback
-                setLocalUsers(updatedUsers.sort((a,b) => a.name.localeCompare(b.name)));
+                const sortedUsers = updatedUsers.sort((a,b) => a.name.localeCompare(b.name));
+                setLocalUsers(sortedUsers);
                 
                 toast({
                     title: "Role Updated",
@@ -109,7 +129,7 @@ export default function ManageUsersPage() {
     
     return (
         <div>
-            <h1 className="text-3xl font-bold mb-8">User Management</h1>
+            <h1 className="text-3xl font-headline font-bold mb-8">User Management</h1>
             {loading ? <UserTableSkeleton /> : (
                 <div className="bg-card border border-border rounded-lg shadow-lg">
                     <Table>
@@ -181,5 +201,3 @@ export default function ManageUsersPage() {
         </div>
     )
 }
-
-    

@@ -13,6 +13,28 @@ import { getModels, setModels } from '@/lib/localStorage';
 import type { Model } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
+function ModelsPageSkeleton() {
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-8">
+                <Skeleton className="h-10 w-64" />
+                <Skeleton className="h-10 w-48" />
+            </div>
+            <div className="bg-card border border-border rounded-lg shadow-lg p-4 space-y-2">
+               {Array.from({length: 5}).map((_, i) => (
+                    <div key={i} className="flex items-center space-x-4 p-2">
+                        <Skeleton className="h-16 w-12 rounded-md" />
+                        <div className="flex-1">
+                            <Skeleton className="h-5 w-1/3" />
+                        </div>
+                        <Skeleton className="h-8 w-8" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
 export default function ManageModelsPage() {
   const [models, setLocalModels] = React.useState<Model[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -20,7 +42,6 @@ export default function ManageModelsPage() {
 
   const fetchModels = React.useCallback(() => {
     setLoading(true);
-    // Simulate loading delay for skeleton
     setTimeout(() => {
         const modelsData = getModels().sort((a,b) => a.name.localeCompare(b.name));
         setLocalModels(modelsData);
@@ -53,32 +74,14 @@ export default function ManageModelsPage() {
   };
 
   if (loading) {
-    return (
-        <div>
-            <div className="flex justify-between items-center mb-8">
-                <Skeleton className="h-10 w-64" />
-                <Skeleton className="h-10 w-48" />
-            </div>
-            <div className="bg-card border border-border rounded-lg shadow-lg p-4 space-y-2">
-               {Array.from({length: 5}).map((_, i) => (
-                    <div key={i} className="flex items-center space-x-4 p-2">
-                        <Skeleton className="h-16 w-12 rounded-md" />
-                        <div className="flex-1">
-                            <Skeleton className="h-5 w-1/3" />
-                        </div>
-                        <Skeleton className="h-8 w-8" />
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
+    return <ModelsPageSkeleton />
   }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Manage Models</h1>
-        <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
+        <h1 className="text-3xl font-headline font-bold">Manage Models</h1>
+        <Button asChild>
           <Link href="/admin/models/new">
             <PlusCircle className="mr-2" />
             Add New Model
@@ -114,11 +117,11 @@ export default function ManageModelsPage() {
                          <Link href={`/admin/models/edit/${model.id}`} className="flex items-center cursor-pointer"><Edit className="mr-2 h-4 w-4"/> Edit</Link>
                       </DropdownMenuItem>
                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <button className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground'>
+                          <DropdownMenuItem asChild>
+                            <AlertDialogTrigger className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground'>
                               <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </button>
-                          </AlertDialogTrigger>
+                            </AlertDialogTrigger>
+                          </DropdownMenuItem>
                           <AlertDialogContent className="bg-card border-border text-card-foreground">
                               <AlertDialogHeader>
                                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
