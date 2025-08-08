@@ -120,12 +120,11 @@ export default function Home() {
                 <h2 className="mb-12 text-center">Top Videos</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                   <div className="lg:col-span-1">
-                    <ContentCard content={topVideos[0]} type="video" />
+                    {topVideos[0] && <ContentCard content={topVideos[0]} type="video" priority={true}/>}
                   </div>
                   <div className="lg:col-span-1 grid grid-cols-1 gap-8">
-                    {topVideos.slice(1).map((video) => (
-                      <ContentCard key={video.id} content={video} type="video" />
-                    ))}
+                    {topVideos[1] && <ContentCard key={topVideos[1].id} content={topVideos[1]} type="video" />}
+                    {topVideos[2] && <ContentCard key={topVideos[2].id} content={topVideos[2]} type="video" />}
                   </div>
                 </div>
             </section>

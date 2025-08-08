@@ -1,7 +1,7 @@
 
-'use client'
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import type { Photo } from '@/lib/types';
@@ -18,8 +18,13 @@ interface PhotoCardProps {
 export const PhotoCard = ({ photo, onImageClick }: PhotoCardProps) => {
   const { currentUser, updateUserFavorites } = useAuth();
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [animate, setAnimate] = useState(false);
 
-  const isFavorite = currentUser?.favorites?.some(fav => fav.id === photo.id) || false;
+  useEffect(() => {
+    setIsFavorited(currentUser?.favorites?.some(fav => fav.id === photo.id) || false);
+  }, [currentUser?.favorites, photo.id]);
+
 
   const handleCardClick = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -33,9 +38,12 @@ export const PhotoCard = ({ photo, onImageClick }: PhotoCardProps) => {
     e.stopPropagation();
     if (!currentUser || isFavoriteLoading) return;
 
+    setAnimate(true);
+    setTimeout(() => setAnimate(false), 300);
+
     setIsFavoriteLoading(true);
     const favoriteData = { id: photo.id, type: 'photo' as const };
-    await updateUserFavorites(favoriteData, !isFavorite);
+    await updateUserFavorites(favoriteData, !isFavorited);
     setIsFavoriteLoading(false);
   }
 
@@ -46,7 +54,7 @@ export const PhotoCard = ({ photo, onImageClick }: PhotoCardProps) => {
       <div className="absolute top-2 right-2 z-20">
             {currentUser && (
             <Button size="icon" variant="ghost" className="bg-background/50 hover:bg-accent/80 rounded-full h-8 w-8" onClick={handleFavoriteClick} disabled={isFavoriteLoading}>
-                <Heart className={cn("w-4 h-4 text-foreground", isFavorite && "fill-accent text-accent")} />
+                <Heart className={cn("w-4 h-4 text-foreground transition-all duration-300", isFavorited && "fill-accent text-accent", animate && "scale-150")} />
             </Button>
             )}
         </div>

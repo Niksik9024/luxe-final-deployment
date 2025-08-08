@@ -29,12 +29,12 @@ export const Footer = () => {
               <li><Link href="/models" className="text-muted-foreground hover:text-foreground transition-colors">Models</Link></li>
               <li><Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors">Videos</Link></li>
               <li><Link href="/galleries" className="text-muted-foreground hover:text-foreground transition-colors">Galleries</Link></li>
+              <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link></li>
             </ul>
           </div>
            <div>
             <h3 className="font-semibold mb-4 uppercase tracking-wider">Company</h3>
             <ul className="space-y-3">
-              <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
               <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</Link></li>
               <li><Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
               <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>

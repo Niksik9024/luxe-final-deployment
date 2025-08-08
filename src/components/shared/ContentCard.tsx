@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -30,8 +29,12 @@ export const ContentCard = ({
   const { isDataSaver } = useDataSaver();
   const { currentUser, isAdmin, loading, updateUserFavorites } = useAuth();
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
-  
-  const isFavorite = currentUser?.favorites?.some(fav => fav.id === content.id) || false;
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+      setIsFavorited(currentUser?.favorites?.some(fav => fav.id === content.id) || false);
+  }, [currentUser?.favorites, content.id]);
 
   const canPlay = !isDataSaver;
   const isVideo = type === 'video' && 'videoUrl' in content;
@@ -39,17 +42,13 @@ export const ContentCard = ({
   const handleMouseEnter = () => {
     if (!canPlay || !isVideo || !videoRef.current) return;
     setIsHovering(true);
-    playPromiseRef.current = videoRef.current.play().catch(err => {
-        // We catch the error here to prevent it from bubbling up as an uncaught promise rejection.
-        // The error itself is often a benign race condition, so we don't need to log it.
-    });
+    playPromiseRef.current = videoRef.current.play().catch(err => {});
   };
 
   const handleMouseLeave = () => {
     if (!canPlay || !isVideo || !videoRef.current) return;
     setIsHovering(false);
     
-    // Wait for the play promise to resolve before pausing
     if (playPromiseRef.current) {
         playPromiseRef.current.then(() => {
             if (videoRef.current) {
@@ -57,8 +56,6 @@ export const ContentCard = ({
                 videoRef.current.currentTime = 0;
             }
         }).catch(() => {
-            // If play() was interrupted, the promise will reject. 
-            // We can safely ignore this and ensure the video is paused.
             if (videoRef.current) {
                 videoRef.current.pause();
                 videoRef.current.currentTime = 0;
@@ -72,9 +69,12 @@ export const ContentCard = ({
     e.stopPropagation();
     if (!currentUser || isFavoriteLoading) return;
 
+    setAnimate(true);
+    setTimeout(() => setAnimate(false), 300);
+
     setIsFavoriteLoading(true);
     const favoriteData = { id: content.id, type: type };
-    await updateUserFavorites(favoriteData, !isFavorite);
+    await updateUserFavorites(favoriteData, !isFavorited);
     setIsFavoriteLoading(false);
   }
 
@@ -104,7 +104,7 @@ export const ContentCard = ({
         <div className="absolute top-2 right-2 z-20">
             {currentUser && (
             <Button size="icon" variant="ghost" className="bg-background/50 hover:bg-accent/80 rounded-full h-8 w-8" onClick={handleFavoriteClick} disabled={isFavoriteLoading}>
-                <Heart className={cn("w-4 h-4 text-foreground", isFavorite && "fill-accent text-accent")} />
+                <Heart className={cn("w-4 h-4 text-foreground transition-all duration-300", isFavorited && "fill-accent text-accent", animate && "scale-150")} />
             </Button>
             )}
         </div>

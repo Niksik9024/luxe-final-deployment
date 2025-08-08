@@ -1,15 +1,13 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, Search, UserCog, X, Film, ImageIcon, Users, LogOut, Heart, History, User, Image as ImageIconLucide, Settings, ShieldCheck } from 'lucide-react';
+import { Menu, Search, UserCog, X, Film, ImageIcon, Users, LogOut, Heart, History, User, Image as ImageIconLucide, Settings, ShieldCheck, Command } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuGroup } from '../ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Skeleton } from '../ui/skeleton';
@@ -19,6 +17,7 @@ import { ChangeImageModal } from './ChangeImageModal';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
 import { useDataSaver } from '@/contexts/DataSaverContext';
+import { SearchModal } from './SearchModal';
 
 const Logo = () => (
   <Link href="/" className="flex items-center gap-2">
@@ -30,10 +29,11 @@ const Logo = () => (
 );
 
 const NavLinks = ({ onLinkClick }: { onLinkClick?: () => void }) => (
-  <nav className="flex flex-col md:flex-row items-start md:items-center gap-6 text-sm font-medium tracking-wider">
-    <Link href="/models" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>MODELS</Link>
-    <Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>VIDEOS</Link>
-    <Link href="/galleries" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>GALLERIES</Link>
+  <nav className="flex flex-col md:flex-row items-start md:items-center gap-6 text-sm font-medium tracking-wider uppercase">
+    <Link href="/models" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>Models</Link>
+    <Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>Videos</Link>
+    <Link href="/galleries" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>Galleries</Link>
+    <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors" onClick={onLinkClick}>About</Link>
   </nav>
 );
 
@@ -61,6 +61,15 @@ const UserMenu = () => {
                             <p className="text-xs leading-none text-muted-foreground">{currentUser.email}</p>
                         </div>
                     </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                     <DropdownMenuGroup>
+                        <DropdownMenuItem asChild className="cursor-pointer">
+                            <Link href="/favorites"><Heart className="mr-2 h-4 w-4" /><span>Favorites</span></Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild className="cursor-pointer">
+                            <Link href="/history"><History className="mr-2 h-4 w-4" /><span>Watch History</span></Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                         <DropdownMenuItem onSelect={() => setChangeImageOpen(true)} className="cursor-pointer">
@@ -107,69 +116,45 @@ const AuthElement = () => {
         </>
     )
 }
-
-const SearchBar = ({ onSearch, onBlur }: { onSearch: (query: string) => void, onBlur?: () => void }) => {
-    const [query, setQuery] = useState('');
-  
-    const handleSearch = (e: React.FormEvent) => {
-      e.preventDefault();
-      onSearch(query);
-    };
-  
-    return (
-      <form onSubmit={handleSearch} className="w-full max-w-md relative">
-        <Input 
-          placeholder="Search..." 
-          className="bg-muted border-border pr-10" 
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onBlur={onBlur}
-        />
-        <Button type="submit" variant="ghost" size="icon" className="absolute right-0 top-0 text-muted-foreground hover:bg-transparent">
-          <Search className="h-5 w-5" />
-        </Button>
-      </form>
-    );
-  };
   
 
 export const Header = () => {
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const router = useRouter();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { currentUser } = useAuth();
   const { isDataSaver, toggleDataSaver } = useDataSaver();
-
-  const handleSearch = (query: string) => {
-    router.push(`/search?q=${encodeURIComponent(query)}`);
-    setIsMobileSearchOpen(false);
-  };
   
   const handleCloseMobileMenu = () => setIsMobileMenuOpen(false);
 
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setIsSearchOpen((open) => !open)
+      }
+    }
+    document.addEventListener("keydown", down)
+    return () => document.removeEventListener("keydown", down)
+  }, [])
+
   return (
+    <>
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm h-[60px] md:h-[65px] border-b border-border">
       <div className="container mx-auto flex h-full items-center justify-between px-4">
         {/* Desktop View */}
         <div className="hidden md:flex items-center gap-8">
           <Logo />
           <NavLinks />
-           {currentUser && (
-              <nav className="flex items-center gap-6 text-sm font-medium">
-                  <Link href="/favorites" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                      <Heart size={16}/> FAVORITES
-                  </Link>
-                  <Link href="/history" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                      <History size={16}/> HISTORY
-                  </Link>
-              </nav>
-           )}
         </div>
         
         <div className="hidden md:flex items-center gap-4">
-            <div className="w-full max-w-xs">
-                <SearchBar onSearch={handleSearch} />
-            </div>
+            <Button variant="outline" className="h-9" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-4 w-4 mr-2" />
+                Search...
+                <kbd className="pointer-events-none ml-4 inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                    <span className="text-xs">⌘</span>K
+                </kbd>
+            </Button>
              {currentUser && (
                 <div className="flex items-center gap-2">
                     <Switch id="data-saver-mode" checked={isDataSaver} onCheckedChange={toggleDataSaver} />
@@ -218,20 +203,15 @@ export const Header = () => {
           <div className="md:hidden"><Logo /></div>
 
           <div className="flex items-center gap-2">
-            <Sheet open={isMobileSearchOpen} onOpenChange={setIsMobileSearchOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Search className="h-6 w-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="top" className="bg-card p-4">
-                  <SearchBar onSearch={handleSearch} />
-              </SheetContent>
-            </Sheet>
+             <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-6 w-6" />
+            </Button>
             <div className="md:hidden"><AuthElement/></div>
           </div>
         </div>
       </div>
     </header>
+    <SearchModal open={isSearchOpen} onOpenChange={setIsSearchOpen} />
+    </>
   );
 };
