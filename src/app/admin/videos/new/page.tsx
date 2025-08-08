@@ -7,7 +7,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/lib/use-toast"
 import { ContentForm } from '@/components/admin/ContentForm'
 import { getVideos, setVideos, getTags, setTags } from '@/lib/localStorage'
 import { videoFormSchema } from '@/app/admin/schemas/content'
