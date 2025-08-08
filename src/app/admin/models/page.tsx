@@ -20,9 +20,12 @@ export default function ManageModelsPage() {
 
   const fetchModels = React.useCallback(() => {
     setLoading(true);
-    const modelsData = getModels().sort((a,b) => a.name.localeCompare(b.name));
-    setLocalModels(modelsData);
-    setLoading(false);
+    // Simulate loading delay for skeleton
+    setTimeout(() => {
+        const modelsData = getModels().sort((a,b) => a.name.localeCompare(b.name));
+        setLocalModels(modelsData);
+        setLoading(false);
+    }, 500);
   }, []);
 
   React.useEffect(() => {
@@ -56,8 +59,16 @@ export default function ManageModelsPage() {
                 <Skeleton className="h-10 w-64" />
                 <Skeleton className="h-10 w-48" />
             </div>
-            <div className="bg-card border border-border rounded-lg shadow-lg p-4">
-                <Skeleton className="h-96 w-full" />
+            <div className="bg-card border border-border rounded-lg shadow-lg p-4 space-y-2">
+               {Array.from({length: 5}).map((_, i) => (
+                    <div key={i} className="flex items-center space-x-4 p-2">
+                        <Skeleton className="h-16 w-12 rounded-md" />
+                        <div className="flex-1">
+                            <Skeleton className="h-5 w-1/3" />
+                        </div>
+                        <Skeleton className="h-8 w-8" />
+                    </div>
+                ))}
             </div>
         </div>
     )

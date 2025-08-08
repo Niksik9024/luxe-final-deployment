@@ -32,15 +32,18 @@ export default function TagsPage() {
 
   const fetchTags = useCallback(() => {
     setLoading(true);
-    try {
-        const tagsData = getTags();
-        const uniqueTags = Object.keys(tagsData).sort((a,b) => a.localeCompare(b));
-        setLocalTags(uniqueTags);
-    } catch(error) {
-        console.error("Error fetching tags:", error);
-        toast({ title: 'Error', description: 'Could not fetch tags.', variant: 'destructive'})
-    }
-    setLoading(false);
+    // Simulate loading
+    setTimeout(() => {
+        try {
+            const tagsData = getTags();
+            const uniqueTags = Object.keys(tagsData).sort((a,b) => a.localeCompare(b));
+            setLocalTags(uniqueTags);
+        } catch(error) {
+            console.error("Error fetching tags:", error);
+            toast({ title: 'Error', description: 'Could not fetch tags.', variant: 'destructive'})
+        }
+        setLoading(false);
+    }, 500);
   }, [toast]);
 
   useEffect(() => {
@@ -59,30 +62,31 @@ export default function TagsPage() {
       
       const updateContent = (content: (Video | Gallery)[]) => {
           return content.map(item => {
-              const hasTag = item.tags.includes(oldName);
-              const hasKeyword = item.keywords.includes(oldName);
-
-              if (hasTag || hasKeyword) {
-                  let newTags = [...item.tags];
-                  let newKeywords = [...item.keywords];
-
-                  if (operation === 'delete') {
-                      newTags = newTags.filter(t => t !== oldName);
-                      newKeywords = newKeywords.filter(k => k !== oldName);
-                  } else if (operation === 'rename') {
-                      newTags = newTags.map(t => t === oldName ? newName : t);
-                      newKeywords = newKeywords.map(k => k === oldName ? newName : k);
-                  } else if (operation === 'merge' && targetTag) {
-                      newTags = newTags.filter(t => t !== oldName);
-                      if (!newTags.includes(targetTag)) newTags.push(targetTag);
-                      
-                      newKeywords = newKeywords.filter(k => k !== oldName);
-                      if (!newKeywords.includes(targetTag)) newKeywords.push(targetTag);
-                  }
-                  
-                  return { ...item, tags: [...new Set(newTags)], keywords: [...new Set(newKeywords)] };
+              if (!item.tags?.includes(oldName)) {
+                  return item;
               }
-              return item;
+
+              let newTags = [...item.tags];
+              let newKeywords = [...item.keywords];
+
+              if (operation === 'delete') {
+                  newTags = newTags.filter(t => t !== oldName);
+                  newKeywords = newKeywords.filter(k => k !== oldName);
+              } else if (operation === 'rename') {
+                  const tagIndex = newTags.indexOf(oldName);
+                  if(tagIndex > -1) newTags[tagIndex] = newName;
+
+                  const keywordIndex = newKeywords.indexOf(oldName);
+                  if(keywordIndex > -1) newKeywords[keywordIndex] = newName;
+              } else if (operation === 'merge' && targetTag) {
+                  newTags = newTags.filter(t => t !== oldName);
+                  if (!newTags.includes(targetTag)) newTags.push(targetTag);
+                  
+                  newKeywords = newKeywords.filter(k => k !== oldName);
+                  if (!newKeywords.includes(targetTag)) newKeywords.push(targetTag);
+              }
+              
+              return { ...item, tags: [...new Set(newTags)], keywords: [...new Set(newKeywords)] };
           });
       };
       
@@ -149,19 +153,20 @@ export default function TagsPage() {
       return (
         <div>
             <h1 className="text-3xl font-bold mb-8">Manage Tags</h1>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                    <Card className="bg-card border-border shadow-lg">
-                        <CardHeader>
-                            <Skeleton className="h-6 w-32" />
-                            <Skeleton className="h-4 w-48" />
-                        </CardHeader>
-                        <CardContent>
-                             <Skeleton className="h-24 w-full" />
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+            <Card className="bg-card border-border shadow-lg">
+                <CardHeader>
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <Skeleton className="h-4 w-48" />
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                     <Skeleton className="h-8 w-24 rounded-full" />
+                     <Skeleton className="h-8 w-32 rounded-full" />
+                     <Skeleton className="h-8 w-20 rounded-full" />
+                     <Skeleton className="h-8 w-28 rounded-full" />
+                     <Skeleton className="h-8 w-24 rounded-full" />
+                     <Skeleton className="h-8 w-32 rounded-full" />
+                </CardContent>
+            </Card>
         </div>
       )
   }
@@ -170,11 +175,52 @@ export default function TagsPage() {
     <div>
       <h1 className="text-3xl font-bold mb-8">Manage Tags</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <Card className="bg-card border-border shadow-lg">
             <CardHeader>
-              <CardTitle>All Tags ({allTags.length})</CardTitle>
-              <CardDescription>View, rename, or delete tags sitewide.</CardDescription>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <CardTitle>All Tags ({allTags.length})</CardTitle>
+                  <CardDescription>View, rename, merge, or delete tags sitewide.</CardDescription>
+                </div>
+                 <Dialog open={isMergeDialogOpen} onOpenChange={setIsMergeDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="w-full sm:w-auto bg-muted hover:bg-muted/80 text-foreground"><GitMerge className="mr-2"/> Open Merge Tool</Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-card border-border text-card-foreground">
+                        <DialogHeader>
+                            <DialogTitle>Merge Tags</DialogTitle>
+                            <DialogDescription>
+                                Combine two tags. All content using the first tag will be updated to use the second tag.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div>
+                                <label className="text-sm font-medium">Tag to merge from</label>
+                                <Select onValueChange={setTagToMerge} value={tagToMerge}>
+                                <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Select a tag" /></SelectTrigger>
+                                <SelectContent>
+                                    {allTags.filter(t => t !== mergeTargetTag).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium">Merge into tag</label>
+                                <Select onValueChange={setMergeTargetTag} value={mergeTargetTag}>
+                                <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Select a tag" /></SelectTrigger>
+                                <SelectContent>
+                                    {allTags.filter(t => t !== tagToMerge).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                                </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                            <Button onClick={executeMerge} className="bg-accent hover:bg-accent/90" disabled={!tagToMerge || !mergeTargetTag || tagToMerge === mergeTargetTag}>Merge Tags</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+              </div>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {allTags.map(tag => (
@@ -204,45 +250,6 @@ export default function TagsPage() {
                {allTags.length === 0 && <p className="text-muted-foreground">No tags found. Add tags to your videos and galleries to see them here.</p>}
             </CardContent>
           </Card>
-        </div>
-        <div>
-           <Dialog open={isMergeDialogOpen} onOpenChange={setIsMergeDialogOpen}>
-             <DialogTrigger asChild>
-                <Button className="w-full mb-8 bg-muted hover:bg-muted/80 text-foreground"><GitMerge className="mr-2"/> Open Merge Tool</Button>
-             </DialogTrigger>
-             <DialogContent className="bg-card border-border text-card-foreground">
-                <DialogHeader>
-                    <DialogTitle>Merge Tags</DialogTitle>
-                    <DialogDescription>
-                        Combine two tags. All content using the first tag will be updated to use the second tag.
-                    </DialogDescription>
-                </DialogHeader>
-                 <div className="space-y-4 py-4">
-                    <div>
-                        <label className="text-sm font-medium">Tag to merge from</label>
-                        <Select onValueChange={setTagToMerge} value={tagToMerge}>
-                          <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Select a tag" /></SelectTrigger>
-                          <SelectContent>
-                            {allTags.filter(t => t !== mergeTargetTag).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                    </div>
-                     <div>
-                        <label className="text-sm font-medium">Merge into tag</label>
-                        <Select onValueChange={setMergeTargetTag} value={mergeTargetTag}>
-                          <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Select a tag" /></SelectTrigger>
-                           <SelectContent>
-                             {allTags.filter(t => t !== tagToMerge).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                           </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-                    <Button onClick={executeMerge} className="bg-accent hover:bg-accent/90" disabled={!tagToMerge || !mergeTargetTag || tagToMerge === mergeTargetTag}>Merge Tags</Button>
-                </DialogFooter>
-             </DialogContent>
-           </Dialog>
         </div>
       </div>
 

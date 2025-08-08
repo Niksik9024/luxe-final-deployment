@@ -4,7 +4,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlusCircle, MoreHorizontal, Trash2, Edit, Copy } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -40,7 +39,6 @@ export function GalleriesAdminClient() {
             const updatedGalleries = currentGalleries.filter(g => g.id !== id);
             setGalleries(updatedGalleries);
             
-            // Update tags count
             const tags = galleryToDelete.tags || [];
             if (tags.length > 0) {
                 const allTags = getTags();
@@ -122,82 +120,89 @@ export function GalleriesAdminClient() {
               </Link>
             </Button>
         </div>
-       <div className="bg-card border border-border rounded-lg shadow-lg">
-        {loading ? (
-            <div className="p-4 space-y-4">
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-                <Skeleton className="h-12 w-full" />
-            </div>
-        ) : (
-            <Table>
-            <TableHeader>
-                <TableRow className="hover:bg-muted/50">
-                <TableHead className="w-[120px] hidden sm:table-cell">Cover</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead className="hidden md:table-cell">Models</TableHead>
-                <TableHead className="hidden lg:table-cell">Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {galleries.map((gallery) => (
-                <TableRow key={gallery.id} className="border-border hover:bg-muted/50">
-                    <TableCell className="hidden sm:table-cell">
-                        <Image src={gallery.image} alt={gallery.title} width={100} height={56} className="rounded-md object-cover"/>
-                    </TableCell>
-                    <TableCell className="font-medium">{gallery.title}</TableCell>
-                    <TableCell className="hidden md:table-cell">{gallery.models.join(', ')}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{new Date(gallery.date).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                    <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className={cn(gallery.status === 'Published' ? 'bg-primary' : '')}>{gallery.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-card border-border text-card-foreground">
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/galleries/edit/${gallery.id}`} className="flex items-center cursor-pointer"><Edit className="mr-2 h-4 w-4"/> Edit</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleDuplicate(gallery.id)}>
-                                <Copy className="mr-2 h-4 w-4"/> Duplicate
-                            </DropdownMenuItem>
-                            <AlertDialog>
-                                <DropdownMenuItem asChild>
-                                    <AlertDialogTrigger className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground'>
-                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                    </AlertDialogTrigger>
-                                </DropdownMenuItem>
-                                <AlertDialogContent className="bg-card border-border text-card-foreground">
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will permanently delete this gallery.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDelete(gallery.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    </TableCell>
-                </TableRow>
-                ))}
-            </TableBody>
-            </Table>
-        )}
-      </div>
+        <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+            {loading ? (
+                <div className="p-4 space-y-4">
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                </div>
+            ) : (
+                <div className="divide-y divide-border">
+                    {galleries.map((gallery) => (
+                         <div key={gallery.id} className="p-4 flex flex-col md:flex-row md:items-center gap-4 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center gap-4 flex-1">
+                                <Image 
+                                    src={gallery.image} 
+                                    alt={gallery.title} 
+                                    width={80} 
+                                    height={80} 
+                                    className="rounded-md object-cover aspect-[16/9] md:aspect-square"
+                                />
+                                <div className="flex-1">
+                                    <Link href={`/admin/galleries/edit/${gallery.id}`} className="font-semibold hover:underline">{gallery.title}</Link>
+                                    <div className="text-sm text-muted-foreground mt-1 md:hidden">
+                                        {new Date(gallery.date).toLocaleDateString()}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground mt-1">
+                                       Models: {gallery.models.join(', ') || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="hidden md:block text-sm text-muted-foreground w-28">
+                                        {new Date(gallery.date).toLocaleDateString()}
+                                    </div>
+                                    <div className="w-24">
+                                        <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className={cn(gallery.status === 'Published' ? 'bg-primary' : '')}>{gallery.status}</Badge>
+                                    </div>
+                                </div>
+                                <div>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-8 w-8 p-0">
+                                            <span className="sr-only">Open menu</span>
+                                            <MoreHorizontal className="h-4 w-4" />
+                                        </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="bg-card border-border text-card-foreground">
+                                            <DropdownMenuItem asChild>
+                                                <Link href={`/admin/galleries/edit/${gallery.id}`} className="flex items-center cursor-pointer"><Edit className="mr-2 h-4 w-4"/> Edit</Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleDuplicate(gallery.id)}>
+                                                <Copy className="mr-2 h-4 w-4"/> Duplicate
+                                            </DropdownMenuItem>
+                                            <AlertDialog>
+                                                <DropdownMenuItem asChild>
+                                                    <AlertDialogTrigger className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground'>
+                                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                    </AlertDialogTrigger>
+                                                </DropdownMenuItem>
+                                                <AlertDialogContent className="bg-card border-border text-card-foreground">
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This action cannot be undone. This will permanently delete this gallery.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDelete(gallery.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
+                         </div>
+                    ))}
+                </div>
+            )}
+        </div>
     </>
   );
 }
