@@ -2,7 +2,7 @@
 'use client';
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { Video, ImageIcon, Users, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
+import { Video, ImageIcon, Users, Calendar as CalendarIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -111,9 +111,9 @@ export default function AdminDashboard() {
                                         <span className="flex items-center gap-1"><CalendarIcon size={14}/> {new Date(item.date).toLocaleDateString()}</span>
                                     </div>
                                 </div>
-                                <Button variant="ghost" size="icon" asChild>
+                                <Button variant="outline" size="sm" asChild>
                                   <Link href={`/admin/${item.type === 'video' ? 'videos' : 'galleries'}/edit/${item.id}`}>
-                                    <MoreVertical className="text-muted-foreground" />
+                                    Edit
                                   </Link>
                                 </Button>
                             </div>
