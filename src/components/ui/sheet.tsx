@@ -70,8 +70,6 @@ const SheetContent = React.forwardRef<
         
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
-        <SheetPrimitive.Title />
-        <SheetPrimitive.Description />
     </SheetPrimitive.Content>
   </SheetPortal>
 ))
