@@ -5,36 +5,46 @@
 /.pnp
 .pnp.js
 
-# Testing
-/coverage
-
-# Next.js build output
+# Build outputs
 /.next/
 /out/
-
-# Production
 /build
 
-# Misc
-.DS_Store
-*.pem
+# Static exports
+/export
+
+# Local environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Local .env files
-.env*.local
-.env
+# IDE & Editor directories
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
-
-# Firebase
-# Ignore the Firebase credentials file for security
-/src/lib/firebase-credentials.json
-serviceAccountKey.json
-firebase-credentials.json
