@@ -39,57 +39,78 @@ function SearchPageComponent() {
 
   // Advanced search with relevance scoring
   const calculateRelevance = (item: any, query: string, type: string): number => {
-    const lowerQuery = query.toLowerCase();
-    let score = 0;
+    if (!query || !item) return 0;
     
-    // Exact matches get highest priority
-    if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) score += 100;
-    else if (item.title?.toLowerCase().includes(lowerQuery)) score += 100;
-    
-    // Keyword/tag matches
-    if (item.keywords?.some((k: string) => k.toLowerCase().includes(lowerQuery))) score += 80;
-    
-    // Description matches
-    if (item.description?.toLowerCase().includes(lowerQuery)) score += 60;
-    
-    // Bonus for featured content
-    if (type === 'video' && item.isFeatured) score += 20;
-    
-    return score;
+    try {
+      const lowerQuery = query.toLowerCase().trim();
+      let score = 0;
+      
+      // Exact matches get highest priority
+      if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) score += 100;
+      else if (item.title?.toLowerCase().includes(lowerQuery)) score += 100;
+      
+      // Keyword/tag matches
+      if (item.keywords && Array.isArray(item.keywords)) {
+        if (item.keywords.some((k: string) => k?.toLowerCase().includes(lowerQuery))) score += 80;
+      }
+      
+      // Description matches
+      if (item.description?.toLowerCase().includes(lowerQuery)) score += 60;
+      
+      // Bonus for featured content
+      if (type === 'video' && item.isFeatured) score += 20;
+      
+      // Partial word matching
+      const words = lowerQuery.split(' ').filter(w => w.length > 0);
+      words.forEach(word => {
+        const itemText = (type === 'model' ? item.name : item.title)?.toLowerCase() || '';
+        if (itemText.includes(word)) score += 10;
+      });
+      
+      return score;
+    } catch (error) {
+      console.error('Error calculating relevance:', error);
+      return 0;
+    }
   };
 
   useEffect(() => {
     startTransition(() => {
-      if (!queryTerm) {
+      if (!queryTerm || queryTerm.length === 0) {
         setSearchResults({ videos: [], galleries: [], models: [] });
         return;
       }
 
-      const allVideos = getVideos().filter(v => v.status === 'Published');
-      const allGalleries = getGalleries().filter(g => g.status === 'Published');
-      const allModels = getModels();
+      try {
+        const allVideos = getVideos().filter(v => v && v.status === 'Published');
+        const allGalleries = getGalleries().filter(g => g && g.status === 'Published');
+        const allModels = getModels().filter(m => m);
 
-      // Advanced filtering with relevance scoring
-      const filteredVideos = allVideos
-        .map(v => ({ ...v, relevance: calculateRelevance(v, queryTerm, 'video') }))
-        .filter(v => v.relevance > 0)
-        .sort((a, b) => b.relevance - a.relevance);
+        // Advanced filtering with relevance scoring
+        const filteredVideos = allVideos
+          .map(v => ({ ...v, relevance: calculateRelevance(v, queryTerm, 'video') }))
+          .filter(v => v.relevance > 0)
+          .sort((a, b) => b.relevance - a.relevance);
 
-      const filteredGalleries = allGalleries
-        .map(g => ({ ...g, relevance: calculateRelevance(g, queryTerm, 'gallery') }))
-        .filter(g => g.relevance > 0)
-        .sort((a, b) => b.relevance - a.relevance);
+        const filteredGalleries = allGalleries
+          .map(g => ({ ...g, relevance: calculateRelevance(g, queryTerm, 'gallery') }))
+          .filter(g => g.relevance > 0)
+          .sort((a, b) => b.relevance - a.relevance);
 
-      const filteredModels = allModels
-        .map(m => ({ ...m, relevance: calculateRelevance(m, queryTerm, 'model') }))
-        .filter(m => m.relevance > 0)
-        .sort((a, b) => b.relevance - a.relevance);
+        const filteredModels = allModels
+          .map(m => ({ ...m, relevance: calculateRelevance(m, queryTerm, 'model') }))
+          .filter(m => m.relevance > 0)
+          .sort((a, b) => b.relevance - a.relevance);
 
-      setSearchResults({
-        videos: filteredVideos,
-        galleries: filteredGalleries,
-        models: filteredModels,
-      });
+        setSearchResults({
+          videos: filteredVideos,
+          galleries: filteredGalleries,
+          models: filteredModels,
+        });
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults({ videos: [], galleries: [], models: [] });
+      }
     });
   }, [queryTerm]);
 

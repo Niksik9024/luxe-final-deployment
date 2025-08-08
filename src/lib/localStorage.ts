@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Gallery, Model, User, Video } from './types';
@@ -42,15 +41,49 @@ export function initializeLocalStorage() {
 }
 
 // Data Access Functions
-export const getModels = () => getItem<Model[]>('models', []);
+export const getModels = (): Model[] => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const models = localStorage.getItem('models');
+    const parsed = models ? JSON.parse(models) : [];
+    return Array.isArray(parsed) ? parsed.filter(m => m && m.id) : [];
+  } catch (error) {
+    console.error('Error loading models:', error);
+    return [];
+  }
+};
 export const setModels = (data: Model[]) => setItem('models', data);
 export const getModelById = (id: string) => getModels().find(m => m.id === id);
 
-export const getVideos = () => getItem<Video[]>('videos', []);
+export const getVideos = (): Video[] => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const videos = localStorage.getItem('videos');
+    const parsed = videos ? JSON.parse(videos) : [];
+    return Array.isArray(parsed) ? parsed.filter(v => v && v.id) : [];
+  } catch (error) {
+    console.error('Error loading videos:', error);
+    return [];
+  }
+};
+
+export const getGalleries = (): Gallery[] => {
+  if (typeof window === 'undefined') return [];
+
+  try {
+    const galleries = localStorage.getItem('galleries');
+    const parsed = galleries ? JSON.parse(galleries) : [];
+    return Array.isArray(parsed) ? parsed.filter(g => g && g.id) : [];
+  } catch (error) {
+    console.error('Error loading galleries:', error);
+    return [];
+  }
+};
 export const setVideos = (data: Video[]) => setItem('videos', data);
 export const getVideoById = (id: string) => getVideos().find(v => v.id === id);
 
-export const getGalleries = () => getItem<Gallery[]>('galleries', []);
 export const setGalleries = (data: Gallery[]) => setItem('galleries', data);
 export const getGalleryById = (id: string) => getGalleries().find(g => g.id === id);
 

@@ -11,6 +11,8 @@ import Image from 'next/image';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface SearchModalProps {
   open: boolean;
@@ -25,48 +27,72 @@ type SearchResult = (Video | Gallery | Model) & {
 
 // Advanced search algorithm with fuzzy matching and relevance scoring
 const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' | 'model'): number => {
-  const lowerQuery = query.toLowerCase();
+  if (!query || query.length < 1) return 0;
+  
+  const lowerQuery = query.toLowerCase().trim();
   let score = 0;
   
-  // Exact matches get highest priority
-  if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) {
-    score += 100;
-  } else if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase().includes(lowerQuery)) {
-    score += 100;
-  }
-  
-  // Keyword/tag matches
-  if (item.keywords?.some((k: string) => k.toLowerCase().includes(lowerQuery))) {
-    score += 80;
-  }
-  
-  // Description matches
-  if (item.description?.toLowerCase().includes(lowerQuery)) {
-    score += 60;
-  }
-  
-  // Fuzzy matching for model attributes
-  if (type === 'model') {
-    if (item.famousFor?.toLowerCase().includes(lowerQuery)) score += 70;
-    if (item.instagram?.toLowerCase().includes(lowerQuery)) score += 30;
-  }
-  
-  // Bonus for featured content
-  if (type === 'video' && item.isFeatured) {
-    score += 20;
+  try {
+    // Exact matches get highest priority
+    if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) {
+      score += 100;
+    } else if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase().includes(lowerQuery)) {
+      score += 100;
+    }
+    
+    // Keyword/tag matches
+    if (item.keywords && Array.isArray(item.keywords)) {
+      if (item.keywords.some((k: string) => k?.toLowerCase().includes(lowerQuery))) {
+        score += 80;
+      }
+    }
+    
+    // Description matches
+    if (item.description?.toLowerCase().includes(lowerQuery)) {
+      score += 60;
+    }
+    
+    // Fuzzy matching for model attributes
+    if (type === 'model') {
+      if (item.famousFor?.toLowerCase().includes(lowerQuery)) score += 70;
+      if (item.instagram?.toLowerCase().includes(lowerQuery)) score += 30;
+    }
+    
+    // Bonus for featured content
+    if (type === 'video' && item.isFeatured) {
+      score += 20;
+    }
+    
+    // Partial word matching
+    const words = lowerQuery.split(' ').filter(w => w.length > 0);
+    words.forEach(word => {
+      const itemText = (type === 'model' ? item.name : item.title)?.toLowerCase() || '';
+      if (itemText.includes(word)) score += 10;
+    });
+    
+  } catch (error) {
+    console.error('Error calculating relevance:', error);
+    return 0;
   }
   
   return score;
 };
 
 const getMatchType = (item: any, query: string, type: 'video' | 'gallery' | 'model'): SearchResult['matchType'] => {
-  const lowerQuery = query.toLowerCase();
+  if (!query || !item) return 'fuzzy';
   
-  if (type === 'model' && item.name?.toLowerCase() === lowerQuery) return 'exact';
-  if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase() === lowerQuery) return 'exact';
-  if (item.keywords?.some((k: string) => k.toLowerCase() === lowerQuery)) return 'tag';
-  if (item.description?.toLowerCase().includes(lowerQuery)) return 'description';
-  return 'fuzzy';
+  try {
+    const lowerQuery = query.toLowerCase().trim();
+    
+    if (type === 'model' && item.name?.toLowerCase() === lowerQuery) return 'exact';
+    if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase() === lowerQuery) return 'exact';
+    if (item.keywords && Array.isArray(item.keywords) && item.keywords.some((k: string) => k?.toLowerCase() === lowerQuery)) return 'tag';
+    if (item.description?.toLowerCase().includes(lowerQuery)) return 'description';
+    return 'fuzzy';
+  } catch (error) {
+    console.error('Error determining match type:', error);
+    return 'fuzzy';
+  }
 };
 
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
@@ -79,62 +105,71 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const popularSearches = ['Fashion Week', 'Editorial', 'Luxury', 'Haute Couture', 'Runway'];
 
   const searchResults = useMemo(() => {
-    if (query.length < 2) return [];
+    if (query.length < 1) return [];
     
     setIsSearching(true);
     
-    const allVideos = getVideos().filter(v => v.status === 'Published');
-    const allGalleries = getGalleries().filter(g => g.status === 'Published');
-    const allModels = getModels();
+    try {
+      const allVideos = getVideos().filter(v => v && v.status === 'Published');
+      const allGalleries = getGalleries().filter(g => g && g.status === 'Published');
+      const allModels = getModels().filter(m => m);
 
-    const searchableItems: SearchResult[] = [];
+      const searchableItems: SearchResult[] = [];
 
-    // Process models
-    allModels.forEach(model => {
-      const relevance = calculateRelevance(model, query, 'model');
-      if (relevance > 0) {
-        searchableItems.push({
-          ...model,
-          resultType: 'model',
-          relevanceScore: relevance,
-          matchType: getMatchType(model, query, 'model')
-        });
-      }
-    });
+      // Process models
+      allModels.forEach(model => {
+        if (!model) return;
+        const relevance = calculateRelevance(model, query, 'model');
+        if (relevance > 0) {
+          searchableItems.push({
+            ...model,
+            resultType: 'model',
+            relevanceScore: relevance,
+            matchType: getMatchType(model, query, 'model')
+          });
+        }
+      });
 
-    // Process videos
-    allVideos.forEach(video => {
-      const relevance = calculateRelevance(video, query, 'video');
-      if (relevance > 0) {
-        searchableItems.push({
-          ...video,
-          resultType: 'video',
-          relevanceScore: relevance,
-          matchType: getMatchType(video, query, 'video')
-        });
-      }
-    });
+      // Process videos
+      allVideos.forEach(video => {
+        if (!video) return;
+        const relevance = calculateRelevance(video, query, 'video');
+        if (relevance > 0) {
+          searchableItems.push({
+            ...video,
+            resultType: 'video',
+            relevanceScore: relevance,
+            matchType: getMatchType(video, query, 'video')
+          });
+        }
+      });
 
-    // Process galleries
-    allGalleries.forEach(gallery => {
-      const relevance = calculateRelevance(gallery, query, 'gallery');
-      if (relevance > 0) {
-        searchableItems.push({
-          ...gallery,
-          resultType: 'gallery',
-          relevanceScore: relevance,
-          matchType: getMatchType(gallery, query, 'gallery')
-        });
-      }
-    });
+      // Process galleries
+      allGalleries.forEach(gallery => {
+        if (!gallery) return;
+        const relevance = calculateRelevance(gallery, query, 'gallery');
+        if (relevance > 0) {
+          searchableItems.push({
+            ...gallery,
+            resultType: 'gallery',
+            relevanceScore: relevance,
+            matchType: getMatchType(gallery, query, 'gallery')
+          });
+        }
+      });
 
-    // Sort by relevance score and limit results
-    const sorted = searchableItems
-      .sort((a, b) => b.relevanceScore - a.relevanceScore)
-      .slice(0, 12);
-    
-    setTimeout(() => setIsSearching(false), 200);
-    return sorted;
+      // Sort by relevance score and limit results
+      const sorted = searchableItems
+        .sort((a, b) => b.relevanceScore - a.relevanceScore)
+        .slice(0, 15);
+      
+      setTimeout(() => setIsSearching(false), 200);
+      return sorted;
+    } catch (error) {
+      console.error('Search error:', error);
+      setIsSearching(false);
+      return [];
+    }
   }, [query]);
 
   useEffect(() => {
@@ -176,17 +211,26 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       onOpenChange={onOpenChange}
       className="bg-black/95 backdrop-blur-xl border-amber-500/20 shadow-2xl shadow-amber-500/10"
     >
-      <div className="relative">
+      <VisuallyHidden.Root>
+        <DialogTitle>Search Luxury Content</DialogTitle>
+        <DialogDescription>
+          Search for models, videos, galleries and luxury fashion content
+        </DialogDescription>
+      </VisuallyHidden.Root>
+      <div className="relative border-b border-amber-500/20">
         <CommandInput 
           placeholder="Search for luxury content, models, and collections..."
           value={query}
           onValueChange={setQuery}
-          className="text-white placeholder:text-gray-400 border-0 bg-transparent text-lg py-6 px-6"
+          className="text-white placeholder:text-gray-400 border-0 bg-transparent text-lg py-6 px-6 focus:placeholder:text-gray-500 transition-colors"
         />
         
         {isSearching && (
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-amber-500 border-t-transparent"></div>
+          <div className="absolute right-6 top-1/2 transform -translate-y-1/2">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-amber-500/30 border-t-amber-500"></div>
+              <div className="absolute inset-0 animate-ping rounded-full h-5 w-5 border-2 border-amber-400/20"></div>
+            </div>
           </div>
         )}
       </div>
