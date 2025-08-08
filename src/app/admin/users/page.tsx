@@ -66,10 +66,10 @@ export default function ManageUsersPage() {
             try {
                 const currentUsers = getUsers();
                 const updatedUsers = currentUsers.map(u => u.id === userId ? { ...u, role: newRole } : u);
-                setUsers(updatedUsers);
+                setUsers(updatedUsers); // Persist changes to localStorage
                 
                 // Update local state for immediate feedback
-                setLocalUsers(prevUsers => prevUsers.map(u => u.id === userId ? { ...u, role: newRole } : u));
+                setLocalUsers(updatedUsers.sort((a,b) => a.name.localeCompare(b.name)));
                 
                 toast({
                     title: "Role Updated",
@@ -181,3 +181,5 @@ export default function ManageUsersPage() {
         </div>
     )
 }
+
+    

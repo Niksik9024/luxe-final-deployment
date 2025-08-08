@@ -59,7 +59,10 @@ export default function TagsPage() {
       
       const updateContent = (content: (Video | Gallery)[]) => {
           return content.map(item => {
-              if (item.tags.includes(oldName)) {
+              const hasTag = item.tags.includes(oldName);
+              const hasKeyword = item.keywords.includes(oldName);
+
+              if (hasTag || hasKeyword) {
                   let newTags = [...item.tags];
                   let newKeywords = [...item.keywords];
 
@@ -72,6 +75,7 @@ export default function TagsPage() {
                   } else if (operation === 'merge' && targetTag) {
                       newTags = newTags.filter(t => t !== oldName);
                       if (!newTags.includes(targetTag)) newTags.push(targetTag);
+                      
                       newKeywords = newKeywords.filter(k => k !== oldName);
                       if (!newKeywords.includes(targetTag)) newKeywords.push(targetTag);
                   }
@@ -270,3 +274,5 @@ export default function TagsPage() {
     </div>
   );
 }
+
+    

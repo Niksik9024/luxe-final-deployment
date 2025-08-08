@@ -73,6 +73,7 @@ const MultiSelectModels: React.FC = () => {
                               ? selected.filter((name) => name !== model.name)
                               : [...selected, model.name];
                             field.onChange(newSelection);
+                            setOpen(false); // Close popover on select
                           }}
                         >
                           <Check
@@ -358,3 +359,5 @@ export const ContentForm: React.FC<ContentFormProps> = ({ type }) => {
     </div>
   )
 }
+
+    
