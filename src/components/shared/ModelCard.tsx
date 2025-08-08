@@ -10,13 +10,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '../ui/button';
 import { Edit } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { cn } from '@/lib/utils';
 
 interface ModelCardProps {
   model: Model;
   priority?: boolean;
+  isHomepage?: boolean;
 }
 
-export const ModelCard = ({ model, priority = false }: ModelCardProps) => {
+export const ModelCard = ({ model, priority = false, isHomepage = false }: ModelCardProps) => {
   const { isAdmin } = useAuth();
   return (
     <Card className="overflow-hidden group relative shadow-lg rounded-lg md:hover:shadow-2xl bg-card border-border hover:border-primary transition-all duration-300">
@@ -41,8 +43,14 @@ export const ModelCard = ({ model, priority = false }: ModelCardProps) => {
           />
            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
         </div>
-        <div className="absolute bottom-0 left-0 w-full p-4">
-          <h3 className="font-semibold text-lg [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">{model.name}</h3>
+        <div className={cn(
+            "absolute bottom-0 left-0 w-full p-4",
+            isHomepage && "p-2 text-center"
+            )}>
+          <h3 className={cn(
+            "font-semibold text-lg [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]",
+             isHomepage && "text-base"
+             )}>{model.name}</h3>
         </div>
       </Link>
     </Card>

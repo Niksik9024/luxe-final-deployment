@@ -11,9 +11,7 @@ export const metadata = {
 export default async function ManageGalleriesPage() {
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-headline font-bold">Manage Galleries</h1>
-      </div>
+      <h1 className="text-3xl font-headline font-bold mb-8">Manage Galleries</h1>
       <GalleriesAdminClient />
     </div>
   );

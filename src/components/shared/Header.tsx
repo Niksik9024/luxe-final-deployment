@@ -191,7 +191,7 @@ export const Header = () => {
                             <Link href="/favorites" className="text-muted-foreground hover:text-foreground transition-colors" onClick={handleCloseMobileMenu}>Favorites</Link>
                             <Link href="/history" className="text-muted-foreground hover:text-foreground transition-colors" onClick={handleCloseMobileMenu}>Watch History</Link>
                             <div className="flex items-center justify-between pt-4">
-                               <Label htmlFor="data-saver-mode-mobile">Data Saver</Label>
+                               <Label htmlFor="data-saver-mode-mobile" className="text-base font-medium tracking-wider uppercase text-muted-foreground">Data Saver</Label>
                                <Switch id="data-saver-mode-mobile" checked={isDataSaver} onCheckedChange={toggleDataSaver} />
                             </div>
                         </>

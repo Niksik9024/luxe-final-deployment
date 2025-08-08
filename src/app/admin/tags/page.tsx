@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -152,7 +153,7 @@ export default function TagsPage() {
   if (loading) {
       return (
         <div>
-            <h1 className="text-3xl font-bold mb-8">Manage Tags</h1>
+            <h1 className="text-3xl font-headline font-bold mb-8">Manage Tags</h1>
             <Card className="bg-card border-border shadow-lg">
                 <CardHeader>
                     <Skeleton className="h-6 w-32 mb-2" />
@@ -173,7 +174,7 @@ export default function TagsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Manage Tags</h1>
+      <h1 className="text-3xl font-headline font-bold mb-8">Manage Tags</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-3">
           <Card className="bg-card border-border shadow-lg">

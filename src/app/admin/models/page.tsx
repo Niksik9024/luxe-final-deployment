@@ -1,4 +1,5 @@
 
+
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -117,11 +118,13 @@ export default function ManageModelsPage() {
                          <Link href={`/admin/models/edit/${model.id}`} className="flex items-center cursor-pointer"><Edit className="mr-2 h-4 w-4"/> Edit</Link>
                       </DropdownMenuItem>
                        <AlertDialog>
-                          <DropdownMenuItem asChild>
-                            <AlertDialogTrigger className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground'>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem 
+                              onSelect={(e) => e.preventDefault()}
+                              className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground'>
                               <Trash2 className="mr-2 h-4 w-4" /> Delete
-                            </AlertDialogTrigger>
-                          </DropdownMenuItem>
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
                           <AlertDialogContent className="bg-card border-border text-card-foreground">
                               <AlertDialogHeader>
                                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>

@@ -112,8 +112,8 @@ export default function AdminDashboard() {
         <StatCard title="Total Galleries" value={String(stats.galleries)} icon={ImageIcon} />
         <StatCard title="Total Models" value={String(stats.models)} icon={Users} />
       </div>
-      <div className="grid gap-8 mt-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid gap-8 mt-8 grid-cols-1 xl:grid-cols-3">
+        <div className="xl:col-span-2">
             <Card className="bg-card border-border shadow-lg h-full">
                 <CardHeader>
                     <CardTitle className="text-xl font-headline">Content Growth</CardTitle>
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
                 </CardContent>
             </Card>
         </div>
-         <div className="lg:col-span-1">
+         <div className="xl:col-span-1">
             <Card className="bg-card border-border shadow-lg h-full">
                 <CardHeader>
                     <CardTitle className="text-xl font-headline">Recent Content</CardTitle>

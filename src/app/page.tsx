@@ -171,7 +171,7 @@ export default function Home() {
                     <CarouselContent>
                         {topModels.map((model, index) => (
                         <CarouselItem key={index} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/6">
-                            <ModelCard model={model} />
+                            <ModelCard model={model} isHomepage={true}/>
                         </CarouselItem>
                         ))}
                     </CarouselContent>

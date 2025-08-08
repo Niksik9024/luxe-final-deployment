@@ -203,9 +203,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-8">
                 <div className="flex items-center">
                     <MobileAdminSidebar />
-                    <div className="hidden md:block">
-                        <h1 className="text-xl font-bold font-headline">Admin Panel</h1>
-                    </div>
                 </div>
                 
                 <div className="flex items-center gap-4">

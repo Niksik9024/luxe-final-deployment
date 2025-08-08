@@ -51,6 +51,13 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     router.push(url);
     onOpenChange(false);
   };
+  
+  const emptyMessage = () => {
+      if(query.length > 1 && results.length === 0) {
+          return `No results for "${query}". Try a different search term.`
+      }
+      return 'Start typing to search.'
+  }
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
@@ -60,7 +67,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         onValueChange={setQuery}
       />
       <CommandList>
-        <CommandEmpty>{query.length > 1 && results.length === 0 ? 'No results found.' : 'Start typing to search.'}</CommandEmpty>
+        <CommandEmpty>{emptyMessage()}</CommandEmpty>
         
         {results.length > 0 && (
           <CommandGroup heading="Results">
