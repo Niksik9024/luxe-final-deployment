@@ -3,7 +3,6 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Video, ImageIcon, Users, Calendar as CalendarIcon, MoreVertical } from 'lucide-react';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -26,36 +25,10 @@ const StatCard = ({ title, value, icon: Icon }: { title: string; value: string; 
     </Card>
   );
   
-const getMonthlyContentData = (content: ContentItem[]) => {
-    const months = Array.from({ length: 6 }, (_, i) => {
-        const d = new Date();
-        d.setMonth(d.getMonth() - i);
-        return { name: d.toLocaleString('default', { month: 'short' }), year: d.getFullYear(), videos: 0, galleries: 0 };
-    }).reverse();
-
-    const monthMap = new Map(months.map(m => [`${m.name}-${m.year}`, m]));
-
-    content.forEach(item => {
-        const itemDate = new Date(item.date);
-        const monthKey = `${itemDate.toLocaleString('default', { month: 'short' })}-${itemDate.getFullYear()}`;
-        if (monthMap.has(monthKey)) {
-            const monthData = monthMap.get(monthKey)!;
-            if (item.type === 'video') {
-                monthData.videos += 1;
-            } else {
-                monthData.galleries += 1;
-            }
-        }
-    });
-
-    return Array.from(monthMap.values());
-};
-
 
 export default function AdminDashboard() {
     const [stats, setStats] = React.useState({ videos: 0, galleries: 0, models: 0 });
     const [recentContent, setRecentContent] = React.useState<ContentItem[]>([]);
-    const [chartData, setChartData] = React.useState<any[]>([]);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
@@ -74,7 +47,6 @@ export default function AdminDashboard() {
             const allContent: ContentItem[] = [...videos, ...galleries];
             allContent.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setRecentContent(allContent.slice(0, 5));
-            setChartData(getMonthlyContentData(allContent));
 
         } catch (error) {
             console.error("Error fetching dashboard data: ", error);
@@ -116,30 +88,6 @@ export default function AdminDashboard() {
         <div className="xl:col-span-2">
             <Card className="bg-card border-border shadow-lg h-full">
                 <CardHeader>
-                    <CardTitle className="text-xl font-headline">Content Growth</CardTitle>
-                    <CardDescription>New videos and galleries added in the last 6 months.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={chartData}>
-                            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                            <Tooltip
-                              cursor={{ fill: 'hsla(var(--muted), 0.5)' }}
-                              contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 'var(--radius)' }}
-                              labelStyle={{ color: 'hsl(var(--foreground))' }}
-                            />
-                            <Legend wrapperStyle={{fontSize: "0.8rem"}}/>
-                            <Bar dataKey="videos" fill="hsl(var(--accent))" name="Videos" stackId="a" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="galleries" fill="hsl(var(--primary))" name="Galleries" stackId="a" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
-        </div>
-         <div className="xl:col-span-1">
-            <Card className="bg-card border-border shadow-lg h-full">
-                <CardHeader>
                     <CardTitle className="text-xl font-headline">Recent Content</CardTitle>
                     <CardDescription>The latest videos and galleries added.</CardDescription>
                 </CardHeader>
@@ -171,6 +119,17 @@ export default function AdminDashboard() {
                             </div>
                         ))}
                    </div>
+                </CardContent>
+            </Card>
+        </div>
+         <div className="xl:col-span-1">
+            <Card className="bg-card border-border shadow-lg h-full">
+                <CardHeader>
+                    <CardTitle className="text-xl font-headline">Top Performing Models</CardTitle>
+                    <CardDescription>Models featured in the most content.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                   <p className="text-muted-foreground">Data coming soon.</p>
                 </CardContent>
             </Card>
         </div>
