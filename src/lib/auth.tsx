@@ -3,7 +3,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect, useMemo, useCallback } from 'react';
 import type { User, Favorite } from './types';
 import { getUserByEmail, getUserById, getUsers, setUsers } from './localStorage';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/lib/use-toast';
 
 const SESSION_KEY = 'session_user_id';
 

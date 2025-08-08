@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { getUsers, setUsers } from '@/lib/localStorage';
 import { useAuth } from '@/lib/auth';
 import type { User } from '@/lib/types';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';

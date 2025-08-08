@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/use-toast";
 import { getModels, setModels } from '@/lib/localStorage';
 import type { Model } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -121,7 +121,7 @@ export default function ManageModelsPage() {
                           <AlertDialogTrigger asChild>
                             <DropdownMenuItem 
                               onSelect={(e) => e.preventDefault()}
-                              className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground'>
+                              className='flex items-center w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer text-destructive focus:bg-destructive focus:text-destructive-foreground'>
                               <Trash2 className="mr-2 h-4 w-4" /> Delete
                             </DropdownMenuItem>
                           </AlertDialogTrigger>

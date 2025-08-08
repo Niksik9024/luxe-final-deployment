@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Image from 'next/image';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/use-toast";
 import { getGalleries, setGalleries, getTags, setTags } from '@/lib/localStorage';
 import type { Gallery } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';

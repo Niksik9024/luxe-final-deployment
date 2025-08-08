@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/lib/use-toast';
 import { Image } from 'lucide-react';
 
 interface ChangeImageModalProps {

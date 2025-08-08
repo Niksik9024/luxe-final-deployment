@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/lib/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";

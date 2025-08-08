@@ -7,7 +7,7 @@ import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/lib/use-toast"
 import { ContentForm } from '@/components/admin/ContentForm'
 import { getGalleryById, setGalleries, getGalleries, getTags, setTags } from '@/lib/localStorage'
 import type { Gallery } from '@/lib/types'

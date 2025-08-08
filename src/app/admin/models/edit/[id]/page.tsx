@@ -7,7 +7,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/lib/use-toast"
 import { getModelById, setModels, getModels } from '@/lib/localStorage'
 import type { Model } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
