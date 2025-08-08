@@ -8,6 +8,8 @@ import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import type { Video, Gallery, Model } from '@/lib/types';
 import { FileVideo, ImageIcon, User } from 'lucide-react';
 import Image from 'next/image';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
 
 interface SearchModalProps {
   open: boolean;
@@ -75,8 +77,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               if (item.resultType === 'model') {
                 return (
                   <CommandItem key={`model-${item.id}`} onSelect={() => handleSelect(`/models/${item.id}`)}>
-                    <AvatarImage src={item.image} className="w-6 h-6 mr-3 rounded-sm object-cover" />
-                    <User className="mr-3" />
+                    <Avatar className="w-6 h-6 mr-3 rounded-sm">
+                      <AvatarImage src={item.image} className="object-cover" />
+                      <AvatarFallback><User className="h-4 w-4"/></AvatarFallback>
+                    </Avatar>
                     <span>{item.name}</span>
                   </CommandItem>
                 )
@@ -85,7 +89,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 return (
                   <CommandItem key={`video-${item.id}`} onSelect={() => handleSelect(`/videos/${item.id}`)}>
                     <Image src={item.image} alt={item.title} width={24} height={24} className="w-6 h-6 mr-3 rounded-sm object-cover" />
-                    <FileVideo className="mr-3" />
                     <span>{item.title}</span>
                   </CommandItem>
                 )
@@ -94,7 +97,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 return (
                   <CommandItem key={`gallery-${item.id}`} onSelect={() => handleSelect(`/galleries/${item.id}`)}>
                      <Image src={item.image} alt={item.title} width={24} height={24} className="w-6 h-6 mr-3 rounded-sm object-cover" />
-                    <ImageIcon className="mr-3" />
                     <span>{item.title}</span>
                   </CommandItem>
                 )
