@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, Star, Crown, Sparkles, X, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, Star, Crown, Sparkles, X, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type SearchResult = (Video | Gallery | Model) & { 
@@ -26,28 +26,46 @@ const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' 
   const lowerQuery = query.toLowerCase();
   let score = 0;
   
-  if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) {
-    score += 100;
-  } else if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase().includes(lowerQuery)) {
-    score += 100;
-  }
-  
-  if (item.keywords && Array.isArray(item.keywords)) {
-    if (item.keywords.some((k: string) => k?.toLowerCase().includes(lowerQuery))) {
-      score += 80;
+  try {
+    // Safe property access
+    const title = item?.title || '';
+    const name = item?.name || '';
+    const description = item?.description || '';
+    const keywords = Array.isArray(item?.keywords) ? item.keywords : [];
+    const famousFor = item?.famousFor || '';
+
+    // Primary title/name matches
+    if (type === 'model' && name.toLowerCase().includes(lowerQuery)) {
+      score += 100;
+    } else if ((type === 'video' || type === 'gallery') && title.toLowerCase().includes(lowerQuery)) {
+      score += 100;
     }
-  }
-  
-  if (item.description?.toLowerCase().includes(lowerQuery)) {
-    score += 60;
-  }
-  
-  if (type === 'model') {
-    if (item.famousFor?.toLowerCase().includes(lowerQuery)) score += 70;
-  }
-  
-  if (type === 'video' && item.isFeatured) {
-    score += 20;
+    
+    // Keyword matches
+    if (keywords.length > 0) {
+      const keywordMatch = keywords.some((k: string) => 
+        k && typeof k === 'string' && k.toLowerCase().includes(lowerQuery)
+      );
+      if (keywordMatch) score += 80;
+    }
+    
+    // Description matches
+    if (description && description.toLowerCase().includes(lowerQuery)) {
+      score += 60;
+    }
+    
+    // Model-specific matches
+    if (type === 'model' && famousFor && famousFor.toLowerCase().includes(lowerQuery)) {
+      score += 70;
+    }
+    
+    // Featured content bonus
+    if (type === 'video' && item?.isFeatured) {
+      score += 20;
+    }
+  } catch (error) {
+    console.error('Error calculating relevance:', error);
+    return 0;
   }
   
   return score;
@@ -64,7 +82,7 @@ function SearchResultsContent() {
   const [sortBy, setSortBy] = useState('relevance');
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
 
-  const performSearch = (searchQuery: string) => {
+  const performSearch = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults([]);
       return;
@@ -73,45 +91,61 @@ function SearchResultsContent() {
     setLoading(true);
     
     try {
+      // Add a small delay to prevent too rapid searching
+      await new Promise(resolve => setTimeout(resolve, 200));
+
       const allVideos = getVideos().filter(v => v && v.status === 'Published');
       const allGalleries = getGalleries().filter(g => g && g.status === 'Published');
       const allModels = getModels().filter(m => m);
 
       const searchableItems: SearchResult[] = [];
 
-      // Search models
+      // Process each type safely
       allModels.forEach(model => {
-        const relevance = calculateRelevance(model, searchQuery, 'model');
-        if (relevance > 0) {
-          searchableItems.push({
-            ...model,
-            resultType: 'model',
-            relevanceScore: relevance
-          });
+        if (!model || !model.id) return;
+        try {
+          const relevance = calculateRelevance(model, searchQuery, 'model');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...model,
+              resultType: 'model',
+              relevanceScore: relevance
+            });
+          }
+        } catch (error) {
+          console.error('Error processing model:', model.id, error);
         }
       });
 
-      // Search videos
       allVideos.forEach(video => {
-        const relevance = calculateRelevance(video, searchQuery, 'video');
-        if (relevance > 0) {
-          searchableItems.push({
-            ...video,
-            resultType: 'video',
-            relevanceScore: relevance
-          });
+        if (!video || !video.id) return;
+        try {
+          const relevance = calculateRelevance(video, searchQuery, 'video');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...video,
+              resultType: 'video',
+              relevanceScore: relevance
+            });
+          }
+        } catch (error) {
+          console.error('Error processing video:', video.id, error);
         }
       });
 
-      // Search galleries
       allGalleries.forEach(gallery => {
-        const relevance = calculateRelevance(gallery, searchQuery, 'gallery');
-        if (relevance > 0) {
-          searchableItems.push({
-            ...gallery,
-            resultType: 'gallery',
-            relevanceScore: relevance
-          });
+        if (!gallery || !gallery.id) return;
+        try {
+          const relevance = calculateRelevance(gallery, searchQuery, 'gallery');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...gallery,
+              resultType: 'gallery',
+              relevanceScore: relevance
+            });
+          }
+        } catch (error) {
+          console.error('Error processing gallery:', gallery.id, error);
         }
       });
 
@@ -171,69 +205,89 @@ function SearchResultsContent() {
     <div className="min-h-screen bg-luxury-dark-gradient pt-20">
       <div className="container mx-auto px-4 py-12">
         {/* Search Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 luxury-fade-in">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Crown className="w-6 h-6 text-primary" />
-            <Badge className="bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
-              LUXURY SEARCH
+            <Crown className="w-8 h-8 text-primary animate-pulse" />
+            <Badge className="bg-luxury-gradient text-black font-bold text-lg px-6 py-3">
+              LUXURY SEARCH EXPERIENCE
             </Badge>
           </div>
-          <h1 className="mb-6">Discover Premium Content</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Search through our exclusive collection of models, videos, and galleries
+          <h1 className="mb-6 luxury-slide-up">Discover Premium Content</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8 luxury-fade-in">
+            Search through our exclusive collection of elite models, premium videos, and luxury galleries
           </p>
         </div>
 
         {/* Enhanced Search Bar */}
-        <Card className="luxury-card mb-8 max-w-4xl mx-auto">
-          <CardContent className="p-6">
-            <form onSubmit={handleSearch} className="space-y-4">
+        <Card className="luxury-card mb-12 max-w-5xl mx-auto luxury-glow">
+          <CardContent className="p-8">
+            <form onSubmit={handleSearch} className="space-y-6">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-primary w-6 h-6" />
                 <Input
                   type="text"
-                  placeholder="Search for luxury content, elite models, premium collections..."
+                  placeholder="Search for luxury content, elite models, premium collections, haute couture..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="pl-12 pr-4 py-4 text-lg bg-background/50 border-primary/30 focus:border-primary transition-colors"
+                  className="pl-16 pr-6 py-6 text-xl bg-background/50 border-primary/30 focus:border-primary transition-all duration-300 rounded-xl"
+                  disabled={loading}
                 />
+                {loading && (
+                  <div className="absolute right-6 top-1/2 transform -translate-y-1/2">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                )}
               </div>
               
-              <div className="flex flex-wrap gap-4 items-center justify-between">
+              <div className="flex flex-wrap gap-6 items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Sort by:</span>
+                  <div className="flex items-center gap-3">
+                    <SlidersHorizontal className="w-5 h-5 text-primary" />
+                    <span className="text-base font-semibold text-primary">Sort by:</span>
                   </div>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-40 bg-background/50 border-primary/30">
+                  <Select value={sortBy} onValueChange={setSortBy} disabled={loading}>
+                    <SelectTrigger className="w-48 h-12 bg-background/50 border-primary/30 focus:border-primary">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="relevance">Best Match</SelectItem>
                       <SelectItem value="newest">Newest First</SelectItem>
-                      <SelectItem value="alphabetical">A-Z</SelectItem>
+                      <SelectItem value="alphabetical">A-Z Order</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
-                <Button type="submit" className="btn-luxury px-6" disabled={loading}>
-                  {loading ? 'Searching...' : 'Search'}
+                <Button 
+                  type="submit" 
+                  className="btn-luxury px-8 py-3 h-12 text-lg font-bold" 
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="mr-3 h-5 w-5" />
+                      Search
+                    </>
+                  )}
                 </Button>
               </div>
 
               {/* Applied Filters */}
               {appliedFilters.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-sm text-muted-foreground">Active filters:</span>
+                <div className="flex flex-wrap gap-2 pt-4 border-t border-primary/20">
+                  <span className="text-sm font-medium text-primary">Active filters:</span>
                   {appliedFilters.map(filter => (
                     <Badge 
                       key={filter} 
                       variant="secondary" 
-                      className="cursor-pointer hover:bg-destructive/20"
+                      className="cursor-pointer hover:bg-destructive/20 transition-colors"
                       onClick={() => removeFilter(filter)}
                     >
-                      {filter} <X className="w-3 h-3 ml-1" />
+                      {filter} <X className="w-3 h-3 ml-2" />
                     </Badge>
                   ))}
                 </div>
@@ -246,31 +300,50 @@ function SearchResultsContent() {
         <div className="max-w-7xl mx-auto">
           {query && (
             <div className="mb-8 text-center">
-              <p className="text-lg text-muted-foreground">
-                {loading ? 'Searching...' : `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${query}"`}
+              <p className="text-xl font-medium">
+                {loading ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Searching our luxury collection...
+                  </span>
+                ) : (
+                  `Found ${results.length} premium result${results.length !== 1 ? 's' : ''} for "${query}"`
+                )}
               </p>
             </div>
           )}
 
-          {results.length > 0 && (
+          {results.length > 0 && !loading && (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-8 bg-card/50 border border-primary/20">
-                <TabsTrigger value="all" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
-                  All ({resultCounts.all})
+              <TabsList className="grid w-full grid-cols-4 mb-8 h-14 bg-card/50 border border-primary/20">
+                <TabsTrigger 
+                  value="all" 
+                  className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black text-base font-semibold"
+                >
+                  All Results ({resultCounts.all})
                 </TabsTrigger>
-                <TabsTrigger value="video" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
+                <TabsTrigger 
+                  value="video" 
+                  className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black text-base font-semibold"
+                >
                   Videos ({resultCounts.video})
                 </TabsTrigger>
-                <TabsTrigger value="gallery" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
+                <TabsTrigger 
+                  value="gallery" 
+                  className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black text-base font-semibold"
+                >
                   Galleries ({resultCounts.gallery})
                 </TabsTrigger>
-                <TabsTrigger value="model" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
+                <TabsTrigger 
+                  value="model" 
+                  className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black text-base font-semibold"
+                >
                   Models ({resultCounts.model})
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="space-y-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {filteredResults.map((result, index) => (
                     <div key={`${result.resultType}-${result.id}-${index}`} className="luxury-fade-in">
                       {result.resultType === 'model' ? (
@@ -287,7 +360,7 @@ function SearchResultsContent() {
               </TabsContent>
 
               <TabsContent value="video" className="space-y-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {filteredResults.filter(r => r.resultType === 'video').map((result, index) => (
                     <div key={`video-${result.id}-${index}`} className="luxury-fade-in">
                       <ContentCard content={result as Video} type="video" />
@@ -297,7 +370,7 @@ function SearchResultsContent() {
               </TabsContent>
 
               <TabsContent value="gallery" className="space-y-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {filteredResults.filter(r => r.resultType === 'gallery').map((result, index) => (
                     <div key={`gallery-${result.id}-${index}`} className="luxury-fade-in">
                       <ContentCard content={result as Gallery} type="gallery" />
@@ -307,7 +380,7 @@ function SearchResultsContent() {
               </TabsContent>
 
               <TabsContent value="model" className="space-y-8">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
                   {filteredResults.filter(r => r.resultType === 'model').map((result, index) => (
                     <div key={`model-${result.id}-${index}`} className="luxury-fade-in">
                       <ModelCard model={result as Model} />
@@ -319,31 +392,39 @@ function SearchResultsContent() {
           )}
 
           {query && !loading && results.length === 0 && (
-            <Card className="luxury-card text-center py-16">
+            <Card className="luxury-card text-center py-20 max-w-2xl mx-auto">
               <CardContent>
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
-                  <Sparkles className="h-10 w-10 text-black" />
+                <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-luxury-gradient flex items-center justify-center">
+                  <Sparkles className="h-12 w-12 text-black" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">No results found</h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  We couldn't find any content matching "{query}". Try adjusting your search terms.
+                <h3 className="text-3xl font-bold mb-6">No results found</h3>
+                <p className="text-muted-foreground mb-8 text-lg max-w-md mx-auto">
+                  We couldn't find any content matching "{query}". Try different keywords or browse our featured collections.
                 </p>
-                <Button onClick={() => setQuery('')} className="btn-luxury">
-                  Clear Search
-                </Button>
+                <div className="flex gap-4 justify-center">
+                  <Button onClick={() => setQuery('')} className="btn-luxury">
+                    Clear Search
+                  </Button>
+                  <Button variant="outline" onClick={() => window.location.href = '/'} className="border-primary/40 hover:bg-primary/10">
+                    Browse Featured
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}
 
-          {!query && (
-            <Card className="luxury-card text-center py-16">
+          {!query && !loading && (
+            <Card className="luxury-card text-center py-20 max-w-2xl mx-auto">
               <CardContent>
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
-                  <Search className="h-10 w-10 text-black" />
+                <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-luxury-gradient flex items-center justify-center">
+                  <Search className="h-12 w-12 text-black" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">Start Your Search</h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                <h3 className="text-3xl font-bold mb-6">Begin Your Luxury Search</h3>
+                <p className="text-muted-foreground mb-8 text-lg max-w-md mx-auto">
                   Enter a search term above to discover our premium content, elite models, and exclusive collections.
+                </p>
+                <p className="text-sm text-primary font-medium">
+                  Try searching for: Fashion Week, Editorial, Haute Couture, Runway
                 </p>
               </CardContent>
             </Card>
@@ -359,10 +440,10 @@ export default function SearchPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-luxury-dark-gradient pt-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
-            <Search className="h-10 w-10 text-black animate-pulse" />
+          <div className="w-24 h-24 mx-auto mb-8 rounded-full bg-luxury-gradient flex items-center justify-center">
+            <Loader2 className="h-12 w-12 text-black animate-spin" />
           </div>
-          <p className="text-xl">Loading search...</p>
+          <p className="text-2xl font-semibold">Loading luxury search experience...</p>
         </div>
       </div>
     }>

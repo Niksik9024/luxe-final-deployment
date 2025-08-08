@@ -32,39 +32,54 @@ const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' 
   let score = 0;
   
   try {
-    if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) {
+    // Safe property access with fallbacks
+    const title = item?.title || '';
+    const name = item?.name || '';
+    const description = item?.description || '';
+    const keywords = Array.isArray(item?.keywords) ? item.keywords : [];
+    const famousFor = item?.famousFor || '';
+    const instagram = item?.instagram || '';
+
+    // Primary matches (highest score)
+    if (type === 'model' && name.toLowerCase().includes(lowerQuery)) {
       score += 100;
-    } else if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase().includes(lowerQuery)) {
+    } else if ((type === 'video' || type === 'gallery') && title.toLowerCase().includes(lowerQuery)) {
       score += 100;
     }
     
-    if (item.keywords && Array.isArray(item.keywords)) {
-      if (item.keywords.some((k: string) => k?.toLowerCase().includes(lowerQuery))) {
-        score += 80;
-      }
+    // Keyword matches
+    if (keywords.length > 0) {
+      const keywordMatch = keywords.some((k: string) => {
+        return k && typeof k === 'string' && k.toLowerCase().includes(lowerQuery);
+      });
+      if (keywordMatch) score += 80;
     }
     
-    if (item.description?.toLowerCase().includes(lowerQuery)) {
+    // Description matches
+    if (description && description.toLowerCase().includes(lowerQuery)) {
       score += 60;
     }
     
+    // Model-specific matches
     if (type === 'model') {
-      if (item.famousFor?.toLowerCase().includes(lowerQuery)) score += 70;
-      if (item.instagram?.toLowerCase().includes(lowerQuery)) score += 30;
+      if (famousFor && famousFor.toLowerCase().includes(lowerQuery)) score += 70;
+      if (instagram && instagram.toLowerCase().includes(lowerQuery)) score += 30;
     }
     
-    if (type === 'video' && item.isFeatured) {
+    // Featured content bonus
+    if (type === 'video' && item?.isFeatured) {
       score += 20;
     }
     
+    // Word-based matching
     const words = lowerQuery.split(' ').filter(w => w.length > 0);
     words.forEach(word => {
-      const itemText = (type === 'model' ? item.name : item.title)?.toLowerCase() || '';
+      const itemText = (type === 'model' ? name : title).toLowerCase();
       if (itemText.includes(word)) score += 10;
     });
     
   } catch (error) {
-    console.error('Error calculating relevance:', error);
+    console.error('Error calculating relevance for item:', item?.id, error);
     return 0;
   }
   
@@ -76,11 +91,21 @@ const getMatchType = (item: any, query: string, type: 'video' | 'gallery' | 'mod
   
   try {
     const lowerQuery = query.toLowerCase().trim();
+    const title = item?.title || '';
+    const name = item?.name || '';
+    const keywords = Array.isArray(item?.keywords) ? item.keywords : [];
+    const description = item?.description || '';
     
-    if (type === 'model' && item.name?.toLowerCase() === lowerQuery) return 'exact';
-    if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase() === lowerQuery) return 'exact';
-    if (item.keywords && Array.isArray(item.keywords) && item.keywords.some((k: string) => k?.toLowerCase() === lowerQuery)) return 'tag';
-    if (item.description?.toLowerCase().includes(lowerQuery)) return 'description';
+    // Exact matches
+    if (type === 'model' && name.toLowerCase() === lowerQuery) return 'exact';
+    if ((type === 'video' || type === 'gallery') && title.toLowerCase() === lowerQuery) return 'exact';
+    
+    // Keyword matches
+    if (keywords.some((k: string) => k && k.toLowerCase() === lowerQuery)) return 'tag';
+    
+    // Description matches
+    if (description && description.toLowerCase().includes(lowerQuery)) return 'description';
+    
     return 'fuzzy';
   } catch (error) {
     console.error('Error determining match type:', error);
@@ -114,50 +139,65 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
       const searchableItems: SearchResult[] = [];
 
+      // Process models safely
       allModels.forEach(model => {
-        if (!model) return;
-        const relevance = calculateRelevance(model, query, 'model');
-        if (relevance > 0) {
-          searchableItems.push({
-            ...model,
-            resultType: 'model',
-            relevanceScore: relevance,
-            matchType: getMatchType(model, query, 'model')
-          });
+        if (!model || !model.id) return;
+        try {
+          const relevance = calculateRelevance(model, query, 'model');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...model,
+              resultType: 'model',
+              relevanceScore: relevance,
+              matchType: getMatchType(model, query, 'model')
+            });
+          }
+        } catch (error) {
+          console.error('Error processing model:', model.id, error);
         }
       });
 
+      // Process videos safely
       allVideos.forEach(video => {
-        if (!video) return;
-        const relevance = calculateRelevance(video, query, 'video');
-        if (relevance > 0) {
-          searchableItems.push({
-            ...video,
-            resultType: 'video',
-            relevanceScore: relevance,
-            matchType: getMatchType(video, query, 'video')
-          });
+        if (!video || !video.id) return;
+        try {
+          const relevance = calculateRelevance(video, query, 'video');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...video,
+              resultType: 'video',
+              relevanceScore: relevance,
+              matchType: getMatchType(video, query, 'video')
+            });
+          }
+        } catch (error) {
+          console.error('Error processing video:', video.id, error);
         }
       });
 
+      // Process galleries safely
       allGalleries.forEach(gallery => {
-        if (!gallery) return;
-        const relevance = calculateRelevance(gallery, query, 'gallery');
-        if (relevance > 0) {
-          searchableItems.push({
-            ...gallery,
-            resultType: 'gallery',
-            relevanceScore: relevance,
-            matchType: getMatchType(gallery, query, 'gallery')
-          });
+        if (!gallery || !gallery.id) return;
+        try {
+          const relevance = calculateRelevance(gallery, query, 'gallery');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...gallery,
+              resultType: 'gallery',
+              relevanceScore: relevance,
+              matchType: getMatchType(gallery, query, 'gallery')
+            });
+          }
+        } catch (error) {
+          console.error('Error processing gallery:', gallery.id, error);
         }
       });
 
       const sorted = searchableItems
         .sort((a, b) => b.relevanceScore - a.relevanceScore)
-        .slice(0, 15);
+        .slice(0, 12); // Limit to 12 results for better UX
       
-      setTimeout(() => setIsSearching(false), 200);
+      setTimeout(() => setIsSearching(false), 300);
       return sorted;
     } catch (error) {
       console.error('Search error:', error);
@@ -203,12 +243,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     <CommandDialog 
       open={open} 
       onOpenChange={onOpenChange}
-      className="bg-black/98 backdrop-blur-xl border-2 border-primary/30 shadow-luxury max-w-2xl"
+      className="bg-black/98 backdrop-blur-xl border-2 border-primary/30 shadow-luxury max-w-3xl"
     >
       <VisuallyHidden.Root>
         <DialogTitle>Search Luxury Content</DialogTitle>
         <DialogDescription>
-          Search for models, videos, galleries and luxury fashion content
+          Search for models, videos, galleries and luxury fashion content from our premium collection
         </DialogDescription>
       </VisuallyHidden.Root>
       
@@ -230,7 +270,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         )}
       </div>
       
-      <CommandList className="bg-luxury-dark-gradient backdrop-blur-sm max-h-[400px]">
+      <CommandList className="bg-luxury-dark-gradient backdrop-blur-sm max-h-[500px]">
         <CommandEmpty className="py-16 text-center">
           {query.length > 1 ? (
             <div className="space-y-6">
@@ -241,14 +281,14 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 <h3 className="text-xl font-semibold mb-3">No matches found</h3>
                 <p className="text-lg mb-2">for "{query}"</p>
                 <p className="text-sm text-gray-500 max-w-md mx-auto">
-                  Try refining your search terms or explore our curated collections below
+                  Try refining your search terms or explore our curated collections
                 </p>
               </div>
               
               <div className="flex justify-center">
                 <button 
                   onClick={handleViewAllResults}
-                  className="btn-luxury px-6 py-2 text-sm"
+                  className="btn-luxury px-6 py-3 text-sm font-bold"
                 >
                   Advanced Search
                 </button>
@@ -299,44 +339,56 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 <div className="flex items-center gap-2">
                   <Crown className="w-4 h-4 text-primary" />
                   <span className="text-primary font-semibold">Search Results</span>
+                  <Badge className="bg-primary/20 text-primary border-0 text-xs">
+                    {results.length}
+                  </Badge>
                 </div>
                 <button 
                   onClick={handleViewAllResults}
-                  className="text-xs text-gray-400 hover:text-primary transition-colors font-medium"
+                  className="text-xs text-gray-400 hover:text-primary transition-colors font-medium px-3 py-1 rounded-md hover:bg-primary/10"
                 >
-                  View All ({results.length})
+                  View All Results
                 </button>
               </div>
             }
           >
-            {results.map(item => {
+            {results.map((item, index) => {
               const url = item.resultType === 'model' 
                 ? `/models/${item.id}` 
                 : `/${item.resultType}s/${item.id}`;
               
               return (
                 <CommandItem 
-                  key={`${item.resultType}-${item.id}`} 
+                  key={`${item.resultType}-${item.id}-${index}`} 
                   onSelect={() => handleSelect(url)}
                   className="px-6 py-4 hover:bg-primary/10 cursor-pointer group transition-all duration-300 border-b border-gray-800/30 last:border-0"
                 >
                   <div className="flex items-center space-x-4 w-full">
                     <div className="relative flex-shrink-0">
                       {item.resultType === 'model' ? (
-                        <Avatar className="w-14 h-14 border-2 border-primary/40 group-hover:border-primary/70 transition-all duration-300 ring-2 ring-transparent group-hover:ring-primary/20">
-                          <AvatarImage src={item.image} className="object-cover" />
-                          <AvatarFallback className="bg-luxury-gradient text-black font-semibold">
-                            <User className="h-6 w-6" />
+                        <Avatar className="w-16 h-16 border-2 border-primary/40 group-hover:border-primary/70 transition-all duration-300 ring-2 ring-transparent group-hover:ring-primary/20">
+                          <AvatarImage 
+                            src={item.image} 
+                            className="object-cover" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/api/placeholder/64/64';
+                            }}
+                          />
+                          <AvatarFallback className="bg-luxury-gradient text-black font-semibold text-lg">
+                            <User className="h-8 w-8" />
                           </AvatarFallback>
                         </Avatar>
                       ) : (
-                        <div className="relative w-14 h-14 rounded-xl overflow-hidden border-2 border-primary/40 group-hover:border-primary/70 transition-all duration-300">
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-primary/40 group-hover:border-primary/70 transition-all duration-300">
                           <Image 
                             src={item.image} 
-                            alt={item.title || item.name} 
-                            width={56} 
-                            height={56} 
-                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300" 
+                            alt={item.title || item.name || 'Content'} 
+                            width={64} 
+                            height={64} 
+                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/api/placeholder/64/64';
+                            }}
                           />
                         </div>
                       )}
@@ -368,7 +420,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                         <span className="capitalize font-semibold text-primary bg-primary/10 px-2 py-1 rounded-md">
                           {item.resultType}
                         </span>
-                        {item.keywords && item.keywords.length > 0 && (
+                        {item.keywords && Array.isArray(item.keywords) && item.keywords.length > 0 && (
                           <>
                             <Separator orientation="vertical" className="h-4 bg-gray-600" />
                             <span className="truncate text-gray-500">
