@@ -148,10 +148,11 @@ export const Header = () => {
         </div>
         
         <div className="hidden md:flex items-center gap-4">
-            <Button variant="outline" className="h-9" onClick={() => setIsSearchOpen(true)}>
-                <Search className="h-4 w-4 mr-2" />
-                Search...
-                <kbd className="pointer-events-none ml-4 inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <Button variant="outline" className="h-10 border-primary/30 hover:border-primary hover:bg-primary/10 transition-all duration-300" onClick={() => setIsSearchOpen(true)}>
+                <Search className="h-4 w-4 mr-2 text-primary" />
+                <span className="hidden sm:inline">Search luxury content...</span>
+                <span className="sm:hidden">Search...</span>
+                <kbd className="pointer-events-none ml-4 inline-flex h-5 select-none items-center gap-1 rounded border border-primary/40 bg-primary/10 px-1.5 font-mono text-[10px] font-medium text-primary opacity-100">
                     <span className="text-xs">⌘</span>K
                 </kbd>
             </Button>
@@ -203,7 +204,7 @@ export const Header = () => {
           <div className="md:hidden"><Logo /></div>
 
           <div className="flex items-center gap-2">
-             <Button variant="ghost" size="icon" onClick={() => setIsSearchOpen(true)}>
+             <Button variant="ghost" size="icon" className="hover:bg-primary/10 hover:text-primary transition-colors" onClick={() => setIsSearchOpen(true)}>
                 <Search className="h-6 w-6" />
             </Button>
             <div className="md:hidden"><AuthElement/></div>

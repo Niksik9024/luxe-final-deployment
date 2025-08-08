@@ -1,368 +1,354 @@
 
 'use client';
 
-import React, { useEffect, useState, useTransition, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
+import type { Video, Gallery, Model } from '@/lib/types';
 import { ContentCard } from '@/components/shared/ContentCard';
 import { ModelCard } from '@/components/shared/ModelCard';
-import { Search as SearchIcon, Loader2, Filter, SlidersHorizontal, Grid, List, Sparkles, TrendingUp } from 'lucide-react';
-import type { Video, Gallery, Model } from '@/lib/types';
-import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Filter, Star, Crown, Sparkles, X, SlidersHorizontal } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type SearchResults = {
-  videos: Video[];
-  galleries: Gallery[];
-  models: Model[];
-}
+type SearchResult = (Video | Gallery | Model) & { 
+  resultType: 'video' | 'gallery' | 'model';
+  relevanceScore: number;
+};
 
-type SortOption = 'relevance' | 'date' | 'alphabetical' | 'featured';
-type ViewMode = 'grid' | 'list';
-type ContentFilter = 'all' | 'videos' | 'galleries' | 'models';
-
-function SearchPageComponent() {
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' | 'model'): number => {
+  if (!query) return 0;
   
-  const [searchResults, setSearchResults] = useState<SearchResults>({ videos: [], galleries: [], models: [] });
-  const [sortBy, setSortBy] = useState<SortOption>('relevance');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [contentFilter, setContentFilter] = useState<ContentFilter>('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const lowerQuery = query.toLowerCase();
+  let score = 0;
+  
+  if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) {
+    score += 100;
+  } else if ((type === 'video' || type === 'gallery') && item.title?.toLowerCase().includes(lowerQuery)) {
+    score += 100;
+  }
+  
+  if (item.keywords && Array.isArray(item.keywords)) {
+    if (item.keywords.some((k: string) => k?.toLowerCase().includes(lowerQuery))) {
+      score += 80;
+    }
+  }
+  
+  if (item.description?.toLowerCase().includes(lowerQuery)) {
+    score += 60;
+  }
+  
+  if (type === 'model') {
+    if (item.famousFor?.toLowerCase().includes(lowerQuery)) score += 70;
+  }
+  
+  if (type === 'video' && item.isFeatured) {
+    score += 20;
+  }
+  
+  return score;
+};
 
-  const queryTerm = searchParams.get('q')?.toLowerCase() || '';
+function SearchResultsContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  
+  const [query, setQuery] = useState(initialQuery);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [sortBy, setSortBy] = useState('relevance');
+  const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
 
-  // Advanced search with relevance scoring
-  const calculateRelevance = (item: any, query: string, type: string): number => {
-    if (!query || !item) return 0;
+  const performSearch = (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setResults([]);
+      return;
+    }
+
+    setLoading(true);
     
     try {
-      const lowerQuery = query.toLowerCase().trim();
-      let score = 0;
-      
-      // Exact matches get highest priority
-      if (type === 'model' && item.name?.toLowerCase().includes(lowerQuery)) score += 100;
-      else if (item.title?.toLowerCase().includes(lowerQuery)) score += 100;
-      
-      // Keyword/tag matches
-      if (item.keywords && Array.isArray(item.keywords)) {
-        if (item.keywords.some((k: string) => k?.toLowerCase().includes(lowerQuery))) score += 80;
-      }
-      
-      // Description matches
-      if (item.description?.toLowerCase().includes(lowerQuery)) score += 60;
-      
-      // Bonus for featured content
-      if (type === 'video' && item.isFeatured) score += 20;
-      
-      // Partial word matching
-      const words = lowerQuery.split(' ').filter(w => w.length > 0);
-      words.forEach(word => {
-        const itemText = (type === 'model' ? item.name : item.title)?.toLowerCase() || '';
-        if (itemText.includes(word)) score += 10;
+      const allVideos = getVideos().filter(v => v && v.status === 'Published');
+      const allGalleries = getGalleries().filter(g => g && g.status === 'Published');
+      const allModels = getModels().filter(m => m);
+
+      const searchableItems: SearchResult[] = [];
+
+      // Search models
+      allModels.forEach(model => {
+        const relevance = calculateRelevance(model, searchQuery, 'model');
+        if (relevance > 0) {
+          searchableItems.push({
+            ...model,
+            resultType: 'model',
+            relevanceScore: relevance
+          });
+        }
       });
-      
-      return score;
+
+      // Search videos
+      allVideos.forEach(video => {
+        const relevance = calculateRelevance(video, searchQuery, 'video');
+        if (relevance > 0) {
+          searchableItems.push({
+            ...video,
+            resultType: 'video',
+            relevanceScore: relevance
+          });
+        }
+      });
+
+      // Search galleries
+      allGalleries.forEach(gallery => {
+        const relevance = calculateRelevance(gallery, searchQuery, 'gallery');
+        if (relevance > 0) {
+          searchableItems.push({
+            ...gallery,
+            resultType: 'gallery',
+            relevanceScore: relevance
+          });
+        }
+      });
+
+      // Sort results
+      let sortedResults = [...searchableItems];
+      if (sortBy === 'relevance') {
+        sortedResults.sort((a, b) => b.relevanceScore - a.relevanceScore);
+      } else if (sortBy === 'newest') {
+        sortedResults.sort((a, b) => {
+          const dateA = new Date(a.date || '').getTime();
+          const dateB = new Date(b.date || '').getTime();
+          return dateB - dateA;
+        });
+      } else if (sortBy === 'alphabetical') {
+        sortedResults.sort((a, b) => {
+          const nameA = (a.resultType === 'model' ? a.name : a.title) || '';
+          const nameB = (b.resultType === 'model' ? b.name : b.title) || '';
+          return nameA.localeCompare(nameB);
+        });
+      }
+
+      setResults(sortedResults);
     } catch (error) {
-      console.error('Error calculating relevance:', error);
-      return 0;
+      console.error('Search error:', error);
+      setResults([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    startTransition(() => {
-      if (!queryTerm || queryTerm.length === 0) {
-        setSearchResults({ videos: [], galleries: [], models: [] });
-        return;
-      }
+    performSearch(query);
+  }, [query, sortBy]);
 
-      try {
-        const allVideos = getVideos().filter(v => v && v.status === 'Published');
-        const allGalleries = getGalleries().filter(g => g && g.status === 'Published');
-        const allModels = getModels().filter(m => m);
-
-        // Advanced filtering with relevance scoring
-        const filteredVideos = allVideos
-          .map(v => ({ ...v, relevance: calculateRelevance(v, queryTerm, 'video') }))
-          .filter(v => v.relevance > 0)
-          .sort((a, b) => b.relevance - a.relevance);
-
-        const filteredGalleries = allGalleries
-          .map(g => ({ ...g, relevance: calculateRelevance(g, queryTerm, 'gallery') }))
-          .filter(g => g.relevance > 0)
-          .sort((a, b) => b.relevance - a.relevance);
-
-        const filteredModels = allModels
-          .map(m => ({ ...m, relevance: calculateRelevance(m, queryTerm, 'model') }))
-          .filter(m => m.relevance > 0)
-          .sort((a, b) => b.relevance - a.relevance);
-
-        setSearchResults({
-          videos: filteredVideos,
-          galleries: filteredGalleries,
-          models: filteredModels,
-        });
-      } catch (error) {
-        console.error('Search error:', error);
-        setSearchResults({ videos: [], galleries: [], models: [] });
-      }
-    });
-  }, [queryTerm]);
-
-  // Sort results based on selected option
-  const sortResults = (items: any[], type: string) => {
-    switch (sortBy) {
-      case 'date':
-        return [...items].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      case 'alphabetical':
-        return [...items].sort((a, b) => {
-          const nameA = type === 'model' ? a.name : a.title;
-          const nameB = type === 'model' ? b.name : b.title;
-          return nameA.localeCompare(nameB);
-        });
-      case 'featured':
-        return [...items].sort((a, b) => {
-          if (type === 'video') {
-            return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
-          }
-          return 0;
-        });
-      default:
-        return items; // Already sorted by relevance
-    }
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(query);
   };
 
-  const { videos, galleries, models } = searchResults;
-  const sortedVideos = sortResults(videos, 'video');
-  const sortedGalleries = sortResults(galleries, 'gallery');
-  const sortedModels = sortResults(models, 'model');
+  const filteredResults = results.filter(result => {
+    if (activeTab === 'all') return true;
+    return result.resultType === activeTab;
+  });
 
-  const totalResults = videos.length + galleries.length + models.length;
-  const hasResults = totalResults > 0;
+  const resultCounts = {
+    all: results.length,
+    video: results.filter(r => r.resultType === 'video').length,
+    gallery: results.filter(r => r.resultType === 'gallery').length,
+    model: results.filter(r => r.resultType === 'model').length,
+  };
 
-  const popularTags = ['Fashion Week', 'Editorial', 'Luxury', 'Haute Couture', 'Runway', 'Portrait'];
+  const removeFilter = (filter: string) => {
+    setAppliedFilters(prev => prev.filter(f => f !== filter));
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
-      {/* Luxury Header Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-yellow-600/10"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.02"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
-        
-        <div className="container relative mx-auto py-16 px-4">
-          <div className="text-center space-y-6">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-yellow-600/20 backdrop-blur-sm border border-amber-500/30 rounded-full px-6 py-2 mb-4">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              <span className="text-sm text-amber-200 font-medium">LUXURY SEARCH EXPERIENCE</span>
-            </div>
-            
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-white via-amber-100 to-yellow-200 bg-clip-text text-transparent leading-tight">
-              Search Results
-            </h1>
-            
-            <div className="max-w-2xl mx-auto space-y-4">
-              {isPending ? (
-                <div className="flex items-center justify-center gap-3 text-amber-200">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <p className="text-lg">Searching our exclusive collection...</p>
-                </div>
-              ) : queryTerm ? (
-                <div className="space-y-3">
-                  <p className="text-xl text-gray-300">
-                    Showing results for <span className="font-bold text-amber-300">"{searchParams.get('q')}"</span>
-                  </p>
-                  <div className="flex items-center justify-center gap-4 text-sm text-gray-400">
-                    <span>{totalResults} results found</span>
-                    {totalResults > 0 && (
-                      <>
-                        <Separator orientation="vertical" className="h-4" />
-                        <span>{models.length} models</span>
-                        <span>{videos.length} videos</span>
-                        <span>{galleries.length} galleries</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xl text-gray-400">Enter a search term to discover luxury content</p>
-              )}
-            </div>
+    <div className="min-h-screen bg-luxury-dark-gradient pt-20">
+      <div className="container mx-auto px-4 py-12">
+        {/* Search Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Crown className="w-6 h-6 text-primary" />
+            <Badge className="bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
+              LUXURY SEARCH
+            </Badge>
           </div>
+          <h1 className="mb-6">Discover Premium Content</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+            Search through our exclusive collection of models, videos, and galleries
+          </p>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 pb-12">
-        {/* Advanced Controls */}
-        {hasResults && (
-          <div className="bg-black/40 backdrop-blur-sm border border-amber-500/20 rounded-2xl p-6 mb-8 -mt-8 relative z-10">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-                  <SelectTrigger className="w-48 bg-black/50 border-amber-500/30 text-white">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-black border-amber-500/30">
-                    <SelectItem value="relevance">Most Relevant</SelectItem>
-                    <SelectItem value="date">Latest First</SelectItem>
-                    <SelectItem value="alphabetical">A-Z</SelectItem>
-                    <SelectItem value="featured">Featured First</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <div className="flex items-center gap-2 bg-black/30 rounded-lg p-1">
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className="text-white hover:text-amber-400"
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className="text-white hover:text-amber-400"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Tabs value={contentFilter} onValueChange={(value: ContentFilter) => setContentFilter(value)} className="w-auto">
-                  <TabsList className="bg-black/50 border border-amber-500/30">
-                    <TabsTrigger value="all" className="text-white data-[state=active]:bg-amber-500 data-[state=active]:text-black">All</TabsTrigger>
-                    <TabsTrigger value="models" className="text-white data-[state=active]:bg-amber-500 data-[state=active]:text-black">Models</TabsTrigger>
-                    <TabsTrigger value="videos" className="text-white data-[state=active]:bg-amber-500 data-[state=active]:text-black">Videos</TabsTrigger>
-                    <TabsTrigger value="galleries" className="text-white data-[state=active]:bg-amber-500 data-[state=active]:text-black">Galleries</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Results Display */}
-        {isPending ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
-            <div className="text-center space-y-4">
+        {/* Enhanced Search Bar */}
+        <Card className="luxury-card mb-8 max-w-4xl mx-auto">
+          <CardContent className="p-6">
+            <form onSubmit={handleSearch} className="space-y-4">
               <div className="relative">
-                <div className="w-16 h-16 mx-auto border-4 border-amber-500/30 border-t-amber-500 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 w-16 h-16 mx-auto border-4 border-transparent border-l-yellow-600 rounded-full animate-spin animation-delay-150"></div>
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Search for luxury content, elite models, premium collections..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  className="pl-12 pr-4 py-4 text-lg bg-background/50 border-primary/30 focus:border-primary transition-colors"
+                />
               </div>
-              <p className="text-amber-200 text-lg">Curating luxury content...</p>
-            </div>
-          </div>
-        ) : hasResults ? (
-          <div className="space-y-12">
-            {/* Models Section */}
-            {sortedModels.length > 0 && (contentFilter === 'all' || contentFilter === 'models') && (
-              <section>
-                <div className="flex items-center gap-4 mb-8">
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                    Models
-                  </h2>
-                  <Badge variant="outline" className="bg-amber-500/20 border-amber-500/40 text-amber-200">
-                    {sortedModels.length} found
-                  </Badge>
-                </div>
-                <div className={`grid ${viewMode === 'grid' 
-                  ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6' 
-                  : 'grid-cols-1 gap-4'}`}>
-                  {sortedModels.map(model => (
-                    <div key={model.id} className="group hover:scale-105 transition-transform duration-300">
-                      <ModelCard model={model} />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Videos Section */}
-            {sortedVideos.length > 0 && (contentFilter === 'all' || contentFilter === 'videos') && (
-              <section>
-                <div className="flex items-center gap-4 mb-8">
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                    Videos
-                  </h2>
-                  <Badge variant="outline" className="bg-amber-500/20 border-amber-500/40 text-amber-200">
-                    {sortedVideos.length} found
-                  </Badge>
-                </div>
-                <div className={`grid ${viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' 
-                  : 'grid-cols-1 gap-6'}`}>
-                  {sortedVideos.map(video => (
-                    <div key={video.id} className="group hover:scale-102 transition-transform duration-500">
-                      <ContentCard content={video} type="video" />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Galleries Section */}
-            {sortedGalleries.length > 0 && (contentFilter === 'all' || contentFilter === 'galleries') && (
-              <section>
-                <div className="flex items-center gap-4 mb-8">
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
-                    Galleries
-                  </h2>
-                  <Badge variant="outline" className="bg-amber-500/20 border-amber-500/40 text-amber-200">
-                    {sortedGalleries.length} found
-                  </Badge>
-                </div>
-                <div className={`grid ${viewMode === 'grid' 
-                  ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6' 
-                  : 'grid-cols-1 gap-4'}`}>
-                  {sortedGalleries.map(gallery => (
-                    <div key={gallery.id} className="group hover:scale-105 transition-transform duration-300">
-                      <ContentCard content={gallery} type="gallery" />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-        ) : (
-          <div className="text-center py-20 min-h-[50vh] flex flex-col items-center justify-center">
-            <Card className="bg-black/40 border-amber-500/20 backdrop-blur-sm max-w-2xl mx-auto">
-              <CardContent className="p-12">
-                <SearchIcon className="mx-auto h-20 w-20 text-amber-500/60 mb-8" />
-                <h2 className="text-3xl font-bold text-white mb-4">No Results Found</h2>
-                <p className="text-gray-400 mb-8 text-lg">
-                  We couldn't find anything matching your search. Try exploring our curated collections.
-                </p>
-                
-                {/* Popular Tags Suggestions */}
-                <div className="space-y-4">
-                  <p className="text-sm text-amber-400 flex items-center justify-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
-                    Popular Searches
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {popularTags.map(tag => (
-                      <Badge 
-                        key={tag}
-                        variant="outline" 
-                        className="cursor-pointer hover:bg-amber-500/20 border-amber-500/30 text-amber-200 transition-all duration-300 hover:scale-105"
-                        onClick={() => window.location.href = `/search?q=${encodeURIComponent(tag)}`}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
+              
+              <div className="flex flex-wrap gap-4 items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Sort by:</span>
                   </div>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-40 bg-background/50 border-primary/30">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="relevance">Relevance</SelectItem>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="alphabetical">A-Z</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+                
+                <Button type="submit" className="btn-luxury px-6" disabled={loading}>
+                  {loading ? 'Searching...' : 'Search'}
+                </Button>
+              </div>
+
+              {/* Applied Filters */}
+              {appliedFilters.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-sm text-muted-foreground">Active filters:</span>
+                  {appliedFilters.map(filter => (
+                    <Badge 
+                      key={filter} 
+                      variant="secondary" 
+                      className="cursor-pointer hover:bg-destructive/20"
+                      onClick={() => removeFilter(filter)}
+                    >
+                      {filter} <X className="w-3 h-3 ml-1" />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Search Results */}
+        <div className="max-w-7xl mx-auto">
+          {query && (
+            <div className="mb-8 text-center">
+              <p className="text-lg text-muted-foreground">
+                {loading ? 'Searching...' : `Found ${results.length} result${results.length !== 1 ? 's' : ''} for "${query}"`}
+              </p>
+            </div>
+          )}
+
+          {results.length > 0 && (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-8 bg-card/50 border border-primary/20">
+                <TabsTrigger value="all" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
+                  All ({resultCounts.all})
+                </TabsTrigger>
+                <TabsTrigger value="video" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
+                  Videos ({resultCounts.video})
+                </TabsTrigger>
+                <TabsTrigger value="gallery" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
+                  Galleries ({resultCounts.gallery})
+                </TabsTrigger>
+                <TabsTrigger value="model" className="data-[state=active]:bg-luxury-gradient data-[state=active]:text-black">
+                  Models ({resultCounts.model})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all" className="space-y-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredResults.map((result, index) => (
+                    <div key={`${result.resultType}-${result.id}-${index}`} className="luxury-fade-in">
+                      {result.resultType === 'model' ? (
+                        <ModelCard model={result as Model} />
+                      ) : (
+                        <ContentCard 
+                          content={result as Video | Gallery} 
+                          type={result.resultType as 'video' | 'gallery'} 
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="video" className="space-y-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredResults.filter(r => r.resultType === 'video').map((result, index) => (
+                    <div key={`video-${result.id}-${index}`} className="luxury-fade-in">
+                      <ContentCard content={result as Video} type="video" />
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="gallery" className="space-y-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredResults.filter(r => r.resultType === 'gallery').map((result, index) => (
+                    <div key={`gallery-${result.id}-${index}`} className="luxury-fade-in">
+                      <ContentCard content={result as Gallery} type="gallery" />
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="model" className="space-y-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                  {filteredResults.filter(r => r.resultType === 'model').map((result, index) => (
+                    <div key={`model-${result.id}-${index}`} className="luxury-fade-in">
+                      <ModelCard model={result as Model} />
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+
+          {query && !loading && results.length === 0 && (
+            <Card className="luxury-card text-center py-16">
+              <CardContent>
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
+                  <Sparkles className="h-10 w-10 text-black" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">No results found</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  We couldn't find any content matching "{query}". Try adjusting your search terms.
+                </p>
+                <Button onClick={() => setQuery('')} className="btn-luxury">
+                  Clear Search
+                </Button>
               </CardContent>
             </Card>
-          </div>
-        )}
+          )}
+
+          {!query && (
+            <Card className="luxury-card text-center py-16">
+              <CardContent>
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
+                  <Search className="h-10 w-10 text-black" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">Start Your Search</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Enter a search term above to discover our premium content, elite models, and exclusive collections.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -371,19 +357,16 @@ function SearchPageComponent() {
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="relative">
-            <Loader2 className="h-16 w-16 text-amber-500 animate-spin mx-auto" />
-            <div className="absolute inset-0">
-              <Sparkles className="h-16 w-16 text-yellow-400 animate-pulse mx-auto" />
-            </div>
+      <div className="min-h-screen bg-luxury-dark-gradient pt-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
+            <Search className="h-10 w-10 text-black animate-pulse" />
           </div>
-          <p className="text-amber-200 text-xl">Loading luxury experience...</p>
+          <p className="text-xl">Loading search...</p>
         </div>
       </div>
     }>
-      <SearchPageComponent />
+      <SearchResultsContent />
     </Suspense>
-  )
+  );
 }
