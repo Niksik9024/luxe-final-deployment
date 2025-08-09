@@ -1,0 +1,99 @@
+You are a web developer tasked with implementing a dynamic hero section for a models page with full CRUD functionality using local storage (no database required).
+
+**Project Overview:**
+Transform the provided HTML/CSS carousel code into a complete model management system with a dynamic hero section that displays random model images and a local storage-based admin panel.
+
+**Core Requirements:**
+
+1. **Hero Section Enhancement:**
+   - Modify the existing carousel to display random model images from local storage
+   - Implement automatic randomization on every page refresh
+   - Maintain the existing 3D carousel animation and responsive design
+   - Replace hardcoded `dragon_*` images with dynamic `model_*` images from storage
+
+2. **Local Storage Data Structure:**
+   Design a models data structure with these fields:
+   ```javascript
+   {
+     id: "unique_id",
+     bg_image: "path/to/background.jpg",
+     model_image: "path/to/main_model.jpg", 
+     model_1: "path/to/model_1.jpg",
+     model_2: "path/to/model_2.jpg",
+     model_3: "path/to/model_3.jpg",
+     // ... up to model_10
+     title: "Model Name",
+     status: "active|inactive",
+     created_at: "timestamp",
+     updated_at: "timestamp"
+   }
+   ```
+
+3. **Frontend Randomization Logic:**
+   - Create JavaScript functions to fetch random active models from local storage
+   - Dynamically populate the carousel with random model combinations on each page load
+   - Implement smooth transitions and loading states
+   - Handle cases where insufficient models exist
+
+4. **Admin Panel CRUD Interface:**
+   - **Create:** Form with multiple file input fields for model images, title, and status
+   - **Read:** Display all models in a grid/table with image thumbnails and model details
+   - **Update:** Edit existing models with image replacement capability
+   - **Delete:** Remove models with confirmation dialogs
+   - **Bulk Actions:** Select and manage multiple models simultaneously
+
+5. **Image Handling System:**
+   - Implement client-side image upload with preview functionality
+   - Add image validation (file type: jpg/png/gif, max size: 5MB per image)
+   - Create image compression/resizing utilities using Canvas API
+   - Handle drag-and-drop image uploads
+   - Store images as base64 data URLs in local storage
+
+6. **Admin Panel Features:**
+   - Search functionality to find models by title or ID
+   - Filter models by status (active/inactive/all)
+   - Pagination for large model datasets (10 models per page)
+   - Sort models by creation date, title, or status
+   - Export/import functionality for model data backup
+
+7. **Technical Implementation:**
+   - Use vanilla JavaScript (no frameworks required)
+   - Implement proper error handling for storage limits and missing images
+   - Add loading indicators during image processing
+   - Create responsive admin interface that works on mobile devices
+   - Include form validation with user-friendly error messages
+
+**File Structure Required:**
+```
+project/
+├── index.html (hero section)
+├── admin.html (CRUD interface)
+├── css/
+│   ├── style.css (existing styles)
+│   └── admin.css (admin panel styles)
+├── js/
+│   ├── hero.js (randomization logic)
+│   ├── admin.js (CRUD operations)
+│   ├── storage.js (local storage utilities)
+│   └── image-utils.js (image handling)
+└── images/ (sample model images)
+```
+
+**Specific Deliverables:**
+1. Enhanced hero section HTML with dynamic model loading
+2. Complete admin panel interface with all CRUD operations
+3. JavaScript modules for local storage management
+4. Image processing and validation utilities
+5. Responsive CSS for both hero section and admin panel
+6. Sample model data for testing
+7. Comprehensive documentation with setup instructions
+
+**Key Constraints:**
+- No backend database - use local storage exclusively
+- No authentication system required
+- Must work offline after initial load
+- Support modern browsers (Chrome, Firefox, Safari, Edge)
+- Maximum local storage usage should be monitored and managed
+- Graceful degradation when local storage is full
+
+Provide complete, production-ready code with detailed comments explaining the randomization algorithm, local storage operations, and admin panel functionality. Include error handling for edge cases and user-friendly interfaces throughout.  use attached code files 
