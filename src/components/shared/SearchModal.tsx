@@ -1,383 +1,445 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandList } from '@/components/ui/command';
+import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import type { Video, Gallery, Model } from '@/lib/types';
-import { FileVideo, ImageIcon, User, Filter, Sparkles, TrendingUp, Crown, Star, Diamond, Clock, Calendar, Hash } from 'lucide-react';
+import { FileVideo, ImageIcon, User, Filter, Sparkles, TrendingUp, Crown, Star, Diamond } from 'lucide-react';
 import Image from 'next/image';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
-import { Button } from '@/components/ui/button';
 
 interface SearchModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-// Advanced search scoring algorithm
-function calculateRelevanceScore(item: any, query: string, type: string): number {
-  const queryLower = query.toLowerCase().trim();
+type SearchResult = (Video | Gallery | Model) & { 
+  resultType: 'video' | 'gallery' | 'model';
+  relevanceScore: number;
+  matchType: 'exact' | 'fuzzy' | 'tag' | 'description';
+};
+
+const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' | 'model'): number => {
+  if (!query || query.length < 1) return 0;
+  
+  const lowerQuery = query.toLowerCase().trim();
   let score = 0;
+  
+  try {
+    // Safe property access with fallbacks
+    const title = item?.title || '';
+    const name = item?.name || '';
+    const description = item?.description || '';
+    const keywords = Array.isArray(item?.keywords) ? item.keywords : [];
+    const famousFor = item?.famousFor || '';
+    const instagram = item?.instagram || '';
 
-  // Exact title/name matches get highest priority
-  const title = (item.title || item.name || '').toLowerCase();
-  if (title === queryLower) score += 100;
-  else if (title.startsWith(queryLower)) score += 80;
-  else if (title.includes(queryLower)) score += 60;
-
-  // Description matches
-  const description = (item.description || '').toLowerCase();
-  if (description.includes(queryLower)) score += 30;
-
-  // Keywords and tags (for non-model content)
-  if (type !== 'model' && item.keywords) {
-    const keywordMatch = item.keywords.some((keyword: string) => 
-      keyword.toLowerCase().includes(queryLower)
-    );
-    if (keywordMatch) score += 40;
-  }
-
-  if (type !== 'model' && item.tags) {
-    const tagMatch = item.tags.some((tag: string) => 
-      tag.toLowerCase().includes(queryLower)
-    );
-    if (tagMatch) score += 35;
-  }
-
-  // Fuzzy matching for typos
-  const words = queryLower.split(/\s+/);
-  words.forEach(word => {
-    if (word.length > 2) {
-      const titleWords = title.split(/\s+/);
-      const fuzzyMatch = titleWords.some(titleWord => {
-        return titleWord.includes(word) || word.includes(titleWord);
-      });
-      if (fuzzyMatch) score += 15;
+    // Primary matches (highest score)
+    if (type === 'model' && name.toLowerCase().includes(lowerQuery)) {
+      score += 100;
+    } else if ((type === 'video' || type === 'gallery') && title.toLowerCase().includes(lowerQuery)) {
+      score += 100;
     }
-  });
-
-  // Boost recent content
-  if (type !== 'model' && item.date) {
-    const daysSinceCreated = (Date.now() - new Date(item.date).getTime()) / (1000 * 60 * 60 * 24);
-    if (daysSinceCreated < 30) score += 10;
+    
+    // Keyword matches
+    if (keywords.length > 0) {
+      const keywordMatch = keywords.some((k: string) => {
+        return k && typeof k === 'string' && k.toLowerCase().includes(lowerQuery);
+      });
+      if (keywordMatch) score += 80;
+    }
+    
+    // Description matches
+    if (description && description.toLowerCase().includes(lowerQuery)) {
+      score += 60;
+    }
+    
+    // Model-specific matches
+    if (type === 'model') {
+      if (famousFor && famousFor.toLowerCase().includes(lowerQuery)) score += 70;
+      if (instagram && instagram.toLowerCase().includes(lowerQuery)) score += 30;
+    }
+    
+    // Featured content bonus
+    if (type === 'video' && item?.isFeatured) {
+      score += 20;
+    }
+    
+    // Word-based matching
+    const words = lowerQuery.split(' ').filter(w => w.length > 0);
+    words.forEach(word => {
+      const itemText = (type === 'model' ? name : title).toLowerCase();
+      if (itemText.includes(word)) score += 10;
+    });
+    
+  } catch (error) {
+    console.error('Error calculating relevance for item:', item?.id, error);
+    return 0;
   }
-
-  // Featured content boost
-  if (item.isFeatured) score += 20;
-
+  
   return score;
-}
+};
 
-export function SearchModal({ isOpen, onClose }: SearchModalProps) {
+const getMatchType = (item: any, query: string, type: 'video' | 'gallery' | 'model'): SearchResult['matchType'] => {
+  if (!query || !item) return 'fuzzy';
+  
+  try {
+    const lowerQuery = query.toLowerCase().trim();
+    const title = item?.title || '';
+    const name = item?.name || '';
+    const keywords = Array.isArray(item?.keywords) ? item.keywords : [];
+    const description = item?.description || '';
+    
+    // Exact matches
+    if (type === 'model' && name.toLowerCase() === lowerQuery) return 'exact';
+    if ((type === 'video' || type === 'gallery') && title.toLowerCase() === lowerQuery) return 'exact';
+    
+    // Keyword matches
+    if (keywords.some((k: string) => k && k.toLowerCase() === lowerQuery)) return 'tag';
+    
+    // Description matches
+    if (description && description.toLowerCase().includes(lowerQuery)) return 'description';
+    
+    return 'fuzzy';
+  } catch (error) {
+    console.error('Error determining match type:', error);
+    return 'fuzzy';
+  }
+};
+
+export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const [query, setQuery] = useState('');
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
+  const popularSearches = [
+    { term: 'Fashion Week', icon: <Crown className="w-3 h-3" /> },
+    { term: 'Editorial', icon: <Star className="w-3 h-3" /> },
+    { term: 'Luxury', icon: <Diamond className="w-3 h-3" /> },
+    { term: 'Haute Couture', icon: <Sparkles className="w-3 h-3" /> },
+    { term: 'Runway', icon: <TrendingUp className="w-3 h-3" /> }
+  ];
+
+  const searchResults = useMemo(() => {
+    if (query.length < 1) return [];
+    
+    setIsSearching(true);
+    
+    try {
+      // Get data with better error handling
+      const allVideos = (getVideos() || []).filter(v => v && v.id && v.status === 'Published');
+      const allGalleries = (getGalleries() || []).filter(g => g && g.id && g.status === 'Published');
+      const allModels = (getModels() || []).filter(m => m && m.id);
+
+      const searchableItems: SearchResult[] = [];
+
+      // Process models safely
+      allModels.forEach(model => {
+        if (!model || !model.id) return;
+        try {
+          const relevance = calculateRelevance(model, query, 'model');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...model,
+              resultType: 'model',
+              relevanceScore: relevance,
+              matchType: getMatchType(model, query, 'model')
+            });
+          }
+        } catch (error) {
+          console.error('Error processing model:', model.id, error);
+        }
+      });
+
+      // Process videos safely
+      allVideos.forEach(video => {
+        if (!video || !video.id) return;
+        try {
+          const relevance = calculateRelevance(video, query, 'video');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...video,
+              resultType: 'video',
+              relevanceScore: relevance,
+              matchType: getMatchType(video, query, 'video')
+            });
+          }
+        } catch (error) {
+          console.error('Error processing video:', video.id, error);
+        }
+      });
+
+      // Process galleries safely
+      allGalleries.forEach(gallery => {
+        if (!gallery || !gallery.id) return;
+        try {
+          const relevance = calculateRelevance(gallery, query, 'gallery');
+          if (relevance > 0) {
+            searchableItems.push({
+              ...gallery,
+              resultType: 'gallery',
+              relevanceScore: relevance,
+              matchType: getMatchType(gallery, query, 'gallery')
+            });
+          }
+        } catch (error) {
+          console.error('Error processing gallery:', gallery.id, error);
+        }
+      });
+
+      const sorted = searchableItems
+        .sort((a, b) => b.relevanceScore - a.relevanceScore)
+        .slice(0, 12); // Limit to 12 results for better UX
+      
+      setTimeout(() => setIsSearching(false), 300);
+      return sorted;
+    } catch (error) {
+      console.error('Search error:', error);
+      setIsSearching(false);
+      return [];
+    }
+  }, [query]);
+
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const recent = localStorage.getItem('luxury_recent_searches');
-      if (recent) {
-        setRecentSearches(JSON.parse(recent));
-      }
-    }
-  }, []);
+    setResults(searchResults);
+  }, [searchResults]);
 
-  const saveRecentSearch = (searchQuery: string) => {
-    if (typeof window !== 'undefined' || !searchQuery.trim()) return;
-
-    const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
-    setRecentSearches(updated);
-    localStorage.setItem('luxury_recent_searches', JSON.stringify(updated));
+  const handleSelect = (url: string) => {
+    router.push(url);
+    onOpenChange(false);
+    setQuery('');
   };
 
-  const allContent = useMemo(() => {
-    const videos = getVideos().filter(v => v.status === 'Published').map(v => ({ ...v, type: 'video' as const }));
-    const galleries = getGalleries().filter(g => g.status === 'Published').map(g => ({ ...g, type: 'gallery' as const }));
-    const models = getModels().map(m => ({ ...m, type: 'model' as const }));
-    return [...videos, ...galleries, ...models];
-  }, []);
-
-  const filteredContent = useMemo(() => {
-    if (!query.trim()) return [];
-
-    const queryLower = query.toLowerCase();
-
-    // Score and sort results by relevance
-    const scored = allContent
-      .map(item => ({
-        ...item,
-        score: calculateRelevanceScore(item, queryLower, item.type)
-      }))
-      .filter(item => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 20);
-
-    return scored;
-  }, [query, allContent]);
-
-  const handleSelect = (item: any) => {
-    saveRecentSearch(query);
-
-    if (item.type === 'video') {
-      router.push(`/videos/${item.id}`);
-    } else if (item.type === 'gallery') {
-      router.push(`/galleries/${item.id}`);
-    } else if (item.type === 'model') {
-      router.push(`/models/${item.id}`);
-    }
-    onClose();
+  const handleViewAllResults = () => {
+    router.push(`/search?q=${encodeURIComponent(query)}`);
+    onOpenChange(false);
+    setQuery('');
   };
 
-  const handleQuickSearch = (searchTerm: string) => {
-    setQuery(searchTerm);
-  };
-
-  const getIcon = (type: string) => {
+  const getResultIcon = (type: SearchResult['resultType']) => {
     switch (type) {
-      case 'video': return <FileVideo className="w-4 h-4 text-primary" />;
-      case 'gallery': return <ImageIcon className="w-4 h-4 text-accent" />;
-      case 'model': return <User className="w-4 h-4 text-secondary" />;
-      default: return null;
+      case 'model': return <User className="h-4 w-4" />;
+      case 'video': return <FileVideo className="h-4 w-4" />;
+      case 'gallery': return <ImageIcon className="h-4 w-4" />;
     }
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'video': return 'bg-primary/20 text-primary';
-      case 'gallery': return 'bg-accent/20 text-accent';
-      case 'model': return 'bg-secondary/20 text-secondary';
-      default: return 'bg-muted';
+  const getMatchBadgeStyle = (matchType: SearchResult['matchType']) => {
+    switch (matchType) {
+      case 'exact': return 'bg-luxury-gradient text-black font-bold border-0';
+      case 'tag': return 'bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0';
+      case 'description': return 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white border-0';
+      default: return 'bg-gradient-to-r from-gray-600 to-gray-700 text-white border-0';
     }
   };
 
   return (
-    <CommandDialog open={isOpen} onOpenChange={onClose} className="luxury-modal max-w-2xl">
+    <CommandDialog 
+      open={open} 
+      onOpenChange={onOpenChange}
+      className="bg-black/98 backdrop-blur-xl border-2 border-primary/30 shadow-luxury max-w-3xl"
+    >
       <VisuallyHidden.Root>
-        <DialogTitle>Luxury Content Search</DialogTitle>
+        <DialogTitle>Search Luxury Content</DialogTitle>
         <DialogDescription>
-          Advanced search through our exclusive collection of videos, galleries, and models
+          Search for models, videos, galleries and luxury fashion content from our premium collection
         </DialogDescription>
       </VisuallyHidden.Root>
-
-      <div className="flex items-center border-b px-4 py-3 luxury-gradient-border">
-        <div className="relative flex-1">
-          <Sparkles className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <CommandInput
-            placeholder="Search our luxury collection..."
-            value={query}
-            onValueChange={setQuery}
-            className="pl-10 h-12 text-base bg-transparent border-none focus:ring-0 placeholder:text-muted-foreground/70"
-          />
-        </div>
-        {query && (
-          <Badge className="ml-2 bg-luxury-gradient text-black font-semibold">
-            {filteredContent.length} results
-          </Badge>
+      
+      <div className="relative border-b border-primary/20 bg-luxury-dark-gradient">
+        <CommandInput 
+          placeholder="Search for luxury content, elite models, premium collections..."
+          value={query}
+          onValueChange={setQuery}
+          className="text-white placeholder:text-gray-400 border-0 bg-transparent text-lg py-8 px-8 focus:placeholder:text-gray-500 transition-colors font-medium"
+        />
+        
+        {isSearching && (
+          <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary/30 border-t-primary"></div>
+              <div className="absolute inset-0 animate-ping rounded-full h-6 w-6 border-2 border-primary/20"></div>
+            </div>
+          </div>
         )}
       </div>
-
-      <CommandList className="max-h-[500px] overflow-y-auto">
-        {query.trim() ? (
-          <>
-            {filteredContent.length === 0 ? (
-              <CommandEmpty className="py-12 text-center">
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center luxury-pulse">
-                    <Sparkles className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-medium mb-2">No results found</p>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      No content matches "{query}". Try adjusting your search terms.
-                    </p>
-                    <div className="flex gap-2 justify-center">
-                      <Button variant="outline" size="sm" onClick={() => setQuery('fashion')}>
-                        Try "fashion"
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => setQuery('editorial')}>
-                        Try "editorial"
-                      </Button>
-                    </div>
-                  </div>
+      
+      <CommandList className="bg-luxury-dark-gradient backdrop-blur-sm max-h-[500px]">
+        <CommandEmpty className="py-16 text-center">
+          {query.length > 1 ? (
+            <div className="space-y-6">
+              <div className="text-gray-300">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
+                  <Sparkles className="h-10 w-10 text-black" />
                 </div>
-              </CommandEmpty>
-            ) : (
-              <div className="p-2">
-                {['model', 'video', 'gallery'].map(type => {
-                  const items = filteredContent.filter(item => item.type === type);
-                  if (items.length === 0) return null;
-
-                  return (
-                    <CommandGroup key={type} heading={
-                      <div className="flex items-center gap-3 px-2 py-2">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${getTypeColor(type)}`}>
-                          {getIcon(type)}
-                        </div>
-                        <span className="text-sm font-semibold uppercase tracking-wider">
-                          {type === 'video' ? 'Premium Videos' : type === 'gallery' ? 'Exclusive Galleries' : 'Elite Models'}
-                        </span>
-                        <Badge variant="secondary" className="text-xs">
-                          {items.length}
-                        </Badge>
-                        {items.some(item => item.score > 80) && (
-                          <Badge className="text-xs bg-luxury-gradient text-black">
-                            <Star className="w-3 h-3 mr-1" />
-                            Top Matches
-                          </Badge>
-                        )}
-                      </div>
-                    }>
-                      {items.map((item: any) => (
-                        <CommandItem
-                          key={`${item.type}-${item.id}`}
-                          onSelect={() => handleSelect(item)}
-                          className="flex items-center gap-4 p-4 rounded-xl cursor-pointer hover:bg-muted/60 transition-all duration-300 luxury-fade-in group"
-                        >
-                          <div className="relative">
-                            {item.type === 'model' ? (
-                              <Avatar className="w-14 h-14 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
-                                <AvatarImage src={item.image} alt={item.name} />
-                                <AvatarFallback className="bg-luxury-gradient text-black font-bold">
-                                  {item.name?.charAt(0) || 'M'}
-                                </AvatarFallback>
-                              </Avatar>
-                            ) : (
-                              <div className="w-14 h-14 relative rounded-lg overflow-hidden ring-2 ring-accent/20 group-hover:ring-accent/40 transition-all">
-                                <Image
-                                  src={item.image}
-                                  alt={item.title || item.name || ''}
-                                  fill
-                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                  sizes="56px"
-                                />
-                              </div>
-                            )}
-                            <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 border-background flex items-center justify-center ${getTypeColor(item.type)}`}>
-                              {getIcon(item.type)}
-                            </div>
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="font-semibold text-foreground group-hover:text-primary transition-colors truncate">
-                                {item.type === 'model' ? item.name : item.title}
-                              </p>
-                              {item.score > 90 && (
-                                <Badge className="bg-luxury-gradient text-black text-xs px-2">
-                                  <Crown className="w-3 h-3 mr-1" />
-                                  Perfect Match
-                                </Badge>
-                              )}
-                              {item.isFeatured && (
-                                <Star className="w-4 h-4 text-primary fill-primary" />
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground truncate mb-2">
-                              {item.description}
-                            </p>
-
-                            {item.type !== 'model' && (
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                {item.date && (
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    {new Date(item.date).toLocaleDateString()}
-                                  </div>
-                                )}
-                                {item.keywords && (
-                                  <div className="flex items-center gap-1">
-                                    <Hash className="w-3 h-3" />
-                                    {item.keywords.slice(0, 2).join(', ')}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="text-right">
-                            {item.type === 'video' && item.duration && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                                <Clock className="w-3 h-3" />
-                                {item.duration}m
-                              </div>
-                            )}
-                            <div className="text-xs font-medium text-primary">
-                              {Math.round(item.score)}% match
-                            </div>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  );
-                })}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="p-8 text-center">
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-24 h-24 bg-luxury-gradient rounded-full flex items-center justify-center luxury-pulse">
-                <Sparkles className="w-10 h-10 text-black" />
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold mb-2">Discover Luxury Content</h3>
-                <p className="text-muted-foreground mb-6 max-w-md">
-                  Search through our exclusive collection of premium videos, stunning galleries, and elite models
+                <h3 className="text-xl font-semibold mb-3">No matches found</h3>
+                <p className="text-lg mb-2">for "{query}"</p>
+                <p className="text-sm text-gray-500 max-w-md mx-auto">
+                  Try refining your search terms or explore our curated collections
                 </p>
               </div>
-
-              <div className="space-y-4 w-full max-w-md">
+              
+              <div className="flex justify-center">
+                <button 
+                  onClick={handleViewAllResults}
+                  className="btn-luxury px-6 py-3 text-sm font-bold"
+                >
+                  Advanced Search
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <div className="text-gray-300">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-luxury-gradient flex items-center justify-center">
+                  <Filter className="h-10 w-10 text-black" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">Discover Premium Content</h3>
+                <p className="text-lg mb-2">Search our exclusive collection</p>
+                <p className="text-sm text-gray-500 max-w-md mx-auto">
+                  Find models, videos, galleries, and luxury fashion content
+                </p>
+              </div>
+              
+              {popularSearches.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
-                    Popular Searches
-                  </h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Fashion', 'Portrait', 'Editorial', 'Runway', 'Beauty', 'Couture'].map(term => (
-                      <Button 
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">Popular Searches</span>
+                  </div>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    {popularSearches.map(({ term, icon }) => (
+                      <Badge 
                         key={term}
                         variant="outline" 
-                        size="sm" 
-                        onClick={() => handleQuickSearch(term.toLowerCase())}
-                        className="justify-start hover:bg-luxury-gradient hover:text-black transition-all"
+                        className="cursor-pointer hover:bg-primary/20 border-primary/40 text-primary/90 hover:text-primary transition-all duration-300 hover:scale-105 px-4 py-2 text-sm font-medium"
+                        onClick={() => setQuery(term)}
                       >
-                        {term}
-                      </Button>
+                        {icon}
+                        <span className="ml-2">{term}</span>
+                      </Badge>
                     ))}
                   </div>
                 </div>
-
-                {recentSearches.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      Recent Searches
-                    </h4>
-                    <div className="space-y-1">
-                      {recentSearches.slice(0, 3).map((search, idx) => (
-                        <Button
-                          key={idx}
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setQuery(search)}
-                          className="w-full justify-start text-muted-foreground hover:text-foreground"
+              )}
+            </div>
+          )}
+        </CommandEmpty>
+        
+        {results.length > 0 && (
+          <CommandGroup 
+            heading={
+              <div className="flex items-center justify-between px-4 py-3 bg-primary/10 border-b border-primary/20">
+                <div className="flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-primary" />
+                  <span className="text-primary font-semibold">Search Results</span>
+                  <Badge className="bg-primary/20 text-primary border-0 text-xs">
+                    {results.length}
+                  </Badge>
+                </div>
+                <button 
+                  onClick={handleViewAllResults}
+                  className="text-xs text-gray-400 hover:text-primary transition-colors font-medium px-3 py-1 rounded-md hover:bg-primary/10"
+                >
+                  View All Results
+                </button>
+              </div>
+            }
+          >
+            {results.map((item, index) => {
+              const url = item.resultType === 'model' 
+                ? `/models/${item.id}` 
+                : `/${item.resultType}s/${item.id}`;
+              
+              return (
+                <CommandItem 
+                  key={`${item.resultType}-${item.id}-${index}`} 
+                  onSelect={() => handleSelect(url)}
+                  className="px-6 py-4 hover:bg-primary/10 cursor-pointer group transition-all duration-300 border-b border-gray-800/30 last:border-0"
+                >
+                  <div className="flex items-center space-x-4 w-full">
+                    <div className="relative flex-shrink-0">
+                      {item.resultType === 'model' ? (
+                        <Avatar className="w-16 h-16 border-2 border-primary/40 group-hover:border-primary/70 transition-all duration-300 ring-2 ring-transparent group-hover:ring-primary/20">
+                          <AvatarImage 
+                            src={item.image} 
+                            className="object-cover" 
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/api/placeholder/64/64';
+                            }}
+                          />
+                          <AvatarFallback className="bg-luxury-gradient text-black font-semibold text-lg">
+                            <User className="h-8 w-8" />
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-primary/40 group-hover:border-primary/70 transition-all duration-300">
+                          <Image 
+                            src={item.image} 
+                            alt={item.title || item.name || 'Content'} 
+                            width={64} 
+                            height={64} 
+                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/api/placeholder/64/64';
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      <div className="absolute -bottom-1 -right-1 bg-luxury-gradient rounded-full p-1.5 border-2 border-black">
+                        {getResultIcon(item.resultType)}
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="font-semibold text-white truncate group-hover:text-primary transition-colors text-lg">
+                          {item.resultType === 'model' ? item.name : item.title}
+                        </h4>
+                        <Badge 
+                          className={`text-xs px-3 py-1 font-semibold ${getMatchBadgeStyle(item.matchType)}`}
                         >
-                          <Clock className="w-3 h-3 mr-2" />
-                          {search}
-                        </Button>
-                      ))}
+                          {item.matchType === 'exact' ? 'PERFECT' : 
+                           item.matchType === 'tag' ? 'TAG' : 
+                           item.matchType === 'description' ? 'DESC' : 'MATCH'}
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-sm text-gray-400 truncate mb-2 leading-relaxed">
+                        {item.description || (item.resultType === 'model' ? item.famousFor : 'Premium luxury content')}
+                      </p>
+                      
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="capitalize font-semibold text-primary bg-primary/10 px-2 py-1 rounded-md">
+                          {item.resultType}
+                        </span>
+                        {item.keywords && Array.isArray(item.keywords) && item.keywords.length > 0 && (
+                          <>
+                            <Separator orientation="vertical" className="h-4 bg-gray-600" />
+                            <span className="truncate text-gray-500">
+                              {item.keywords.slice(0, 2).join(', ')}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-luxury-gradient rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse"></div>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
         )}
       </CommandList>
     </CommandDialog>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -49,11 +48,11 @@ function HomePageSkeleton() {
     )
 }
 
-const StatsCard = ({ icon, title, value, description }: { 
-  icon: React.ReactNode, 
-  title: string, 
-  value: string, 
-  description: string 
+const StatsCard = ({ icon, title, value, description }: {
+  icon: React.ReactNode,
+  title: string,
+  value: string,
+  description: string
 }) => (
   <Card className="luxury-card group">
     <CardContent className="p-6 text-center">
@@ -67,11 +66,11 @@ const StatsCard = ({ icon, title, value, description }: {
   </Card>
 );
 
-const FeatureCard = ({ icon, title, description, badge }: { 
-  icon: React.ReactNode, 
-  title: string, 
+const FeatureCard = ({ icon, title, description, badge }: {
+  icon: React.ReactNode,
+  title: string,
   description: string,
-  badge?: string 
+  badge?: string
 }) => (
   <Card className="luxury-card group relative overflow-hidden">
     <CardContent className="p-8 text-center relative z-10">
@@ -107,26 +106,26 @@ export default function Home() {
         }
         return shuffled;
     };
-    
+
     const allVideos = getVideos();
     const allModels = getModels();
     const allGalleries = getGalleries();
-    
+
     const shuffledModels = shuffleArray(allModels);
     const shuffledGalleries = shuffleArray(allGalleries.filter(g => g.status === 'Published'));
 
     const publishedVideos = allVideos.filter(v => v.status === 'Published');
-    
+
     setFeaturedVideos(publishedVideos.filter(v => v.isFeatured));
-    
+
     const nonFeaturedVideos = publishedVideos
         .filter(v => !v.isFeatured)
         .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     setTopVideos(nonFeaturedVideos.slice(0, 3));
-    setLatestVideos(nonFeaturedVideos.slice(3, 12)); 
+    setLatestVideos(nonFeaturedVideos.slice(3, 12));
     setLatestGalleries(shuffledGalleries.slice(0, 12));
-    setTopModels(shuffledModels.slice(0, 12)); 
+    setTopModels(shuffledModels.slice(0, 12));
     setLoading(false);
   }, []);
 
@@ -159,27 +158,27 @@ export default function Home() {
             Join the world's most exclusive fashion and modeling platform
           </p>
         </div>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <StatsCard 
+          <StatsCard
             icon={<Crown className="w-8 h-8 text-black" />}
             title="Elite Models"
             value={`${topModels.length}+`}
             description="Verified professionals"
           />
-          <StatsCard 
+          <StatsCard
             icon={<Play className="w-8 h-8 text-black" />}
             title="Premium Videos"
             value={`${featuredVideos.length + latestVideos.length}+`}
             description="High-quality content"
           />
-          <StatsCard 
+          <StatsCard
             icon={<ImageIcon className="w-8 h-8 text-black" />}
             title="Exclusive Galleries"
             value={`${latestGalleries.length}+`}
             description="Curated collections"
           />
-          <StatsCard 
+          <StatsCard
             icon={<Award className="w-8 h-8 text-black" />}
             title="Premium Features"
             value="100%"
@@ -202,7 +201,7 @@ export default function Home() {
                     Hand-picked premium content from our top creators
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                   <div className="lg:col-span-1 luxury-fade-in">
                     {topVideos[0] && <ContentCard content={topVideos[0]} type="video" priority={true}/>}
@@ -220,50 +219,35 @@ export default function Home() {
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
               <Diamond className="w-4 h-4 mr-2" />
-              LUXURY FEATURES
+              FEATURED MODEL
             </Badge>
-            <h2 className="mb-6">Premium Experience</h2>
+            <h2 className="mb-6">Discover Our Talents</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover what makes our platform the choice of luxury brands worldwide
+              Get to know some of our exclusive models.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard 
-              icon={<Eye className="w-10 h-10 text-primary"/>}
-              title="4K Ultra HD"
-              description="Crystal clear visuals with professional-grade quality and cinematic excellence."
-              badge="NEW"
-            />
-            <FeatureCard 
-              icon={<Heart className="w-10 h-10 text-primary"/>}
-              title="Curated Content"
-              description="Every piece of content is carefully selected and reviewed by our luxury standards team."
-            />
-            <FeatureCard 
-              icon={<Sparkles className="w-10 h-10 text-primary"/>}
-              title="Exclusive Access"
-              description="Premium members get early access to new content and exclusive behind-the-scenes material."
-              badge="VIP"
-            />
-            <FeatureCard 
-              icon={<TrendingUp className="w-10 h-10 text-primary"/>}
-              title="Trending Now"
-              description="Stay ahead with real-time trending content and personalized recommendations."
-            />
-            <FeatureCard 
-              icon={<Crown className="w-10 h-10 text-primary"/>}
-              title="Elite Network"
-              description="Connect with top models, photographers, and industry professionals."
-            />
-            <FeatureCard 
-              icon={<Award className="w-10 h-10 text-primary"/>}
-              title="Premium Support"
-              description="24/7 concierge-level support with dedicated account management."
-            />
-          </div>
+
+          {topModels.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div className="md:col-span-1">
+                <h3 className="text-3xl font-bold mb-4">{topModels[0].name}</h3>
+                <p className="text-muted-foreground leading-relaxed mb-6">
+                  {topModels[0].bio ? topModels[0].bio.substring(0, 150) + '...' : 'No bio available.'}
+                </p>
+                <Button asChild className="btn-luxury">
+                  <Link href={`/models/${topModels[0].id}`}>View Profile</Link>
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {topModels[0].images && topModels[0].images.slice(0, 4).map((img, index) => (
+                  <img key={index} src={img} alt={`${topModels[0].name} - ${index + 1}`} className="aspect-square object-cover rounded-md" />
+                ))}
+                {!topModels[0].images && <p>No images available.</p>}
+              </div>
+            </div>
+          )}
         </section>
-        
+
         {/* Galleries Section */}
         {latestGalleries.length > 0 && (
             <section className="container mx-auto px-4">
@@ -277,7 +261,7 @@ export default function Home() {
                     Explore our collection of stunning photography from world-class artists
                   </p>
                 </div>
-                
+
                  <Carousel
                   opts={{
                     align: "start",
@@ -295,13 +279,13 @@ export default function Home() {
                   <CarouselPrevious className="ml-14 luxury-glow"/>
                   <CarouselNext className="mr-14 luxury-glow"/>
                 </Carousel>
-                
+
                   <div className="flex justify-center mt-12">
                       <Button asChild className="btn-luxury px-8 py-3 text-lg">
                           <Link href="/galleries">Explore All Galleries</Link>
                       </Button>
                   </div>
-            </section>      
+            </section>
         )}
 
         {/* Models Section */}
@@ -317,7 +301,7 @@ export default function Home() {
                       Meet our exclusive roster of international models and fashion icons
                     </p>
                   </div>
-                  
+
                   <Carousel
                     opts={{
                         align: "start",
@@ -357,7 +341,7 @@ export default function Home() {
                     The newest additions to our premium video collection
                   </p>
                 </div>
-                
+
                 <Carousel
                   opts={{
                     align: "start",
@@ -375,7 +359,7 @@ export default function Home() {
                   <CarouselPrevious className="ml-14 luxury-glow"/>
                   <CarouselNext className="mr-14 luxury-glow"/>
                 </Carousel>
-                
+
                 <div className="text-center mt-12">
                     <Button asChild className="btn-luxury px-8 py-3 text-lg">
                         <Link href="/videos">View All Videos</Link>
