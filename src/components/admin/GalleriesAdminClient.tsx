@@ -77,7 +77,7 @@ export function GalleriesAdminClient() {
               {galleries.map((gallery) => (
                 <div key={gallery.id} className="flex items-center justify-between p-4 border rounded-lg w-full min-w-0">
                   <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    {(gallery.images?.length || 0) > 0 && (
+                    {(gallery.images && gallery.images.length > 0) && (
                       <img
                         src={gallery.images[0].url}
                         alt={gallery.title}
@@ -127,7 +127,7 @@ export function GalleriesAdminClient() {
               <div key={gallery.id} className="mobile-card w-full">
                 <div className="mobile-card-header">
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    {(gallery.images?.length || 0) > 0 && (
+                    {(gallery.images && gallery.images.length > 0) && (
                       <img
                         src={gallery.images[0].url}
                         alt={gallery.title}
