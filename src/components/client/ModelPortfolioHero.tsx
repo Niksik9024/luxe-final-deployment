@@ -69,13 +69,6 @@ export default function ModelPortfolioHero({ modelProfile, className = "" }: Mod
           <h1 data-content={modelProfile.name.toUpperCase()}>
             {modelProfile.name.toUpperCase()}
           </h1>
-          <div className="author">
-            <h2>{modelProfile.name}</h2>
-            <p><b>{modelProfile.category}</b></p>
-            <p>
-              {modelProfile.description || "Professional model portfolio"}
-            </p>
-          </div>
           <div className="model"></div>
         </div>
       </div>

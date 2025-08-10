@@ -10,7 +10,8 @@ import { useSearchParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Users } from 'lucide-react';
 import ModelPortfolioHero from '@/components/client/ModelPortfolioHero';
-import { sampleModelData } from '@/lib/hero-sample-data';
+import { sampleModelData, type ModelProfileWithImages } from '@/lib/hero-sample-data';
+import { getModelProfiles } from '@/lib/model-profile-storage';
 
 const MODELS_PER_PAGE = 18;
 
@@ -36,16 +37,14 @@ function ModelsContent() {
     const [models, setModels] = useState<Model[]>([]);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [heroModel, setHeroModel] = useState(sampleModelData);
+    const [heroModel, setHeroModel] = useState<ModelProfileWithImages>(sampleModelData);
 
     useEffect(() => {
         setModels(getModels());
 
         // Try to get a random model profile, fallback to sample data
         const randomProfile = getRandomModelProfile();
-        if (randomProfile) {
-            setHeroModel(randomProfile);
-        }
+        setHeroModel(randomProfile);
 
         setLoading(false);
     }, []);
@@ -78,13 +77,13 @@ function ModelsContent() {
 }
 
 // Helper function to get a random model profile
-function getRandomModelProfile(): Model | undefined {
-    const allModels = getModels();
-    if (allModels.length === 0) {
-        return undefined;
+function getRandomModelProfile(): ModelProfileWithImages {
+    const modelProfiles = getModelProfiles();
+    if (modelProfiles.length === 0) {
+        return sampleModelData;
     }
-    const randomIndex = Math.floor(Math.random() * allModels.length);
-    return allModels[randomIndex];
+    const randomIndex = Math.floor(Math.random() * modelProfiles.length);
+    return modelProfiles[randomIndex];
 }
 
 
@@ -95,7 +94,7 @@ export default function ModelsPage() {
     <div className="w-full-safe max-w-screen-safe">
       {/* Hero Section */}
       <ModelPortfolioHero
-        modelProfile={sampleModelData}
+        modelProfile={heroModel}
         className="w-full"
       />
 
