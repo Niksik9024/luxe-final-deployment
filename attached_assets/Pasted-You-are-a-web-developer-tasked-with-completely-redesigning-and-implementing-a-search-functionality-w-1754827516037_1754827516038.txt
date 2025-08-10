@@ -1,0 +1,29 @@
+You are a web developer tasked with completely redesigning and implementing a search functionality with improved UI/UX and with better working functionality. Please address the following specific requirements:
+
+**Search Functionality Requirements:**
+1. **Complete Redesign**: Replace the existing search system with a new, modern search interface matching with overall ui ux 
+2. **Instant Results Display**: Implement real-time search results that appear immediately upon typing, without requiring a separate results page
+3. **Search Interface**: Create an intuitive search bar with proper placeholder text, search icons, and clear visual hierarchy
+
+**UI/UX Improvements:**
+1. **Results Display**: Show search results in an overlay, dropdown, or inline format directly below/near the search input
+2. **Visual Design**: Ensure the search interface follows modern design principles with proper spacing, typography, and visual feedback
+3. **User Experience**: Include loading states, empty states, and error handling for search queries
+
+**Responsive Design Requirements:**
+1. **Mobile Optimization**: Ensure the search functionality works seamlessly across all device sizes (mobile, tablet, desktop)
+2. **Touch-Friendly**: Make search elements appropriately sized for touch interactions on mobile devices
+3. **Adaptive Layout**: Adjust search results display format based on screen size
+
+**Navigation Menu Fix:**
+1. **Hamburger Menu Font Size**: Reduce the font size in the hamburger menu to appropriate proportions
+2. **Menu Styling**: Ensure consistent typography hierarchy throughout the navigation
+
+**Deliverables:**
+- Provide complete HTML, CSS, and JavaScript code
+- Include responsive breakpoints and media queries
+- Demonstrate the search functionality with sample data
+- Show before/after comparison if possible
+- Ensure cross-browser compatibility
+
+Please implement a fully functional solution with clean, maintainable code and detailed comments explaining the key features.
