@@ -1,0 +1,56 @@
+**Website Audit & Homepage Redesign Project Brief**
+
+You are tasked with conducting a comprehensive website audit and implementing a homepage redesign. Follow this structured approach:
+
+## Phase 1: Pre-Redesign Website Audit (COMPLETE BEFORE ANY HOMEPAGE CHANGES)
+
+### Critical Requirements:
+1. **Full Site Functionality Check:**
+   - Test every page's refresh behavior across all browsers
+   - Document any data loss, content loading errors, or layout shifts on refresh
+   - Ensure all pages load consistently and correctly every time
+
+2. **Mobile Responsiveness Audit:**
+   - Test all pages on mobile devices and various screen sizes
+   - Identify and fix any responsive design issues
+   - Verify touch interactions work properly on mobile
+
+3. **Bug & Error Detection:**
+   - Check for JavaScript errors in browser console
+   - Test all interactive elements (forms, buttons, navigation)
+   - Verify loading speeds and identify performance bottlenecks
+   - Fix any broken links or missing resources
+
+**MANDATORY:** Complete all fixes and verify the website is fully functional with zero issues before proceeding to Phase 2. Request approval before making any homepage changes.
+
+## Phase 2: Homepage Redesign (Only After Phase 1 Approval)
+
+### Design Guidelines:
+1. **Layout Simplification:**
+   - Reduce visual clutter by removing non-essential elements
+   - Create more white space for improved readability
+   - Streamline the number of sections displayed
+
+2. **Visual Consistency Enhancement:**
+   - Establish and apply a unified color palette site-wide
+   - Standardize typography (font families, sizes, weights)
+   - Implement consistent spacing and alignment across all components
+   - Ensure design elements follow the same visual language
+
+3. **Content Prioritization:**
+   - Position the most critical information prominently
+   - Remove visual distractions that compete with key messages
+   - Create clear visual hierarchy through typography and spacing
+
+### Specific Restrictions:
+- **DO NOT modify the hero carousel functionality or structure**
+- **ONLY adjust font-related properties** (size, weight, color, family) within the hero carousel
+- Maintain all existing carousel features and behavior
+
+## Deliverables:
+1. Detailed audit report documenting all issues found and fixed
+2. Before/after screenshots of the homepage redesign
+3. Confirmation that all changes maintain mobile responsiveness
+4. Final testing report confirming zero bugs or issues remain
+
+**Remember:** No homepage modifications until you receive explicit approval after completing Phase 1.  
