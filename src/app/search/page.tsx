@@ -14,7 +14,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, Star, Crown, Sparkles, X, SlidersHorizontal, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AdvancedFilters, FilterOptions } from '@/components/shared/AdvancedFilters';
 
 type SearchResult = (Video | Gallery | Model) & { 
   resultType: 'video' | 'gallery' | 'model';
@@ -22,77 +21,54 @@ type SearchResult = (Video | Gallery | Model) & {
 };
 
 const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' | 'model'): number => {
-  if (!query || !item) return 0;
+  if (!query) return 0;
   
-  const lowerQuery = query.toLowerCase().trim();
+  const lowerQuery = query.toLowerCase();
   let score = 0;
   
   try {
-    // Safe property access with better fallbacks
-    const title = String(item?.title || '').toLowerCase();
-    const name = String(item?.name || '').toLowerCase();
-    const description = String(item?.description || '').toLowerCase();
+    // Safe property access
+    const title = item?.title || '';
+    const name = item?.name || '';
+    const description = item?.description || '';
     const keywords = Array.isArray(item?.keywords) ? item.keywords : [];
-    const famousFor = String(item?.famousFor || '').toLowerCase();
+    const famousFor = item?.famousFor || '';
 
-    // Exact matches get highest priority
-    const searchText = type === 'model' ? name : title;
-    if (searchText === lowerQuery) {
-      score += 200;
-    } else if (searchText.startsWith(lowerQuery)) {
-      score += 150;
-    } else if (searchText.includes(lowerQuery)) {
+    // Primary title/name matches
+    if (type === 'model' && name.toLowerCase().includes(lowerQuery)) {
+      score += 100;
+    } else if ((type === 'video' || type === 'gallery') && title.toLowerCase().includes(lowerQuery)) {
       score += 100;
     }
-
-    // Multi-word search support
-    const queryWords = lowerQuery.split(/\s+/).filter(w => w.length > 0);
-    if (queryWords.length > 1) {
-      const matchedWords = queryWords.filter(word => 
-        searchText.includes(word) || description.includes(word)
-      );
-      score += (matchedWords.length / queryWords.length) * 50;
-    }
     
-    // Keyword matches with better scoring
+    // Keyword matches
     if (keywords.length > 0) {
-      const keywordMatches = keywords.filter((k: any) => {
-        const keyword = String(k || '').toLowerCase();
-        return keyword && (
-          keyword === lowerQuery || 
-          keyword.includes(lowerQuery) ||
-          lowerQuery.includes(keyword)
-        );
-      });
-      score += keywordMatches.length * 40;
+      const keywordMatch = keywords.some((k: string) => 
+        k && typeof k === 'string' && k.toLowerCase().includes(lowerQuery)
+      );
+      if (keywordMatch) score += 80;
     }
     
     // Description matches
-    if (description.includes(lowerQuery)) {
-      score += 30;
+    if (description && description.toLowerCase().includes(lowerQuery)) {
+      score += 60;
     }
     
     // Model-specific matches
-    if (type === 'model' && famousFor.includes(lowerQuery)) {
-      score += 35;
+    if (type === 'model' && famousFor && famousFor.toLowerCase().includes(lowerQuery)) {
+      score += 70;
     }
     
     // Featured content bonus
     if (type === 'video' && item?.isFeatured) {
-      score += 15;
+      score += 20;
     }
-
-    // Length penalty for very short queries matching long content
-    if (lowerQuery.length < 3 && searchText.length > 20) {
-      score *= 0.8;
-    }
-    
   } catch (error) {
-    console.error('Error calculating relevance for:', item?.id, error);
+    console.error('Error calculating relevance:', error);
     return 0;
   }
   
-  return Math.max(0, score);
+  return score;
 };
 
 function SearchResultsContent() {
@@ -105,21 +81,9 @@ function SearchResultsContent() {
   const [activeTab, setActiveTab] = useState('all');
   const [sortBy, setSortBy] = useState('relevance');
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
-  const [advancedFilters, setAdvancedFilters] = useState<FilterOptions>({
-    sortBy: 'relevance',
-    dateRange: 'all',
-    category: '',
-    featured: false,
-    minRating: 0,
-    tags: [],
-    searchInDescription: false,
-    contentLength: 'all',
-    quality: 'all'
-  });
 
   const performSearch = async (searchQuery: string) => {
-    const trimmedQuery = searchQuery.trim();
-    if (!trimmedQuery || trimmedQuery.length < 1) {
+    if (!searchQuery.trim()) {
       setResults([]);
       return;
     }
@@ -127,13 +91,12 @@ function SearchResultsContent() {
     setLoading(true);
     
     try {
-      // Debounce search for better UX
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Add a small delay to prevent too rapid searching
+      await new Promise(resolve => setTimeout(resolve, 200));
 
-      // Better data filtering with null checks
-      const allVideos = (getVideos() || []).filter(v => v && v.id && v.status === 'Published');
-      const allGalleries = (getGalleries() || []).filter(g => g && g.id && g.status === 'Published');
-      const allModels = (getModels() || []).filter(m => m && m.id);
+      const allVideos = getVideos().filter(v => v && v.status === 'Published');
+      const allGalleries = getGalleries().filter(g => g && g.status === 'Published');
+      const allModels = getModels().filter(m => m);
 
       const searchableItems: SearchResult[] = [];
 

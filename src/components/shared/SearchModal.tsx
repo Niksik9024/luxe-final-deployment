@@ -133,10 +133,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     setIsSearching(true);
     
     try {
-      // Get data with better error handling
-      const allVideos = (getVideos() || []).filter(v => v && v.id && v.status === 'Published');
-      const allGalleries = (getGalleries() || []).filter(g => g && g.id && g.status === 'Published');
-      const allModels = (getModels() || []).filter(m => m && m.id);
+      const allVideos = getVideos().filter(v => v && v.status === 'Published');
+      const allGalleries = getGalleries().filter(g => g && g.status === 'Published');
+      const allModels = getModels().filter(m => m);
 
       const searchableItems: SearchResult[] = [];
 
