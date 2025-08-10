@@ -157,10 +157,10 @@ export const populateCarouselFromGallery = (modelId: string): ModelImage[] => {
   const carouselImages: ModelImage[] = [];
   let position = 1;
 
-  // Extract up to 10 images from the model's galleries
+  // Extract up to 8 images from the model's galleries
   for (const gallery of modelGalleries) {
     for (const image of gallery.images) {
-      if (position > 10) break;
+      if (position > 8) break;
 
       carouselImages.push({
         id: `carousel-${gallery.id}-${image.id}`,
@@ -172,7 +172,7 @@ export const populateCarouselFromGallery = (modelId: string): ModelImage[] => {
       });
       position++;
     }
-    if (position > 10) break;
+    if (position > 8) break;
   }
 
   return carouselImages;
