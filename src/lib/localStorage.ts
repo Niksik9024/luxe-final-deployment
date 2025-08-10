@@ -87,8 +87,24 @@ export const getVideoById = (id: string) => getVideos().find(v => v.id === id);
 export const setGalleries = (data: Gallery[]) => setItem('galleries', data);
 export const getGalleryById = (id: string) => getGalleries().find(g => g.id === id);
 
-export const getUsers = () => getItem<User[]>('users', []);
-export const setUsers = (data: User[]) => setItem('users', data);
+export const getUsers = (): User[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const users = localStorage.getItem('users');
+    return users ? JSON.parse(users) : [];
+  } catch (error) {
+    console.error('Error parsing users from localStorage:', error);
+    return [];
+  }
+};
+export const setUsers = (users: User[]): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('users', JSON.stringify(users));
+  } catch (error) {
+    console.error('Error saving users to localStorage:', error);
+  }
+};
 export const getUserById = (id: string) => getUsers().find(u => u.id === id);
 export const getUserByEmail = (email: string) => getUsers().find(u => u.email === email);
 

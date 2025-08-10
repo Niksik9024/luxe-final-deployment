@@ -176,15 +176,15 @@ export default function Home() {
   const [topModels, setTopModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Generate dynamic hero content that changes on refresh - moved before early return
+  // Generate dynamic hero content that changes on refresh - moved before any conditional logic
   const heroContentSource = useMemo(() => {
-    if (topModels.length === 0) return [];
+    if (!topModels || topModels.length === 0) return [];
     const shuffledForHero = [...topModels].sort(() => Math.random() - 0.5);
     return shuffledForHero.slice(0, 5).map(m => ({ 
       id: m.id, 
-      image: m.image, 
       name: m.name, 
-      type: 'model' as const 
+      image: m.image, 
+      description: m.description 
     }));
   }, [topModels]);
 
@@ -215,14 +215,14 @@ export default function Home() {
     const shuffledGalleries = shuffleArray(allGalleries.filter(g => g.status === 'Published'), generateDynamicSeed());
 
     const publishedVideos = allVideos.filter(v => v.status === 'Published');
-    
+
     // Shuffle featured videos for dynamic display
     const featuredVideos = shuffleArray(publishedVideos.filter(v => v.isFeatured), generateDynamicSeed());
     setFeaturedVideos(featuredVideos);
 
     // Shuffle non-featured videos and mix with some featured ones for variety
     const nonFeaturedVideos = shuffleArray(publishedVideos.filter(v => !v.isFeatured), generateDynamicSeed());
-    
+
     setTopVideos(nonFeaturedVideos.slice(0, 6));
     setLatestGalleries(shuffledGalleries.slice(0, 12));
     setTopModels(shuffledModels.slice(0, 12)); 
