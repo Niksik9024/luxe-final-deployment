@@ -68,27 +68,32 @@ export default function ModelPage() {
     useEffect(() => {
         if (!id) return;
 
-        const modelData = getModelById(id);
-        if (!modelData) {
+        try {
+            const modelData = getModelById(id);
+            if (!modelData) {
+                setLoading(false);
+                return;
+            }
+
+            const allVideos = getVideos() || [];
+            const allGalleries = getGalleries() || [];
+
+            const videosForModel = allVideos
+                .filter(v => v && v.models && Array.isArray(v.models) && v.models.includes(modelData.name) && v.status === 'Published')
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+            const galleriesForModel = allGalleries
+                .filter(g => g && g.models && Array.isArray(g.models) && g.models.includes(modelData.name) && g.status === 'Published')
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+            setModel(modelData);
+            setModelVideos(videosForModel);
+            setModelGalleries(galleriesForModel);
+        } catch (error) {
+            console.error('Error loading model data:', error);
+        } finally {
             setLoading(false);
-            return;
         }
-
-        const allVideos = getVideos();
-        const allGalleries = getGalleries();
-
-        const videosForModel = allVideos
-            .filter(v => v.models && v.models.includes(modelData.name) && v.status === 'Published')
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-        const galleriesForModel = allGalleries
-            .filter(g => g.models && g.models.includes(modelData.name) && g.status === 'Published')
-            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-        setModel(modelData);
-        setModelVideos(videosForModel);
-        setModelGalleries(galleriesForModel);
-        setLoading(false);
     }, [id]);
 
     if (loading) {

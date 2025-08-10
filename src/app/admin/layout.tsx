@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut } from 'lucide-react';
+import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut, BarChart3, Image } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -199,8 +199,8 @@ const MobileAdminSidebar = () => {
 
         <div className="p-4 border-t border-primary/20 flex-shrink-0">
           <SheetClose asChild>
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="flex items-center gap-3 py-3 px-4 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 border-l-4 border-transparent hover:border-primary text-sm font-medium min-h-[44px] touch-manipulation w-full"
               >
                   <Home className="h-4 w-4 flex-shrink-0" />
@@ -274,11 +274,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
             </header>
 
-            <main className="flex-1 w-full max-w-full overflow-x-hidden">
-                <div className="p-4 sm:p-6 md:p-8 w-full max-w-full">
-                    {children}
-                </div>
+            {/* Main Content */}
+            <main className="flex-1 p-4 md:p-6 lg:p-8 admin-content pb-20 md:pb-6">
+              {children}
             </main>
+
+            {/* Mobile Navigation */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50 px-2 py-2">
+              <div className="flex justify-around items-center">
+                <Button variant="ghost" size="sm" asChild className="flex flex-col items-center justify-center p-2 min-h-[60px] touch-manipulation">
+                  <Link href="/admin" className="text-center">
+                    <BarChart3 className="h-4 w-4 mx-auto mb-1" />
+                    <span className="text-[10px] leading-tight">Dashboard</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild className="flex flex-col items-center justify-center p-2 min-h-[60px] touch-manipulation">
+                  <Link href="/admin/models" className="text-center">
+                    <Users className="h-4 w-4 mx-auto mb-1" />
+                    <span className="text-[10px] leading-tight">Models</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild className="flex flex-col items-center justify-center p-2 min-h-[60px] touch-manipulation">
+                  <Link href="/admin/videos" className="text-center">
+                    <Video className="h-4 w-4 mx-auto mb-1" />
+                    <span className="text-[10px] leading-tight">Videos</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild className="flex flex-col items-center justify-center p-2 min-h-[60px] touch-manipulation">
+                  <Link href="/admin/galleries" className="text-center">
+                    <Image className="h-4 w-4 mx-auto mb-1" />
+                    <span className="text-[10px] leading-tight">Galleries</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild className="flex flex-col items-center justify-center p-2 min-h-[60px] touch-manipulation">
+                  <Link href="/admin/model-profiles" className="text-center">
+                    <Crown className="h-4 w-4 mx-auto mb-1" />
+                    <span className="text-[10px] leading-tight">Profiles</span>
+                  </Link>
+                </Button>
+              </div>
+            </nav>
         </div>
     </div>
   );

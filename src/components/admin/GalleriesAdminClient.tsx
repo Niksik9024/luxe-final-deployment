@@ -74,25 +74,29 @@ export function GalleriesAdminClient() {
           {/* Desktop Table View */}
           <div className="hidden md:block">
             <div className="grid gap-4 w-full">
-              {galleries.map((gallery) => (
+              {galleries.map((gallery) => {
+                const safeImages = Array.isArray(gallery.images) ? gallery.images : [];
+                const hasValidImages = safeImages.length > 0 && safeImages[0] && safeImages[0].url;
+                
+                return (
                 <div key={gallery.id} className="flex items-center justify-between p-4 border rounded-lg w-full min-w-0">
                   <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    {(gallery.images && gallery.images.length > 0) && (
+                    {hasValidImages && (
                       <img
-                        src={gallery.images[0].url}
-                        alt={gallery.title}
+                        src={safeImages[0].url}
+                        alt={gallery.title || 'Gallery image'}
                         className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold truncate">{gallery.title}</h3>
-                      <p className="text-sm text-muted-foreground text-truncate-2 max-w-md">{gallery.description}</p>
+                      <h3 className="font-semibold truncate">{gallery.title || 'Untitled Gallery'}</h3>
+                      <p className="text-sm text-muted-foreground text-truncate-2 max-w-md">{gallery.description || 'No description'}</p>
                       <div className="flex gap-2 mt-2 flex-wrap">
                         <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className="text-xs">
-                          {gallery.status}
+                          {gallery.status || 'Draft'}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
-                          {gallery.images?.length || 0} images
+                          {safeImages.length} images
                         </Badge>
                       </div>
                     </div>
@@ -123,19 +127,23 @@ export function GalleriesAdminClient() {
 
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4 p-4 w-full">
-            {galleries.map((gallery) => (
+            {galleries.map((gallery) => {
+              const safeImages = Array.isArray(gallery.images) ? gallery.images : [];
+              const hasValidImages = safeImages.length > 0 && safeImages[0] && safeImages[0].url;
+              
+              return (
               <div key={gallery.id} className="mobile-card w-full">
                 <div className="mobile-card-header">
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    {(gallery.images && gallery.images.length > 0) && (
+                    {hasValidImages && (
                       <img
-                        src={gallery.images[0].url}
-                        alt={gallery.title}
+                        src={safeImages[0].url}
+                        alt={gallery.title || 'Gallery image'}
                         className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
                       />
                     )}
                     <div className="min-w-0 flex-1">
-                      <h3 className="mobile-card-title">{gallery.title}</h3>
+                      <h3 className="mobile-card-title">{gallery.title || 'Untitled Gallery'}</h3>
                     </div>
                   </div>
                   <div className="mobile-card-actions">
@@ -163,13 +171,13 @@ export function GalleriesAdminClient() {
                 <div className="mobile-card-content">
                   <div className="mobile-card-row">
                     <span className="mobile-card-label">Description:</span>
-                    <span className="mobile-card-value text-truncate-2">{gallery.description}</span>
+                    <span className="mobile-card-value text-truncate-2">{gallery.description || 'No description'}</span>
                   </div>
                   <div className="mobile-card-row">
                     <span className="mobile-card-label">Status:</span>
                     <span className="mobile-card-value">
                       <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className="text-xs">
-                        {gallery.status}
+                        {gallery.status || 'Draft'}
                       </Badge>
                     </span>
                   </div>
@@ -177,7 +185,7 @@ export function GalleriesAdminClient() {
                     <span className="mobile-card-label">Images:</span>
                     <span className="mobile-card-value">
                       <Badge variant="outline" className="text-xs">
-                        {gallery.images?.length || 0} images
+                        {safeImages.length} images
                       </Badge>
                     </span>
                   </div>
@@ -189,7 +197,8 @@ export function GalleriesAdminClient() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {galleries.length === 0 && (

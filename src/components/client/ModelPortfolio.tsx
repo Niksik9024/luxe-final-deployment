@@ -17,32 +17,43 @@ export function ModelPortfolio({ videos, galleries }: ModelPortfolioProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'videos' | 'photos' | 'galleries'>('all');
 
   const allContent = useMemo(() => {
-    const videoContent = (videos || []).map(video => ({
-      ...video,
-      type: 'video' as const,
-      date: new Date(video.date)
-    }));
+    try {
+      const safeVideos = Array.isArray(videos) ? videos.filter(v => v && v.id && v.date) : [];
+      const safeGalleries = Array.isArray(galleries) ? galleries.filter(g => g && g.id && g.date) : [];
 
-    const photoContent = (galleries || []).flatMap(gallery => 
-      (gallery.images || []).map(image => ({
-        id: `${gallery.id}-${image.id}`,
-        title: image.title || gallery.title,
-        thumbnail: image.url,
-        type: 'photo' as const,
+      const videoContent = safeVideos.map(video => ({
+        ...video,
+        type: 'video' as const,
+        date: new Date(video.date),
+        thumbnail: video.thumbnail || '/default-avatar.png'
+      }));
+
+      const photoContent = safeGalleries.flatMap(gallery => {
+        const images = Array.isArray(gallery.images) ? gallery.images : [];
+        return images.filter(img => img && img.id && img.url).map(image => ({
+          id: `${gallery.id}-${image.id}`,
+          title: image.title || gallery.title || 'Untitled',
+          thumbnail: image.url,
+          type: 'photo' as const,
+          date: new Date(gallery.date),
+          galleryId: gallery.id,
+          galleryTitle: gallery.title || 'Untitled Gallery'
+        }));
+      });
+
+      const galleryContent = safeGalleries.map(gallery => ({
+        ...gallery,
+        type: 'gallery' as const,
         date: new Date(gallery.date),
-        galleryId: gallery.id,
-        galleryTitle: gallery.title
-      }))
-    );
+        thumbnail: (gallery.images && gallery.images.length > 0) ? gallery.images[0].url : '/default-avatar.png',
+        title: gallery.title || 'Untitled Gallery'
+      }));
 
-    const galleryContent = (galleries || []).map(gallery => ({
-      ...gallery,
-      type: 'gallery' as const,
-      date: new Date(gallery.date),
-      thumbnail: gallery.images?.[0]?.url || '/default-avatar.png'
-    }));
-
-    return [...videoContent, ...photoContent, ...galleryContent].sort((a, b) => b.date.getTime() - a.date.getTime());
+      return [...videoContent, ...photoContent, ...galleryContent].sort((a, b) => b.date.getTime() - a.date.getTime());
+    } catch (error) {
+      console.error('Error processing content for ModelPortfolio:', error);
+      return [];
+    }
   }, [videos, galleries]);
 
   const filteredContent = useMemo(() => {

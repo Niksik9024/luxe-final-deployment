@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import type { Video, Gallery, Model } from '@/lib/types';
 import { FileVideo, ImageIcon, User, Filter, Sparkles, TrendingUp, Crown, Star, Diamond, Search, ArrowDown, ArrowUp, CornerDownLeft, X } from 'lucide-react';
@@ -320,7 +320,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[96vw] max-w-2xl h-[90vh] max-h-[700px] p-0 gap-0 flex flex-col top-[5%] translate-y-0 max-sm:top-4">
-        <DialogTitle className="sr-only">Search</DialogTitle>
+        <DialogTitle>
+            <VisuallyHidden>Search</VisuallyHidden>
+          </DialogTitle>
+          <DialogDescription>
+            <VisuallyHidden>Search for models, videos, and galleries</VisuallyHidden>
+          </DialogDescription>
         <div className="relative border-b border-primary/20 bg-luxury-dark-gradient flex-shrink-0">
           <div className="flex items-center px-4 sm:px-6 py-3 sm:py-4 gap-3">
             <Search className="h-5 w-5 text-primary flex-shrink-0" />
