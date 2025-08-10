@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,11 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { MoreHorizontal, Search, Filter, UserPlus, Edit, Trash2, Shield, ShieldCheck, Eye, EyeOff } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
+import { MoreHorizontal, Search, UserPlus, Edit, Trash2, Shield, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface User {
   id: string;
@@ -194,34 +195,36 @@ export default function UsersPage() {
   return (
     <div className="w-full-safe max-w-screen-safe">
       <div className="responsive-padding">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">User Management</h1>
-            <p className="text-muted-foreground responsive-text-sm md:responsive-text-base">
-              Manage user accounts, roles, and permissions
-            </p>
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">User Management</h1>
+              <p className="text-muted-foreground text-sm sm:text-base mt-1">
+                Manage user accounts, roles, and permissions
+              </p>
+            </div>
+            <Button className="btn-luxury w-full sm:w-auto min-h-[44px] touch-manipulation">
+              <UserPlus className="h-4 w-4 mr-2" />
+              <span>Add User</span>
+            </Button>
           </div>
-          <Button className="btn-luxury w-full sm:w-auto">
-            <UserPlus className="h-4 w-4 mr-2" />
-            <span className="responsive-text-sm md:responsive-text-base">Add User</span>
-          </Button>
         </div>
 
         <Card className="luxury-card w-full">
           <CardHeader className="responsive-padding">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 w-full"
+                  className="pl-10 w-full min-h-[44px] text-base"
                 />
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger className="w-full sm:w-32">
+                  <SelectTrigger className="w-full sm:w-40 min-h-[44px] text-base">
                     <SelectValue placeholder="Role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -232,7 +235,7 @@ export default function UsersPage() {
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-32">
+                  <SelectTrigger className="w-full sm:w-40 min-h-[44px] text-base">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -253,23 +256,23 @@ export default function UsersPage() {
                 <Table className="responsive-table">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead className="hidden sm:table-cell">Role</TableHead>
-                      <TableHead className="hidden md:table-cell">Status</TableHead>
-                      <TableHead className="hidden lg:table-cell">Last Active</TableHead>
-                      <TableHead className="hidden lg:table-cell">Content</TableHead>
-                      <TableHead className="hidden xl:table-cell">Views</TableHead>
-                      <TableHead className="w-12">Actions</TableHead>
+                      <TableHead className="text-base font-semibold">User</TableHead>
+                      <TableHead className="hidden sm:table-cell text-base font-semibold">Role</TableHead>
+                      <TableHead className="hidden md:table-cell text-base font-semibold">Status</TableHead>
+                      <TableHead className="hidden lg:table-cell text-base font-semibold">Last Active</TableHead>
+                      <TableHead className="hidden lg:table-cell text-base font-semibold">Content</TableHead>
+                      <TableHead className="hidden xl:table-cell text-base font-semibold">Views</TableHead>
+                      <TableHead className="w-12 text-base font-semibold">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {loading ? (
                       Array.from({ length: 5 }).map((_, index) => (
                         <TableRow key={index}>
-                          <TableCell colSpan={7}>
+                          <TableCell colSpan={7} className="py-4">
                             <div className="animate-pulse flex items-center gap-3">
-                              <div className="h-10 w-10 bg-muted rounded-full"></div>
-                              <div className="space-y-2">
+                              <div className="h-12 w-12 bg-muted rounded-full"></div>
+                              <div className="space-y-2 flex-1">
                                 <div className="h-4 bg-muted rounded w-32"></div>
                                 <div className="h-3 bg-muted rounded w-48"></div>
                               </div>
@@ -279,51 +282,54 @@ export default function UsersPage() {
                       ))
                     ) : paginatedUsers.length > 0 ? (
                       paginatedUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell>
+                        <TableRow key={user.id} className="hover:bg-muted/50">
+                          <TableCell className="py-4">
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10">
+                              <Avatar className="h-12 w-12">
                                 <AvatarImage src={user.avatar} alt={user.name} />
-                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback className="bg-primary/20 text-primary font-semibold">
+                                  {user.name.charAt(0)}
+                                </AvatarFallback>
                               </Avatar>
-                              <div className="min-w-0">
-                                <div className="font-medium truncate">{user.name}</div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium truncate text-base">{user.name}</div>
                                 <div className="text-sm text-muted-foreground truncate">{user.email}</div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="hidden sm:table-cell">
-                            <Badge className={getRoleColor(user.role)}>
+                            <Badge className={`${getRoleColor(user.role)} text-sm font-medium`}>
                               {user.role}
                             </Badge>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            <Badge className={getStatusColor(user.status)}>
+                            <Badge className={`${getStatusColor(user.status)} text-sm font-medium`}>
                               {user.status}
                             </Badge>
                           </TableCell>
-                          <TableCell className="hidden lg:table-cell responsive-text-sm">
+                          <TableCell className="hidden lg:table-cell text-sm">
                             {formatDate(user.lastActive)}
                           </TableCell>
-                          <TableCell className="hidden lg:table-cell responsive-text-sm">
+                          <TableCell className="hidden lg:table-cell text-sm">
                             {user.totalContent}
                           </TableCell>
-                          <TableCell className="hidden xl:table-cell responsive-text-sm">
+                          <TableCell className="hidden xl:table-cell text-sm">
                             {user.totalViews.toLocaleString()}
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <Button variant="ghost" size="sm" className="h-10 w-10 p-0 min-h-[44px] min-w-[44px] touch-manipulation">
                                   <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem>
+                                <DropdownMenuItem className="min-h-[44px] text-base">
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit User
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => toggleUserStatus(user.id)}>
+                                <DropdownMenuItem onClick={() => toggleUserStatus(user.id)} className="min-h-[44px] text-base">
                                   {user.status === 'active' ? (
                                     <>
                                       <EyeOff className="h-4 w-4 mr-2" />
@@ -336,16 +342,16 @@ export default function UsersPage() {
                                     </>
                                   )}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'admin')}>
+                                <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'admin')} className="min-h-[44px] text-base">
                                   <Shield className="h-4 w-4 mr-2" />
                                   Make Admin
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'moderator')}>
+                                <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'moderator')} className="min-h-[44px] text-base">
                                   <ShieldCheck className="h-4 w-4 mr-2" />
                                   Make Moderator
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
-                                  className="text-destructive focus:text-destructive"
+                                  className="text-destructive focus:text-destructive min-h-[44px] text-base"
                                   onSelect={() => handleDeleteUser(user)}
                                 >
                                   <Trash2 className="h-4 w-4 mr-2" />
@@ -358,7 +364,7 @@ export default function UsersPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
+                        <TableCell colSpan={7} className="text-center py-12 text-base">
                           No users found
                         </TableCell>
                       </TableRow>
@@ -375,10 +381,10 @@ export default function UsersPage() {
                   <div key={index} className="mobile-card animate-pulse">
                     <div className="mobile-card-header">
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="h-12 w-12 bg-muted rounded-full"></div>
+                        <div className="h-14 w-14 bg-muted rounded-full"></div>
                         <div className="space-y-2 flex-1">
-                          <div className="h-4 bg-muted rounded w-3/4"></div>
-                          <div className="h-3 bg-muted rounded w-full"></div>
+                          <div className="h-5 bg-muted rounded w-3/4"></div>
+                          <div className="h-4 bg-muted rounded w-full"></div>
                         </div>
                       </div>
                     </div>
@@ -389,28 +395,31 @@ export default function UsersPage() {
                   <div key={user.id} className="mobile-card">
                     <div className="mobile-card-header">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <Avatar className="h-12 w-12 flex-shrink-0">
+                        <Avatar className="h-14 w-14 flex-shrink-0">
                           <AvatarImage src={user.avatar} alt={user.name} />
-                          <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className="bg-primary/20 text-primary font-semibold text-lg">
+                            {user.name.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 flex-1">
-                          <div className="mobile-card-title truncate">{user.name}</div>
-                          <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                          <div className="mobile-card-title">{user.name}</div>
+                          <div className="text-sm text-muted-foreground truncate mt-1">{user.email}</div>
                         </div>
                       </div>
                       <div className="mobile-card-actions">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button variant="ghost" size="sm" className="h-10 w-10 p-0 min-h-[44px] min-w-[44px] touch-manipulation">
                               <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Open menu</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem className="min-h-[44px] text-base">
                               <Edit className="h-4 w-4 mr-2" />
                               Edit User
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toggleUserStatus(user.id)}>
+                            <DropdownMenuItem onClick={() => toggleUserStatus(user.id)} className="min-h-[44px] text-base">
                               {user.status === 'active' ? (
                                 <>
                                   <EyeOff className="h-4 w-4 mr-2" />
@@ -423,16 +432,16 @@ export default function UsersPage() {
                                 </>
                               )}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'admin')}>
+                            <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'admin')} className="min-h-[44px] text-base">
                               <Shield className="h-4 w-4 mr-2" />
                               Make Admin
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'moderator')}>
+                            <DropdownMenuItem onSelect={() => changeUserRole(user.id, 'moderator')} className="min-h-[44px] text-base">
                               <ShieldCheck className="h-4 w-4 mr-2" />
                               Make Moderator
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              className="text-destructive focus:text-destructive"
+                              className="text-destructive focus:text-destructive min-h-[44px] text-base"
                               onSelect={() => handleDeleteUser(user)}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
@@ -446,13 +455,13 @@ export default function UsersPage() {
                     <div className="mobile-card-content">
                       <div className="mobile-card-row">
                         <span className="mobile-card-label">Role:</span>
-                        <Badge className={`${getRoleColor(user.role)} text-xs`}>
+                        <Badge className={`${getRoleColor(user.role)} text-sm font-medium`}>
                           {user.role}
                         </Badge>
                       </div>
                       <div className="mobile-card-row">
                         <span className="mobile-card-label">Status:</span>
-                        <Badge className={`${getStatusColor(user.status)} text-xs`}>
+                        <Badge className={`${getStatusColor(user.status)} text-sm font-medium`}>
                           {user.status}
                         </Badge>
                       </div>
@@ -476,48 +485,71 @@ export default function UsersPage() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground text-base">
                   No users found
                 </div>
               )}
             </div>
 
-            {/* Pagination */}
+            {/* Enhanced Pagination for Mobile */}
             {totalPages > 1 && (
               <div className="responsive-padding border-t">
                 <Pagination className="justify-center">
-                  <PaginationContent className="flex-wrap gap-1">
+                  <PaginationContent className="flex-wrap gap-2">
                     <PaginationItem>
                       <PaginationPrevious 
                         onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                        className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                        className={`min-h-[44px] min-w-[44px] touch-manipulation ${currentPage === 1 ? 'pointer-events-none opacity-50' : ''}`}
                       />
                     </PaginationItem>
 
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                      const pageNumber = i + 1;
-                      return (
-                        <PaginationItem key={pageNumber} className="hidden sm:block">
-                          <PaginationLink
-                            onClick={() => setCurrentPage(pageNumber)}
-                            isActive={currentPage === pageNumber}
-                          >
-                            {pageNumber}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
+                    {/* Show limited pages on mobile */}
+                    {Array.from({ length: Math.min(totalPages, window.innerWidth < 640 ? 3 : 5) }, (_, i) => {
+                      let pageNumber;
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1;
+                      } else {
+                        if (currentPage <= 3) {
+                          pageNumber = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNumber = totalPages - 4 + i;
+                        } else {
+                          pageNumber = currentPage - 2 + i;
+                        }
+                      }
+                      
+                      if (pageNumber > 0 && pageNumber <= totalPages) {
+                        return (
+                          <PaginationItem key={pageNumber} className="hidden sm:block">
+                            <PaginationLink
+                              onClick={() => setCurrentPage(pageNumber)}
+                              isActive={currentPage === pageNumber}
+                              className="min-h-[44px] min-w-[44px] touch-manipulation"
+                            >
+                              {pageNumber}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      }
                     })}
+
+                    {/* Mobile page indicator */}
+                    <PaginationItem className="sm:hidden">
+                      <span className="px-4 py-2 text-sm text-muted-foreground">
+                        {currentPage} / {totalPages}
+                      </span>
+                    </PaginationItem>
 
                     <PaginationItem>
                       <PaginationNext 
                         onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                        className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                        className={`min-h-[44px] min-w-[44px] touch-manipulation ${currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}`}
                       />
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
 
-                <div className="text-center mt-4 responsive-text-sm text-muted-foreground">
+                <div className="text-center mt-4 text-sm text-muted-foreground">
                   Showing {startIndex + 1} to {Math.min(startIndex + ITEMS_PER_PAGE, filteredUsers.length)} of {filteredUsers.length} users
                 </div>
               </div>
@@ -525,20 +557,20 @@ export default function UsersPage() {
           </CardContent>
         </Card>
 
-        {/* Delete Confirmation Dialog */}
+        {/* Enhanced Delete Confirmation Dialog */}
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent className="w-full max-w-md mx-4">
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete User</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="text-xl">Delete User</AlertDialogTitle>
+              <AlertDialogDescription className="text-base">
                 Are you sure you want to delete {selectedUser?.name}? This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-              <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-3">
+              <AlertDialogCancel className="w-full sm:w-auto min-h-[44px] touch-manipulation">Cancel</AlertDialogCancel>
               <AlertDialogAction 
                 onClick={confirmDeleteUser}
-                className="w-full sm:w-auto bg-destructive hover:bg-destructive/90"
+                className="w-full sm:w-auto bg-destructive hover:bg-destructive/90 min-h-[44px] touch-manipulation"
               >
                 Delete User
               </AlertDialogAction>

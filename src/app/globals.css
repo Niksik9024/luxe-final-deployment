@@ -213,7 +213,7 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.2);
   }
 
-  /* Responsive Width Overflow Prevention */
+  /* Enhanced Mobile Responsiveness and Touch Support */
   * {
     box-sizing: border-box;
   }
@@ -222,6 +222,10 @@
     overflow-x: hidden;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* Internet Explorer 10+ */
+    /* Improved text rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   html::-webkit-scrollbar { /* WebKit */
@@ -234,10 +238,72 @@
     max-width: 100vw;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* Internet Explorer 10+ */
+    /* Enhanced mobile font scaling */
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 640px) {
+    body {
+      font-size: 16px;
+      line-height: 1.6;
+    }
   }
 
   body::-webkit-scrollbar { /* WebKit */
     display: none;
+  }
+
+  /* Touch Support and Accessibility */
+  @media (hover: none) and (pointer: coarse) {
+    /* Touch device specific styles */
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Larger tap targets for mobile */
+    .touch-manipulation {
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  }
+
+  /* Improved text scaling for mobile */
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 2rem;
+      line-height: 1.1;
+    }
+    
+    h2 {
+      font-size: 1.75rem;
+      line-height: 1.2;
+    }
+    
+    h3 {
+      font-size: 1.5rem;
+      line-height: 1.3;
+    }
+    
+    h4 {
+      font-size: 1.25rem;
+      line-height: 1.4;
+    }
+    
+    h5 {
+      font-size: 1.125rem;
+      line-height: 1.5;
+    }
+    
+    h6 {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
   }
 
   /* Container Responsive Fixes */
@@ -347,7 +413,7 @@
     }
   }
 
-  /* Mobile Card Layout */
+  /* Enhanced Mobile Card Layout */
   .mobile-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
@@ -355,6 +421,13 @@
     padding: 1rem;
     margin-bottom: 1rem;
     width: 100%;
+    /* Enhanced touch support */
+    touch-action: manipulation;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-card:active {
+    transform: scale(0.98);
   }
 
   .mobile-card-header {
@@ -363,35 +436,67 @@
     align-items: flex-start;
     margin-bottom: 0.75rem;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    /* Ensure proper spacing on all devices */
+    min-height: 44px;
   }
 
   .mobile-card-title {
     font-weight: 600;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: hsl(var(--foreground));
     flex: 1;
     min-width: 0;
+    line-height: 1.4;
+    /* Better text overflow handling */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  @media (min-width: 640px) {
+    .mobile-card-title {
+      font-size: 1.1rem;
+      -webkit-line-clamp: 1;
+    }
   }
 
   .mobile-card-actions {
     display: flex;
     gap: 0.5rem;
     flex-shrink: 0;
+    align-items: center;
+    /* Ensure touch targets are accessible */
+    min-height: 44px;
   }
 
   .mobile-card-content {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .mobile-card-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.25rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+    /* Better mobile layout */
+    min-height: 24px;
+  }
+
+  @media (max-width: 480px) {
+    .mobile-card-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+    
+    .mobile-card-value {
+      text-align: left !important;
+    }
   }
 
   .mobile-card-label {
@@ -399,6 +504,7 @@
     color: hsl(var(--muted-foreground));
     font-size: 0.875rem;
     min-width: 80px;
+    flex-shrink: 0;
   }
 
   .mobile-card-value {
@@ -407,6 +513,10 @@
     flex: 1;
     text-align: right;
     word-break: break-word;
+    line-height: 1.4;
+    /* Better overflow handling */
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* Image Responsiveness */
