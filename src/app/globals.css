@@ -298,6 +298,7 @@
     [role="button"] {
       min-height: 44px;
       min-width: 44px;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
     }
 
     /* Larger tap targets for mobile */
@@ -348,6 +349,8 @@
   .container {
     width: 100%;
     max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
     padding-left: 1rem;
     padding-right: 1rem;
   }

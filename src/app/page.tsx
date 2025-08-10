@@ -182,10 +182,14 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const shuffleArray = <T,>(array: T[]): T[] => {
+    // Use a consistent seed for initial render to prevent hydration mismatches
+    const shuffleArray = <T,>(array: T[], seed: number = 42): T[] => {
         const shuffled = [...array];
+        // Seeded random for consistent initial render
+        let random = seed;
         for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            random = (random * 9301 + 49297) % 233280;
+            const j = Math.floor((random / 233280) * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         return shuffled;
@@ -195,8 +199,8 @@ export default function Home() {
     const allModels = getModels();
     const allGalleries = getGalleries();
     
-    const shuffledModels = shuffleArray(allModels);
-    const shuffledGalleries = shuffleArray(allGalleries.filter(g => g.status === 'Published'));
+    const shuffledModels = shuffleArray(allModels, 42);
+    const shuffledGalleries = shuffleArray(allGalleries.filter(g => g.status === 'Published'), 84);
 
     const publishedVideos = allVideos.filter(v => v.status === 'Published');
     

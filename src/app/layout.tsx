@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -12,6 +10,7 @@ import { Providers } from '@/components/shared/Providers';
 import { Header } from '@/components/shared/Header';
 import LandingPage from '@/components/client/LandingPage';
 import { usePathname } from 'next/navigation';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -49,7 +48,7 @@ export default function RootLayout({
     localStorage.setItem(ACCESS_KEY, 'true');
     setIsAccessGranted(true);
   };
-  
+
   const AppContent = (
       <div className="flex flex-col min-h-screen">
         <Header />
@@ -59,24 +58,26 @@ export default function RootLayout({
   )
 
   const bodyClasses = cn(
-    'antialiased bg-background font-body', 
-    inter.variable, 
+    'antialiased bg-background font-body',
+    inter.variable,
     playfair.variable,
     { 'admin-body': pathname.startsWith('/admin') }
   );
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning={true}>
       <body className={bodyClasses}>
-        <Providers>
-          {isClient ? (
-            isAccessGranted || pathname.startsWith('/admin') ? AppContent : <LandingPage onAccessGranted={handleAccessGranted} />
-          ) : (
-            // Render a basic skeleton or nothing on the server to avoid flash of unstyled content
-            null
-          )}
-          <Toaster />
-        </Providers>
+        <ErrorBoundary>
+          <Providers>
+            {isClient ? (
+              isAccessGranted || pathname.startsWith('/admin') ? AppContent : <LandingPage onAccessGranted={handleAccessGranted} />
+            ) : (
+              // Render a basic skeleton or nothing on the server to avoid flash of unstyled content
+              null
+            )}
+            <Toaster />
+          </Providers>
+        </ErrorBoundary>
       </body>
     </html>
   );
