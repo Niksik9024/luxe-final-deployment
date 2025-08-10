@@ -1,0 +1,53 @@
+You are a web developer tasked with debugging and enhancing a website. Please perform the following tasks systematically:
+
+**Primary Tasks:**
+
+1. **Error Inspection & Bug Fixes:**
+   - Conduct a comprehensive code review to identify and fix all existing errors
+   - Test all functionality across different browsers and devices
+   - Document any issues found and their resolutions
+
+2. **Homepage Dynamic Content Implementation:**
+   - Add refresh behavior to the following homepage sections:
+     - Hero Carousel
+     - Featured Premium Content
+     - Models Elite Portfolio
+     - Galleries Photo Collections
+   - On each page refresh, these sections should:
+     - Generate new random content
+     - Shuffle the order of displayed items
+     - Maintain visual consistency and loading performance
+
+3. **Model Photo Viewer Fix:**
+   - Navigate to individual model pages (e.g., models/model_1)
+   - Fix the photos section so that clicking on photos opens them in a proper photo viewer
+   - Ensure this functionality matches the behavior of album photos
+   - Test the photo viewer for smooth navigation, zoom, and close functionality
+
+4. **Mobile Search Responsiveness:**
+   - Fix search functionality overflow issues on mobile devices
+   - Ensure the search interface is fully responsive across all screen sizes
+   - Test search results display and interaction on mobile devices
+   - Verify search input field, suggestions, and results are properly contained
+
+5. **Visual Consistency Audit:**
+   - Review and fix all visual inconsistencies throughout the site
+   - Ensure consistent styling, spacing, fonts, and color schemes
+   - Verify responsive design works properly on all device sizes
+   - Check alignment, button states, and hover effects
+
+**Quality Assurance Requirements:**
+- After implementing all fixes, perform thorough testing on desktop, tablet, and mobile
+- Verify no new errors are introduced during the fixing process
+- Test all interactive elements and ensure smooth user experience
+- Confirm all dynamic content loads properly and refreshes as expected
+
+**Deliverables:**
+- Clean, error-free codebase
+- Fully functional dynamic homepage sections
+- Working photo viewer for model pages
+- Mobile-responsive search functionality
+- Consistent visual design across all pages
+- Detailed testing report confirming all issues are resolved
+
+Please approach this systematically, testing each fix before moving to the next task, and provide a summary of all changes made.   and make sure to not change anything in herocarousel apart from the refresh functionality random content generation and shuffling 
