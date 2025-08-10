@@ -97,17 +97,19 @@ export const Lightbox: React.FC<LightboxProps> = ({ images, startIndex, onClose 
         
         {/* Main Image */}
         <div className="relative w-full h-full flex-grow flex items-center justify-center overflow-hidden" onClick={() => isZoomed && setIsZoomed(false)}>
-          <Image
-            key={currentIndex}
-            src={currentImage.image}
-            alt={currentImage.title}
-            fill
-            className={cn(
-                "object-contain transition-transform duration-300",
-                isZoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in'
-            )}
-            onClick={toggleZoom}
-          />
+          <div className="relative w-full h-full">
+            <Image
+              key={currentIndex}
+              src={currentImage.image}
+              alt={currentImage.title}
+              fill
+              className={cn(
+                  "object-contain transition-transform duration-300",
+                  isZoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in'
+              )}
+              onClick={toggleZoom}
+            />
+          </div>
         </div>
 
         {/* Navigation Arrows */}

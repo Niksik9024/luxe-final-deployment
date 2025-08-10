@@ -46,13 +46,13 @@ const galleryAlbums = [
         `https://images.unsplash.com/photo-1588190349479-0a44229535a3?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+1}`,
         `https://images.unsplash.com/photo-1611601322175-804153535543?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+2}`,
         `https://images.unsplash.com/photo-1517940310602-26a3d680948e?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+3}`,
-        `https://images.unsplash.com/photo-1565408684237-90924445c71b?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+4}`,
-        `https://images.unsplash.com/photo-1604681630454-c89118c1874c?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+5}`,
-        `https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+6}`,
-        `https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+7}`,
-        `https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+8}`,
-        `https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+9}`,
-        `https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=800&h=1200&auto=format&fit=crop&seed=${i+10}`
+        `https://images.unsplash.com/photo-1565408684237-90924445c71b?q=80&w=800&h=1200&auto=format&fit=crop`,
+        `https://images.unsplash.com/photo-1604681630454-c89118c1874c?q=80&w=800&h=1200&auto=format&fit=crop`,
+        `https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=800&h=1200&auto=format&fit=crop`,
+        `https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&h=1200&auto=format&fit=crop`,
+        `https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=800&h=1200&auto=format&fit=crop`,
+        `https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=800&h=1200&auto=format&fit=crop`,
+        `https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=800&h=1200&auto=format&fit=crop`
     ])
 ];
 

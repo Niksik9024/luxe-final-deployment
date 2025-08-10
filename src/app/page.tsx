@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Model, Video, Gallery } from '@/lib/types';
 import Link from 'next/link';
 import { HeroCarousel } from '@/components/client/HeroCarousel';
@@ -177,10 +177,15 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Use a consistent seed for initial render to prevent hydration mismatches
-    const shuffleArray = <T,>(array: T[], seed: number = 42): T[] => {
+    // Generate dynamic seed based on current time for true randomization on each refresh
+    const generateDynamicSeed = () => {
+      return Math.floor(Date.now() / 1000) + Math.random() * 1000;
+    };
+
+    const shuffleArray = <T,>(array: T[], seed?: number): T[] => {
         const shuffled = [...array];
-        let random = seed;
+        const actualSeed = seed || generateDynamicSeed();
+        let random = actualSeed;
         for (let i = shuffled.length - 1; i > 0; i--) {
             random = (random * 9301 + 49297) % 233280;
             const j = Math.floor((random / 233280) * (i + 1));
@@ -193,17 +198,19 @@ export default function Home() {
     const allModels = getModels();
     const allGalleries = getGalleries();
 
-    const shuffledModels = shuffleArray(allModels, 42);
-    const shuffledGalleries = shuffleArray(allGalleries.filter(g => g.status === 'Published'), 84);
+    // Dynamic shuffling with different seeds for each section
+    const shuffledModels = shuffleArray(allModels, generateDynamicSeed());
+    const shuffledGalleries = shuffleArray(allGalleries.filter(g => g.status === 'Published'), generateDynamicSeed());
 
     const publishedVideos = allVideos.filter(v => v.status === 'Published');
+    
+    // Shuffle featured videos for dynamic display
+    const featuredVideos = shuffleArray(publishedVideos.filter(v => v.isFeatured), generateDynamicSeed());
+    setFeaturedVideos(featuredVideos);
 
-    setFeaturedVideos(publishedVideos.filter(v => v.isFeatured));
-
-    const nonFeaturedVideos = publishedVideos
-        .filter(v => !v.isFeatured)
-        .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
+    // Shuffle non-featured videos and mix with some featured ones for variety
+    const nonFeaturedVideos = shuffleArray(publishedVideos.filter(v => !v.isFeatured), generateDynamicSeed());
+    
     setTopVideos(nonFeaturedVideos.slice(0, 6));
     setLatestGalleries(shuffledGalleries.slice(0, 12));
     setTopModels(shuffledModels.slice(0, 12)); 
@@ -214,7 +221,16 @@ export default function Home() {
     return <HomePageSkeleton />;
   }
 
-  const heroContentSource = topModels.slice(0, 5).map(m => ({ id: m.id, image: m.image, name: m.name, type: 'model' as const }));
+  // Generate dynamic hero content that changes on refresh
+  const heroContentSource = useMemo(() => {
+    const shuffledForHero = [...topModels].sort(() => Math.random() - 0.5);
+    return shuffledForHero.slice(0, 5).map(m => ({ 
+      id: m.id, 
+      image: m.image, 
+      name: m.name, 
+      type: 'model' as const 
+    }));
+  }, [topModels]);
 
   const heroItems = heroContentSource.map(item => ({
       id: item.id,

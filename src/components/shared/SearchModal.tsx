@@ -316,9 +316,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl p-0 bg-black/95 backdrop-blur-xl border-2 border-primary/30 shadow-luxury">
+      <DialogContent className="w-[95vw] max-w-2xl p-0 bg-black/95 backdrop-blur-xl border-2 border-primary/30 shadow-luxury max-h-[90vh] overflow-hidden">
         <VisuallyHidden>
           <DialogTitle>Search Luxury Content</DialogTitle>
+        </VisuallyHidden>
+        <VisuallyHidden>
+          <p>Search through our exclusive collection of models, videos, and galleries using the input field below.</p>
         </VisuallyHidden>
         
         <div className="relative">
@@ -329,11 +332,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Search luxury content, models, collections..."
+                placeholder="Search luxury content, models..."
                 value={query}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                className="flex-1 bg-transparent text-white placeholder:text-gray-400 border-0 outline-none text-lg font-medium"
+                className="flex-1 bg-transparent text-white placeholder:text-gray-400 border-0 outline-none text-base sm:text-lg font-medium min-w-0"
                 autoComplete="off"
                 autoCapitalize="off"
                 spellCheck={false}
@@ -376,7 +379,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           {/* Results Container */}
           <div 
             ref={resultsRef}
-            className="max-h-96 overflow-y-auto bg-luxury-dark-gradient"
+            className="max-h-[60vh] overflow-y-auto bg-luxury-dark-gradient scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30"
           >
             {/* Show popular searches when no query */}
             {!query && !showResults && (
