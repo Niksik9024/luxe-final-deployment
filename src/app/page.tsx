@@ -234,7 +234,7 @@ export default function Home() {
       {/* Dynamic Model Showcase - Replaces Stats Section */}
       <DynamicModelShowcase models={topModels} />
 
-      <div className="space-y-32 my-32">
+      <div className="space-y-16 sm:space-y-24 lg:space-y-32 my-16 sm:my-24 lg:my-32 w-full-safe max-w-screen-safe">
         {/* Featured Content Section */}
         {topVideos.length > 0 && (
             <section className="container mx-auto px-4">

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
@@ -8,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Model } from '@/lib/types';
 import { getModels } from '@/lib/localStorage';
 import { useSearchParams } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
+import { Users } from 'lucide-react';
 
 const MODELS_PER_PAGE = 18;
 
@@ -46,7 +47,7 @@ function ModelsListContent() {
         setTotalPages(pages);
         setLoading(false);
     }, [currentPage]);
-    
+
     if (loading) {
         return <ModelsGridSkeleton />;
     }
@@ -65,12 +66,28 @@ function ModelsListContent() {
 
 
 export default function ModelsPage() {
+  const models = getModels();
+
   return (
-    <div className="container mx-auto py-12 px-4">
-      <h1 className="text-4xl font-bold mb-8 text-center">Models</h1>
-      <Suspense fallback={<ModelsGridSkeleton />}>
-        <ModelsListContent />
-      </Suspense>
+    <div className="w-full-safe max-w-screen-safe">
+      <div className="container mx-auto responsive-padding py-16">
+        <div className="text-center mb-12 sm:mb-16">
+          <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
+            <Users className="w-4 h-4 mr-2" />
+            MEET OUR TALENT
+          </Badge>
+          <h1 className="mb-6">Exceptional Models</h1>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Discover the extraordinary individuals who bring our premium content to life
+          </p>
+        </div>
+
+        <div className="responsive-grid gap-6 sm:gap-8">
+          {models.map((model, index) => (
+            <ModelCard key={model.id} model={model} priority={index < 6} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

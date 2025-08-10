@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -38,7 +37,7 @@ const Logo = () => (
       </div>
     </Link>
   );
-  
+
 const navItems = [
     { href: '/admin', label: 'Dashboard', icon: BarChart },
     { href: '/admin/videos', label: 'Videos', icon: Video },
@@ -54,7 +53,7 @@ const devNavItems = [
 
 const AdminSidebar = () => {
     const pathname = usePathname();
-    
+
     return (
         <aside className="hidden md:flex flex-col w-64 bg-card text-card-foreground border-r border-border">
             <div className="p-4 border-b border-border">
@@ -106,11 +105,11 @@ const AdminSidebar = () => {
         </aside>
     );
 };
-  
+
 
 const MobileAdminSidebar = () => {
     const pathname = usePathname();
-  
+
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -209,7 +208,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!isAdmin) {
     return null; // or a more friendly "access denied" page
   }
-  
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
         <AdminSidebar />
@@ -219,7 +218,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="flex items-center">
                     <MobileAdminSidebar />
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                      <DropdownMenu>
                         <DropdownMenuTrigger asChild>

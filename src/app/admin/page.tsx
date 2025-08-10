@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -24,7 +23,7 @@ const StatCard = ({ title, value, icon: Icon }: { title: string; value: string; 
       </CardContent>
     </Card>
   );
-  
+
 
 export default function AdminDashboard() {
     const [stats, setStats] = React.useState({ videos: 0, galleries: 0, models: 0 });
@@ -43,7 +42,7 @@ export default function AdminDashboard() {
                 galleries: galleries.length,
                 models: models.length,
             });
-            
+
             const allContent: ContentItem[] = [...videos, ...galleries];
             allContent.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
             setRecentContent(allContent.slice(0, 5));
@@ -87,37 +86,53 @@ export default function AdminDashboard() {
       <div className="grid gap-8 mt-8 grid-cols-1 xl:grid-cols-3">
         <div className="xl:col-span-2">
             <Card className="bg-card border-border shadow-lg h-full">
-                <CardHeader>
+                <CardHeader className="responsive-padding">
                     <CardTitle className="text-xl font-headline">Recent Content</CardTitle>
                     <CardDescription>The latest videos and galleries added.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="responsive-padding">
                    <div className="space-y-4">
-                        {recentContent.map(item => (
-                            <div key={item.id} className="flex items-center gap-4">
-                                <Image 
-                                    src={item.image} 
-                                    alt={item.title} 
-                                    width={64} 
-                                    height={64} 
-                                    className="rounded-md object-cover w-16 h-16"
-                                />
-                                <div className="flex-1">
-                                    <Link href={`/admin/${item.type === 'video' ? 'videos' : 'galleries'}/edit/${item.id}`} className="font-semibold hover:underline">{item.title}</Link>
-                                    <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                                        <Badge variant={item.type === 'video' ? 'destructive' : 'default'} className={item.type === 'video' ? 'bg-accent' : 'bg-primary'}>
-                                          {item.type === 'video' ? 'Video' : 'Gallery'}
-                                        </Badge>
-                                        <span className="flex items-center gap-1"><CalendarIcon size={14}/> {new Date(item.date).toLocaleDateString()}</span>
+                        {loading ? (
+                            Array.from({ length: 3 }).map((_, index) => (
+                                <div key={index} className="flex items-center gap-4 animate-pulse">
+                                    <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0"></div>
+                                    <div className="flex-1 min-w-0 space-y-2">
+                                        <div className="h-4 bg-muted rounded w-3/4"></div>
+                                        <div className="h-3 bg-muted rounded w-1/2"></div>
+                                        <div className="h-3 bg-muted rounded w-1/3"></div>
                                     </div>
+                                    <div className="h-8 w-16 bg-muted rounded flex-shrink-0"></div>
                                 </div>
-                                <Button variant="outline" size="sm" asChild>
-                                  <Link href={`/admin/${item.type === 'video' ? 'videos' : 'galleries'}/edit/${item.id}`}>
-                                    Edit
-                                  </Link>
-                                </Button>
+                            ))
+                        ) : recentContent.length > 0 ? (
+                            recentContent.map(item => (
+                                <div key={item.id} className="flex items-center gap-3 sm:gap-4">
+                                    <Image 
+                                        src={item.image} 
+                                        alt={item.title} 
+                                        width={64} 
+                                        height={64} 
+                                        className="rounded-md object-cover w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-medium text-sm sm:text-base truncate">{item.title}</h3>
+                                        <p className="text-xs sm:text-sm text-muted-foreground capitalize truncate">{item.type}</p>
+                                        <p className="text-xs text-muted-foreground">{new Date(item.date).toLocaleDateString()}</p>
+                                    </div>
+                                    <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="flex-shrink-0 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] touch-manipulation"
+                                    >
+                                        Edit
+                                    </Button>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground">
+                                <p>No recent content found</p>
                             </div>
-                        ))}
+                        )}
                    </div>
                 </CardContent>
             </Card>

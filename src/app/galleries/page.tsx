@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
@@ -7,6 +6,8 @@ import { GalleriesList } from './GalleriesList';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getGalleries } from '@/lib/localStorage';
 import { useSearchParams } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
+import { ImageIcon } from 'lucide-react';
 
 const GALLERIES_PER_PAGE = 18;
 
@@ -27,7 +28,7 @@ function GalleriesContent() {
     const [galleries, setGalleries] = useState<Gallery[]>([]);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
-    
+
     useEffect(() => {
         setLoading(true);
         const allPublishedGalleries = getGalleries().filter(g => g.status === 'Published');
@@ -40,7 +41,7 @@ function GalleriesContent() {
         setTotalPages(pages);
         setLoading(false);
     }, [currentPage]);
-    
+
     if (loading) {
         return <GalleriesPageSkeleton />;
     }
@@ -50,11 +51,21 @@ function GalleriesContent() {
 
 export default function GalleriesPage() {
   return (
-    <div className="container mx-auto py-12 px-4">
-      <h1 className="text-4xl mb-8 text-center">Galleries</h1>
-      <Suspense fallback={<GalleriesPageSkeleton />}>
-        <GalleriesContent />
-      </Suspense>
+    <div className="w-full-safe max-w-screen-safe">
+      <div className="container mx-auto responsive-padding py-16">
+        <div className="text-center mb-12 sm:mb-16">
+          <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
+            <ImageIcon className="w-4 h-4 mr-2" />
+            VISUAL EXCELLENCE
+          </Badge>
+          <h1 className="mb-6">Premium Galleries</h1>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Explore our meticulously curated collection of stunning photography
+          </p>
+        </div>
+
+        <GalleriesList />
+      </div>
     </div>
   );
 }

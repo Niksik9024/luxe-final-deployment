@@ -1,4 +1,3 @@
-
 'use client';
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,12 +12,15 @@ import { getVideos, setVideos, getTags, setTags } from '@/lib/localStorage';
 import type { Video } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 
 export function VideosAdminClient() {
     const [videos, setLocalVideos] = React.useState<Video[]>([]);
     const [loading, setLoading] = React.useState(true);
     const { toast } = useToast();
-    
+
     const fetchVideos = React.useCallback(() => {
         setLoading(true);
         const videosData = getVideos().sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -83,7 +85,7 @@ export function VideosAdminClient() {
                    isFeatured: false, // Ensure duplicates are not featured
                    date: new Date().toISOString(),
                 };
-                
+
                 const currentVideos = getVideos();
                 setVideos([...currentVideos, duplicate]);
 
@@ -110,13 +112,14 @@ export function VideosAdminClient() {
             }
         }
     };
-    
+
   return (
     <>
-      <div className="flex justify-end mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+        <h1 className="text-2xl font-bold">Videos</h1>
         <Button asChild>
           <Link href="/admin/videos/new">
-            <PlusCircle className="mr-2" />
+            <PlusCircle className="mr-2 h-4 w-4" />
             Add New Video
           </Link>
         </Button>
@@ -134,25 +137,25 @@ export function VideosAdminClient() {
             <div className="divide-y divide-border">
                 {videos.map((video) => (
                     <div key={video.id} className="p-4 flex flex-col md:flex-row md:items-center gap-4 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-4 flex-1">
+                        <div className="flex items-center gap-4 flex-1 overflow-hidden">
                             <Image 
                                 src={video.image} 
                                 alt={video.title} 
                                 width={120} 
                                 height={67} 
-                                className="rounded-md object-cover aspect-video"
+                                className="rounded-md object-cover aspect-video flex-shrink-0 w-24 h-auto md:w-32 lg:w-40"
                             />
-                            <div className="flex-1">
-                                <Link href={`/admin/videos/edit/${video.id}`} className="font-semibold hover:underline">{video.title}</Link>
+                            <div className="flex-1 min-w-0">
+                                <Link href={`/admin/videos/edit/${video.id}`} className="font-semibold hover:underline truncate">{video.title}</Link>
                                 <div className="text-sm text-muted-foreground mt-1 md:hidden">
                                     {new Date(video.date).toLocaleDateString()}
                                 </div>
-                                <div className="text-sm text-muted-foreground mt-1">
+                                <div className="text-sm text-muted-foreground mt-1 truncate">
                                    Models: {video.models.join(', ') || 'N/A'}
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between w-full md:w-auto">
                             <div className="flex items-center gap-4">
                                 <div className="hidden md:block text-sm text-muted-foreground w-28">
                                     {new Date(video.date).toLocaleDateString()}
