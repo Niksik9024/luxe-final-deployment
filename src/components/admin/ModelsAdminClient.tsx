@@ -1,32 +1,33 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, Eye, Plus, Play } from 'lucide-react';
+import { Trash2, Edit, Eye, Plus, Crown } from 'lucide-react';
 import Link from 'next/link';
-import { Video } from '@/lib/types';
-import { getVideos, deleteVideo } from '@/lib/localStorage';
+import { Model } from '@/lib/types';
+import { getModels, deleteModel } from '@/lib/localStorage';
 import { useToast } from '@/lib/use-toast';
 
-export function VideosAdminClient() {
-  const [videos, setVideos] = useState<Video[]>([]);
+export function ModelsAdminClient() {
+  const [models, setModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    loadVideos();
+    loadModels();
   }, []);
 
-  const loadVideos = async () => {
+  const loadModels = async () => {
     try {
-      const allVideos = getVideos();
-      setVideos(allVideos);
+      const allModels = getModels();
+      setModels(allModels);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to load videos",
+        description: "Failed to load models",
         variant: "destructive",
       });
     } finally {
@@ -35,18 +36,18 @@ export function VideosAdminClient() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this video?')) {
+    if (confirm('Are you sure you want to delete this model?')) {
       try {
-        deleteVideo(id);
-        await loadVideos();
+        deleteModel(id);
+        await loadModels();
         toast({
           title: "Success",
-          description: "Video deleted successfully",
+          description: "Model deleted successfully",
         });
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to delete video",
+          description: "Failed to delete model",
           variant: "destructive",
         });
       }
@@ -61,66 +62,65 @@ export function VideosAdminClient() {
     <>
       <div className="flex justify-end mb-8">
         <Button asChild>
-          <Link href="/admin/videos/new">
+          <Link href="/admin/models/new">
             <Plus className="mr-2 h-4 w-4" />
-            Add Video
+            Add Model
           </Link>
         </Button>
       </div>
-
+      
       <Card className="bg-card border border-border rounded-lg shadow-lg overflow-hidden">
         <CardHeader>
-          <CardTitle>Videos</CardTitle>
+          <CardTitle>Models</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            {videos.map((video) => (
-              <div key={video.id} className="flex items-center justify-between p-4 border rounded-lg">
+            {models.map((model) => (
+              <div key={model.id} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center space-x-4">
-                  <div className="relative w-16 h-16 bg-black rounded overflow-hidden">
-                    <img 
-                      src={video.thumbnail} 
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                      <Play className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
+                  <img 
+                    src={model.image} 
+                    alt={model.name}
+                    className="w-16 h-16 object-cover rounded-full"
+                  />
                   <div>
-                    <h3 className="font-semibold">{video.title}</h3>
-                    <p className="text-sm text-muted-foreground">{video.description}</p>
+                    <h3 className="font-semibold">{model.name}</h3>
+                    <p className="text-sm text-muted-foreground">{model.description}</p>
                     <div className="flex gap-2 mt-2">
-                      <Badge variant="secondary">{video.status}</Badge>
-                      <Badge variant="outline">{video.duration}</Badge>
-                      {video.isFeatured && <Badge variant="default">Featured</Badge>}
+                      <Badge variant="secondary">{model.status}</Badge>
+                      {model.isFeatured && (
+                        <Badge variant="default" className="bg-luxury-gradient text-black">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Featured
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/videos/${video.id}`}>
+                    <Link href={`/models/${model.id}`}>
                       <Eye className="h-4 w-4" />
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/admin/videos/edit/${video.id}`}>
+                    <Link href={`/admin/models/edit/${model.id}`}>
                       <Edit className="h-4 w-4" />
                     </Link>
                   </Button>
                   <Button 
                     variant="destructive" 
                     size="sm"
-                    onClick={() => handleDelete(video.id)}
+                    onClick={() => handleDelete(model.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             ))}
-            {videos.length === 0 && (
+            {models.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
-                No videos found. Create your first video to get started.
+                No models found. Create your first model to get started.
               </div>
             )}
           </div>

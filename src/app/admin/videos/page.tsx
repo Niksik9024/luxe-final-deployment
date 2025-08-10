@@ -1,7 +1,10 @@
 
-
 import React from 'react';
 import { VideosAdminClient } from '@/components/admin/VideosAdminClient';
+
+export const metadata = {
+  title: 'Admin: Manage Videos',
+};
 
 export default async function ManageVideosPage() {
   return (

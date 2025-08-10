@@ -11,7 +11,7 @@ import { Gallery } from '@/lib/types';
 import { getGalleries, deleteGallery } from '@/lib/localStorage';
 import { useToast } from '@/lib/use-toast';
 
-export default function GalleriesAdminClient() {
+export function GalleriesAdminClient() {
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();

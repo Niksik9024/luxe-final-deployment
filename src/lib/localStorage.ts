@@ -272,6 +272,69 @@ export const clearFavorites = (): void => {
   }
 };
 
+// CRUD Functions for Galleries
+export const addGallery = (gallery: Gallery): void => {
+  const galleries = getGalleries();
+  const updatedGalleries = [...galleries, { ...gallery, id: gallery.id || Date.now().toString() }];
+  setGalleries(updatedGalleries);
+};
+
+export const updateGallery = (id: string, updates: Partial<Gallery>): void => {
+  const galleries = getGalleries();
+  const updatedGalleries = galleries.map(gallery => 
+    gallery.id === id ? { ...gallery, ...updates } : gallery
+  );
+  setGalleries(updatedGalleries);
+};
+
+export const deleteGallery = (id: string): void => {
+  const galleries = getGalleries();
+  const updatedGalleries = galleries.filter(gallery => gallery.id !== id);
+  setGalleries(updatedGalleries);
+};
+
+// CRUD Functions for Videos
+export const addVideo = (video: Video): void => {
+  const videos = getVideos();
+  const updatedVideos = [...videos, { ...video, id: video.id || Date.now().toString() }];
+  setVideos(updatedVideos);
+};
+
+export const updateVideo = (id: string, updates: Partial<Video>): void => {
+  const videos = getVideos();
+  const updatedVideos = videos.map(video => 
+    video.id === id ? { ...video, ...updates } : video
+  );
+  setVideos(updatedVideos);
+};
+
+export const deleteVideo = (id: string): void => {
+  const videos = getVideos();
+  const updatedVideos = videos.filter(video => video.id !== id);
+  setVideos(updatedVideos);
+};
+
+// CRUD Functions for Models
+export const addModel = (model: Model): void => {
+  const models = getModels();
+  const updatedModels = [...models, { ...model, id: model.id || Date.now().toString() }];
+  setModels(updatedModels);
+};
+
+export const updateModel = (id: string, updates: Partial<Model>): void => {
+  const models = getModels();
+  const updatedModels = models.map(model => 
+    model.id === id ? { ...model, ...updates } : model
+  );
+  setModels(updatedModels);
+};
+
+export const deleteModel = (id: string): void => {
+  const models = getModels();
+  const updatedModels = models.filter(model => model.id !== id);
+  setModels(updatedModels);
+};
+
 // Legacy function for backward compatibility
 export const getFavoritesLegacy = (): string[] => {
   const favorites = getFavorites();
