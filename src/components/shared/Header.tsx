@@ -20,18 +20,18 @@ import { useDataSaver } from '@/contexts/DataSaverContext';
 import { SearchModal } from './SearchModal';
 
 const Logo = () => (
-  <Link href="/" className="flex items-center gap-3 group">
+  <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
     <div className="relative">
-      <div className="w-10 h-10 bg-luxury-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-luxury transition-all duration-300 group-hover:scale-105">
-        <Crown className="h-6 w-6 text-black" />
+      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-luxury-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-luxury transition-all duration-300 group-hover:scale-105">
+        <Crown className="h-4 w-4 sm:h-6 sm:w-6 text-black" />
       </div>
-      <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+      <div className="absolute -top-1 -right-1 w-2 h-2 sm:w-3 sm:h-3 bg-primary rounded-full animate-pulse"></div>
     </div>
     <div className="flex flex-col">
-      <span className="font-headline font-black text-2xl tracking-wider bg-luxury-gradient bg-clip-text text-transparent">
+      <span className="font-headline font-black text-lg sm:text-2xl tracking-wider bg-luxury-gradient bg-clip-text text-transparent">
         LUXE
       </span>
-      <span className="text-[10px] text-muted-foreground font-medium tracking-[0.2em] uppercase -mt-1">
+      <span className="text-[8px] sm:text-[10px] text-muted-foreground font-medium tracking-[0.2em] uppercase -mt-1 hidden xs:block">
         Premium Collection
       </span>
     </div>
@@ -249,8 +249,8 @@ export const Header = () => {
           <div className="flex lg:hidden items-center justify-between w-full">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-12 w-12 hover:bg-primary/10 transition-colors">
-                  <Menu className="h-6 w-6 text-primary" />
+                <Button variant="ghost" size="icon" className="h-10 w-10 sm:h-12 sm:w-12 hover:bg-primary/10 transition-colors touch-friendly">
+                  <Menu className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 </Button>
               </SheetTrigger>
               <SheetContent 
