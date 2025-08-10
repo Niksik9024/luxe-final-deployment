@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { Suspense, useState, useEffect } from 'react';
@@ -37,15 +38,9 @@ function ModelsContent() {
     const [models, setModels] = useState<Model[]>([]);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [heroModel, setHeroModel] = useState<ModelProfileWithImages>(sampleModelData);
 
     useEffect(() => {
         setModels(getModels());
-
-        // Try to get a random model profile, fallback to sample data
-        const randomProfile = getRandomModelProfile();
-        setHeroModel(randomProfile);
-
         setLoading(false);
     }, []);
 
@@ -59,21 +54,20 @@ function ModelsContent() {
         setModels(getModels().slice(startIndex, endIndex));
     }, [currentPage, pages, startIndex, endIndex]);
 
-
     if (loading) {
         return <ModelsGridSkeleton />;
     }
 
-  return (
-    <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12 min-h-[500px]">
-        {models.map((model, index) => (
-          <ModelCard key={model.id} model={model} priority={index < 6} />
-        ))}
-      </div>
-      <PaginationControls currentPage={currentPage} totalPages={totalPages} basePath="/models" />
-    </>
-  );
+    return (
+        <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12 min-h-[500px]">
+                {models.map((model, index) => (
+                    <ModelCard key={model.id} model={model} priority={index < 6} />
+                ))}
+            </div>
+            <PaginationControls currentPage={currentPage} totalPages={totalPages} basePath="/models" />
+        </>
+    );
 }
 
 // Helper function to get a random model profile
@@ -86,36 +80,56 @@ function getRandomModelProfile(): ModelProfileWithImages {
     return modelProfiles[randomIndex];
 }
 
-
 export default function ModelsPage() {
-  const models = getModels();
+    const [heroModel, setHeroModel] = useState<ModelProfileWithImages>(sampleModelData);
+    const [loading, setLoading] = useState(true);
 
-  return (
-    <div className="w-full-safe max-w-screen-safe">
-      {/* Hero Section */}
-      <ModelPortfolioHero
-        modelProfile={heroModel}
-        className="w-full"
-      />
+    useEffect(() => {
+        // Try to get a random model profile, fallback to sample data
+        const randomProfile = getRandomModelProfile();
+        setHeroModel(randomProfile);
+        setLoading(false);
+    }, []);
 
-      <div className="container mx-auto responsive-padding py-16">
-        <div className="text-center mb-12 sm:mb-16">
-          <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
-            <Users className="w-4 h-4 mr-2" />
-            MEET OUR TALENT
-          </Badge>
-          <h1 className="mb-6">Exceptional Models</h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Discover the extraordinary individuals who bring our premium content to life
-          </p>
+    const models = getModels();
+
+    if (loading) {
+        return (
+            <div className="w-full-safe max-w-screen-safe">
+                <div className="relative w-full h-[70vh] min-h-[400px] max-h-[700px]">
+                    <Skeleton className="w-full h-full" />
+                </div>
+                <div className="container mx-auto responsive-padding py-16">
+                    <ModelsGridSkeleton />
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full-safe max-w-screen-safe">
+            {/* Hero Section */}
+            <ModelPortfolioHero
+                modelProfile={heroModel}
+                className="w-full"
+            />
+
+            <div className="container mx-auto responsive-padding py-16">
+                <div className="text-center mb-12 sm:mb-16">
+                    <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
+                        <Users className="w-4 h-4 mr-2" />
+                        MEET OUR TALENT
+                    </Badge>
+                    <h1 className="mb-6">Exceptional Models</h1>
+                    <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+                        Discover the extraordinary individuals who bring our premium content to life
+                    </p>
+                </div>
+
+                <Suspense fallback={<ModelsGridSkeleton />}>
+                    <ModelsContent />
+                </Suspense>
+            </div>
         </div>
-
-        <div className="responsive-grid gap-6 sm:gap-8">
-          {models.map((model, index) => (
-            <ModelCard key={model.id} model={model} priority={index < 6} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
