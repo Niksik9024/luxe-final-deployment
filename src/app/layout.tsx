@@ -42,6 +42,35 @@ export default function RootLayout({
     if (hasAccess) {
       setIsAccessGranted(true);
     }
+
+    // Global error handler for chunk loading errors
+    const handleGlobalError = (event: ErrorEvent) => {
+      const error = event.error;
+      if (error && (error.name === 'ChunkLoadError' || 
+          error.message?.includes('Loading chunk') ||
+          error.message?.includes('timeout'))) {
+        console.log('Chunk loading error detected, reloading...');
+        window.location.reload();
+      }
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const error = event.reason;
+      if (error && typeof error === 'object' && 
+          (error.name === 'ChunkLoadError' || 
+           error.message?.includes('Loading chunk'))) {
+        console.log('Chunk loading promise rejection detected, reloading...');
+        window.location.reload();
+      }
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   }, []);
 
   const handleAccessGranted = () => {

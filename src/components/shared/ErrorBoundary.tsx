@@ -1,14 +1,14 @@
-
 'use client';
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error?: Error;
+  isChunkError?: boolean;
 }
 
 interface ErrorBoundaryProps {
@@ -23,19 +23,61 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    // Check if this is a chunk loading error
+    const isChunkError = error.name === 'ChunkLoadError' || 
+                        error.message.includes('Loading chunk') ||
+                        error.message.includes('timeout');
+
+    return { hasError: true, error, isChunkError };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error('Error caught by boundary:', error, errorInfo);
+
+    // If it's a chunk error, attempt automatic reload after a short delay
+    if (error.name === 'ChunkLoadError' || error.message.includes('Loading chunk')) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   }
 
   retry = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState({ hasError: false, error: undefined, isChunkError: false });
   };
 
   render() {
     if (this.state.hasError) {
+      // Special handling for chunk errors
+      if (this.state.isChunkError) {
+        return (
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <Card className="w-full max-w-md">
+              <CardHeader className="text-center">
+                <div className="flex justify-center mb-4">
+                  <RefreshCw className="h-12 w-12 text-primary animate-spin" />
+                </div>
+                <CardTitle>Loading Application...</CardTitle>
+                <CardDescription>
+                  The application is updating. Please wait while we reload the page.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <p className="text-sm text-muted-foreground mb-4">
+                  If this takes too long, try refreshing manually.
+                </p>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="w-full"
+                >
+                  Refresh Now
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      }
+
       if (this.props.fallback) {
         const FallbackComponent = this.props.fallback;
         return <FallbackComponent error={this.state.error} retry={this.retry} />;
