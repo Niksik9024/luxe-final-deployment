@@ -78,15 +78,19 @@ const UserMenu = () => {
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-full hover:ring-2 hover:ring-primary/30 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px]">
-                        <Avatar className="h-10 w-10 sm:h-12 sm:w-12 border-2 border-primary/40 hover:border-primary transition-colors">
-                            <AvatarImage src={currentUser.image} alt={currentUser.name} />
-                            <AvatarFallback className="bg-luxury-gradient text-black font-bold text-sm sm:text-lg">
-                                {currentUser.name?.charAt(0).toUpperCase()}
+                    <Button variant="ghost" className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-full hover:ring-2 hover:ring-primary/30 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] p-0">
+                        <Avatar className="h-10 w-10 sm:h-11 sm:w-11 border-2 border-primary/40 hover:border-primary transition-colors">
+                            <AvatarImage 
+                                src={currentUser.image || '/default-avatar.png'} 
+                                alt={currentUser.name || 'User'} 
+                                className="object-cover"
+                            />
+                            <AvatarFallback className="bg-luxury-gradient text-black font-bold text-base sm:text-lg">
+                                {currentUser.name?.charAt(0)?.toUpperCase() || 'U'}
                             </AvatarFallback>
                         </Avatar>
-                        <div className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-primary rounded-full flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-black rounded-full"></div>
+                        <div className="absolute -top-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 bg-primary rounded-full flex items-center justify-center shadow-sm">
+                            <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
                         </div>
                     </Button>
                 </DropdownMenuTrigger>
@@ -164,7 +168,7 @@ const AuthElement = () => {
     const [authModalOpen, setAuthModalOpen] = useState(false);
 
     if (loading) {
-        return <Skeleton className="h-10 w-20 sm:h-12 sm:w-28" />
+        return <Skeleton className="h-11 w-24 sm:h-12 sm:w-32" />
     }
     
     return (
@@ -172,11 +176,10 @@ const AuthElement = () => {
             {currentUser ? <UserMenu /> : (
                 <Button 
                     onClick={() => setAuthModalOpen(true)} 
-                    className="btn-luxury px-4 py-2 sm:px-6 sm:py-3 font-bold tracking-wider hover:shadow-luxury transition-all duration-300 text-sm sm:text-base min-h-[44px] touch-manipulation"
+                    className="btn-luxury px-3 py-2 sm:px-6 sm:py-3 font-bold tracking-wider hover:shadow-luxury transition-all duration-300 text-xs sm:text-sm md:text-base min-h-[44px] touch-manipulation"
                 >
-                    <User className="mr-2 h-4 w-4" />
-                    <span className="hidden sm:inline">SIGN IN</span>
-                    <span className="sm:hidden">SIGN IN</span>
+                    <User className="mr-1.5 sm:mr-2 h-4 w-4" />
+                    <span className="text-xs sm:text-sm font-semibold">SIGN IN</span>
                 </Button>
             )}
             <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />

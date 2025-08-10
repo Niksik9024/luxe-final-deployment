@@ -56,19 +56,19 @@ export default function AdminDashboard() {
 
     if (loading) {
         return (
-             <div>
-                <h1 className="text-3xl font-headline font-bold mb-8">Dashboard</h1>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                   <Skeleton className="h-28 w-full" />
-                   <Skeleton className="h-28 w-full" />
-                   <Skeleton className="h-28 w-full" />
+             <div className="w-full max-w-full">
+                <h1 className="text-2xl sm:text-3xl font-headline font-bold mb-6 sm:mb-8">Dashboard</h1>
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                   <Skeleton className="h-24 sm:h-28 w-full" />
+                   <Skeleton className="h-24 sm:h-28 w-full" />
+                   <Skeleton className="h-24 sm:h-28 w-full" />
                 </div>
-                 <div className="grid gap-8 mt-8 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                        <Skeleton className="h-[400px] w-full" />
+                 <div className="grid gap-6 sm:gap-8 mt-6 sm:mt-8 grid-cols-1 xl:grid-cols-3">
+                    <div className="xl:col-span-2">
+                        <Skeleton className="h-[300px] sm:h-[400px] w-full" />
                     </div>
-                    <div className="lg:col-span-1">
-                        <Skeleton className="h-[400px] w-full" />
+                    <div className="xl:col-span-1">
+                        <Skeleton className="h-[300px] sm:h-[400px] w-full" />
                     </div>
                  </div>
             </div>
@@ -76,37 +76,37 @@ export default function AdminDashboard() {
     }
 
   return (
-    <div>
-      <h1 className="text-3xl font-headline font-bold mb-8">Dashboard</h1>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="w-full max-w-full">
+      <h1 className="text-2xl sm:text-3xl font-headline font-bold mb-6 sm:mb-8">Dashboard</h1>
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard title="Total Videos" value={String(stats.videos)} icon={Video} />
         <StatCard title="Total Galleries" value={String(stats.galleries)} icon={ImageIcon} />
         <StatCard title="Total Models" value={String(stats.models)} icon={Users} />
       </div>
-      <div className="grid gap-8 mt-8 grid-cols-1 xl:grid-cols-3">
+      <div className="grid gap-6 sm:gap-8 mt-6 sm:mt-8 grid-cols-1 xl:grid-cols-3">
         <div className="xl:col-span-2">
-            <Card className="bg-card border-border shadow-lg h-full">
-                <CardHeader className="responsive-padding">
-                    <CardTitle className="text-xl font-headline">Recent Content</CardTitle>
-                    <CardDescription>The latest videos and galleries added.</CardDescription>
+            <Card className="bg-card border-border shadow-lg h-full w-full max-w-full">
+                <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="text-lg sm:text-xl font-headline">Recent Content</CardTitle>
+                    <CardDescription className="text-sm sm:text-base">The latest videos and galleries added.</CardDescription>
                 </CardHeader>
-                <CardContent className="responsive-padding">
-                   <div className="space-y-4">
+                <CardContent className="p-4 sm:p-6">
+                   <div className="space-y-3 sm:space-y-4 w-full max-w-full">
                         {loading ? (
                             Array.from({ length: 3 }).map((_, index) => (
-                                <div key={index} className="flex items-center gap-4 animate-pulse">
-                                    <div className="w-16 h-16 bg-muted rounded-md flex-shrink-0"></div>
+                                <div key={index} className="flex items-center gap-3 sm:gap-4 animate-pulse w-full">
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-md flex-shrink-0"></div>
                                     <div className="flex-1 min-w-0 space-y-2">
                                         <div className="h-4 bg-muted rounded w-3/4"></div>
                                         <div className="h-3 bg-muted rounded w-1/2"></div>
                                         <div className="h-3 bg-muted rounded w-1/3"></div>
                                     </div>
-                                    <div className="h-8 w-16 bg-muted rounded flex-shrink-0"></div>
+                                    <div className="h-8 w-12 sm:w-16 bg-muted rounded flex-shrink-0"></div>
                                 </div>
                             ))
                         ) : recentContent.length > 0 ? (
                             recentContent.map(item => (
-                                <div key={item.id} className="flex items-center gap-3 sm:gap-4">
+                                <div key={item.id} className="flex items-center gap-3 sm:gap-4 w-full max-w-full">
                                     <Image 
                                         src={item.image} 
                                         alt={item.title} 
@@ -114,15 +114,15 @@ export default function AdminDashboard() {
                                         height={64} 
                                         className="rounded-md object-cover w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0"
                                     />
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-sm sm:text-base truncate">{item.title}</h3>
-                                        <p className="text-xs sm:text-sm text-muted-foreground capitalize truncate">{item.type}</p>
+                                    <div className="flex-1 min-w-0 overflow-hidden">
+                                        <h3 className="font-medium text-sm sm:text-base text-truncate-1">{item.title}</h3>
+                                        <p className="text-xs sm:text-sm text-muted-foreground capitalize text-truncate-1">{item.type}</p>
                                         <p className="text-xs text-muted-foreground">{new Date(item.date).toLocaleDateString()}</p>
                                     </div>
                                     <Button 
                                         variant="outline" 
                                         size="sm" 
-                                        className="flex-shrink-0 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] touch-manipulation"
+                                        className="flex-shrink-0 text-xs sm:text-sm min-h-[36px] sm:min-h-[40px] touch-manipulation px-2 sm:px-3"
                                     >
                                         Edit
                                     </Button>
@@ -130,7 +130,7 @@ export default function AdminDashboard() {
                             ))
                         ) : (
                             <div className="text-center py-8 text-muted-foreground">
-                                <p>No recent content found</p>
+                                <p className="text-sm sm:text-base">No recent content found</p>
                             </div>
                         )}
                    </div>
@@ -138,13 +138,13 @@ export default function AdminDashboard() {
             </Card>
         </div>
          <div className="xl:col-span-1">
-            <Card className="bg-card border-border shadow-lg h-full">
-                <CardHeader>
-                    <CardTitle className="text-xl font-headline">Top Performing Models</CardTitle>
-                    <CardDescription>Models featured in the most content.</CardDescription>
+            <Card className="bg-card border-border shadow-lg h-full w-full max-w-full">
+                <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="text-lg sm:text-xl font-headline">Top Performing Models</CardTitle>
+                    <CardDescription className="text-sm sm:text-base">Models featured in the most content.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                   <p className="text-muted-foreground">Data coming soon.</p>
+                <CardContent className="p-4 sm:p-6">
+                   <p className="text-muted-foreground text-sm sm:text-base">Data coming soon.</p>
                 </CardContent>
             </Card>
         </div>

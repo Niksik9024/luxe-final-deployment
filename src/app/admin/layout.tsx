@@ -113,53 +113,53 @@ const MobileAdminSidebar = () => {
     return (
         <Sheet>
             <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                    <PanelLeft />
+                <Button variant="ghost" size="icon" className="md:hidden h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation">
+                    <PanelLeft className="h-5 w-5" />
                 </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="bg-black/95 backdrop-blur-xl border-primary/20 p-0 w-4/5">
+            <SheetContent side="left" className="bg-black/95 backdrop-blur-xl border-primary/20 p-0 w-full max-w-sm">
                 <div className="absolute inset-0 bg-luxury-dark-gradient opacity-50"></div>
-                <div className="relative">
-                  <div className="p-6 border-b border-primary/20">
+                <div className="relative h-full flex flex-col">
+                  <div className="p-4 sm:p-6 border-b border-primary/20 flex-shrink-0">
                       <Logo />
                   </div>
-                  <nav className="p-6">
-                      <ul className="space-y-2">
+                  <nav className="flex-1 overflow-y-auto p-4 sm:p-6">
+                      <ul className="space-y-1">
                         {navItems.map((item) => (
                         <li key={item.href}>
                             <SheetClose asChild>
                                 <Link 
                                     href={item.href}
                                     className={cn(
-                                        'flex items-center gap-4 py-4 px-6 rounded-xl transition-all duration-300 text-lg font-medium',
+                                        'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium min-h-[44px] touch-manipulation',
                                         pathname === item.href 
                                           ? 'bg-primary text-primary-foreground border-l-4 border-primary' 
                                           : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-l-4 border-transparent hover:border-primary'
                                     )}
                                 >
-                                    <item.icon className="h-5 w-5" />
-                                    {item.label}
+                                    <item.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                    <span className="truncate">{item.label}</span>
                                 </Link>
                             </SheetClose>
                         </li>
                         ))}
                         {process.env.NODE_ENV === 'development' && (
                         <>
-                            <div className="px-6 pt-6 pb-3 text-xs uppercase text-primary tracking-wider font-semibold">Development</div>
+                            <div className="px-4 pt-4 pb-2 text-xs uppercase text-primary tracking-wider font-semibold">Development</div>
                             {devNavItems.map((item) => (
                             <li key={item.href}>
                                 <SheetClose asChild>
                                     <Link 
                                         href={item.href}
                                         className={cn(
-                                            'flex items-center gap-4 py-4 px-6 rounded-xl transition-all duration-300 text-lg font-medium',
+                                            'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium min-h-[44px] touch-manipulation',
                                             pathname === item.href 
                                               ? 'bg-primary text-primary-foreground border-l-4 border-primary' 
                                               : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-l-4 border-transparent hover:border-primary'
                                         )}
                                     >
-                                        <item.icon className="h-5 w-5" />
-                                        {item.label}
+                                        <item.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                        <span className="truncate">{item.label}</span>
                                     </Link>
                                 </SheetClose>
                             </li>
@@ -168,11 +168,11 @@ const MobileAdminSidebar = () => {
                     )}
                     </ul>
                   </nav>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-primary/20">
+                  <div className="flex-shrink-0 p-4 sm:p-6 border-t border-primary/20">
                       <SheetClose asChild>
-                          <Link href="/" className="flex items-center gap-4 py-4 px-6 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 border-l-4 border-transparent hover:border-primary text-lg font-medium">
-                              <Home className="h-5 w-5" />
-                              <span>View Site</span>
+                          <Link href="/" className="flex items-center gap-3 py-3 px-4 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 border-l-4 border-transparent hover:border-primary text-sm sm:text-base font-medium min-h-[44px] touch-manipulation">
+                              <Home className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                              <span className="truncate">View Site</span>
                           </Link>
                     </SheetClose>
                   </div>
@@ -239,8 +239,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </div>
             </div>
             </header>
-            <main className="flex-1 p-4 md:p-8 bg-muted/40 w-full max-w-full overflow-x-hidden">
-                <div className="container mx-auto w-full max-w-full">
+            <main className="flex-1 p-4 md:p-6 lg:p-8 bg-muted/40 w-full max-w-full overflow-x-hidden">
+                <div className="w-full max-w-full mx-auto px-0">
                     {children}
                 </div>
             </main>

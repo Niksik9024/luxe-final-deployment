@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -38,6 +37,18 @@ export const AdminUserTable: React.FC<AdminUserTableProps> = ({
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Placeholder for handleEdit and handleDelete if they are not defined in the scope where AdminUserTable is used.
+  // In a real application, these would likely be passed down as props or defined in a parent component.
+  const handleEdit = (user: AdminUser) => {
+    console.log('Editing user:', user);
+    // Implement actual edit logic here
+  };
+
+  const handleDelete = (userId: string) => {
+    console.log('Deleting user:', userId);
+    // Implement actual delete logic here
   };
 
   return (
@@ -110,11 +121,11 @@ export const AdminUserTable: React.FC<AdminUserTableProps> = ({
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden space-y-4">
+      <div className="mobile-cards md:hidden space-y-3">
         {users.map((user) => (
-          <Card key={user.id} className="mobile-card luxury-card">
+          <div key={user.id} className="mobile-card">
             <div className="mobile-card-header">
-              <div className="flex items-center gap-3 mobile-card-title">
+              <div className="flex items-center gap-3 mobile-card-title text-base font-semibold">
                 <div className="w-10 h-10 bg-luxury-gradient rounded-full flex items-center justify-center">
                   <User className="h-5 w-5 text-black" />
                 </div>
@@ -145,35 +156,41 @@ export const AdminUserTable: React.FC<AdminUserTableProps> = ({
                 </DropdownMenu>
               </div>
             </div>
-            
+
             <div className="mobile-card-content">
               <div className="mobile-card-row">
-                <span className="mobile-card-label">Role:</span>
-                <Badge className={user.role === 'admin' ? 'badge-luxury' : 'bg-muted text-muted-foreground'}>
-                  {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
-                  {user.role.toUpperCase()}
-                </Badge>
+                <span className="mobile-card-label text-xs">Email:</span>
+                <span className="mobile-card-value text-xs text-truncate-1">{user.email}</span>
               </div>
-              
               <div className="mobile-card-row">
-                <span className="mobile-card-label">Status:</span>
-                <Badge variant={user.status === 'active' ? 'default' : 'secondary'} 
-                       className={user.status === 'active' ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}>
-                  {user.status.toUpperCase()}
-                </Badge>
+                <span className="mobile-card-label text-xs">Role:</span>
+                <span className="mobile-card-value">
+                  <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                    {user.role.toUpperCase()}
+                  </Badge>
+                </span>
               </div>
-              
+
               <div className="mobile-card-row">
-                <span className="mobile-card-label">Created:</span>
-                <span className="mobile-card-value">{formatDate(user.createdAt)}</span>
+                <span className="mobile-card-label text-xs">Status:</span>
+                <span className="mobile-card-value">
+                  <Badge variant={user.status === 'active' ? 'default' : 'outline'} className="text-xs">
+                    {user.status.toUpperCase()}
+                  </Badge>
+                </span>
               </div>
-              
+
               <div className="mobile-card-row">
-                <span className="mobile-card-label">Last Login:</span>
-                <span className="mobile-card-value">{formatDate(user.lastLogin)}</span>
+                <span className="mobile-card-label text-xs">Created:</span>
+                <span className="mobile-card-value text-xs">{formatDate(user.createdAt)}</span>
+              </div>
+
+              <div className="mobile-card-row">
+                <span className="mobile-card-label text-xs">Last Login:</span>
+                <span className="mobile-card-value text-xs">{formatDate(user.lastLogin)}</span>
               </div>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
     </>
