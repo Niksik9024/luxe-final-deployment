@@ -1,194 +1,191 @@
+'use client';
 
-
-'use client'
-
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ContentCard } from '@/components/shared/ContentCard';
-import type { Video, Gallery, Photo } from '@/lib/types';
-import { Film, ImageIcon, Grid3x3 } from 'lucide-react';
-import { PhotoCard } from '../shared/PhotoCard';
-import { Lightbox } from '@/components/shared/Lightbox';
+import React, { useState, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Play, Calendar, Image as ImageIcon, Video as VideoIcon, FolderOpen } from 'lucide-react';
+import Link from 'next/link';
+import type { Video, Gallery } from '@/lib/types';
 
 interface ModelPortfolioProps {
-    videos: Video[];
-    galleries: Gallery[];
+  videos: Video[];
+  galleries: Gallery[];
 }
 
 export function ModelPortfolio({ videos, galleries }: ModelPortfolioProps) {
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxStartIndex, setLightboxStartIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState<'all' | 'videos' | 'photos' | 'galleries'>('all');
 
-  const hasVideos = videos.length > 0;
-  const hasGalleries = galleries.length > 0;
-  
-  const allPhotos = galleries.flatMap(gallery => 
-    (gallery.album || []).map((url, i) => ({
-      id: `${gallery.id}-photo-${i}`,
-      image: url,
-      title: `${gallery.title} - Photo ${i + 1}`,
-      galleryId: gallery.id,
-      galleryTitle: gallery.title,
-    }))
-  );
-  const hasPhotos = allPhotos.length > 0;
+  const allContent = useMemo(() => {
+    const videoContent = videos.map(video => ({
+      ...video,
+      type: 'video' as const,
+      date: new Date(video.date)
+    }));
 
-  const handlePhotoClick = (photoIndex: number) => {
-    setLightboxStartIndex(photoIndex);
-    setLightboxOpen(true);
-  };
+    const photoContent = galleries.flatMap(gallery => 
+      gallery.images.map(image => ({
+        id: `${gallery.id}-${image.id}`,
+        title: image.title || gallery.title,
+        thumbnail: image.url,
+        type: 'photo' as const,
+        date: new Date(gallery.date),
+        galleryId: gallery.id,
+        galleryTitle: gallery.title
+      }))
+    );
 
-  if (!hasVideos && !hasGalleries) {
-    return (
-        <div className="text-center py-16 text-muted-foreground bg-card rounded-lg">
-            <p>This model has no content yet.</p>
-        </div>
-    )
-  }
+    const galleryContent = galleries.map(gallery => ({
+      ...gallery,
+      type: 'gallery' as const,
+      date: new Date(gallery.date),
+      thumbnail: gallery.images[0]?.url || '/default-avatar.png'
+    }));
 
-  const allContent = [
-    ...videos.map(v => ({ ...v, type: 'video' as const })),
-    ...galleries.map(g => ({ ...g, type: 'gallery' as const }))
-  ].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...videoContent, ...photoContent, ...galleryContent].sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [videos, galleries]);
+
+  const filteredContent = useMemo(() => {
+    switch (activeTab) {
+      case 'videos':
+        return allContent.filter(item => item.type === 'video');
+      case 'photos':
+        return allContent.filter(item => item.type === 'photo');
+      case 'galleries':
+        return allContent.filter(item => item.type === 'gallery');
+      default:
+        return allContent;
+    }
+  }, [allContent, activeTab]);
 
   return (
-    <div className="space-y-12">
-      {/* Photos Section */}
-      {hasPhotos && (
-        <section>
-          <h3 className="text-2xl font-bold mb-6 text-center">Photos</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {allPhotos.map((photo, index) => (
-              <div 
-                key={photo.id} 
-                className="relative aspect-[3/4] overflow-hidden rounded-lg cursor-pointer group luxury-card"
-                onClick={() => handlePhotoClick(index)}
-              >
+    <div className="space-y-6 w-full">
+      {/* Filter Tabs */}
+      <div className="w-full">
+        <div className="flex flex-wrap gap-2 border-b border-border overflow-x-auto pb-2">
+          <Button
+            variant={activeTab === 'all' ? 'default' : 'ghost'}
+            onClick={() => setActiveTab('all')}
+            className="rounded-b-none whitespace-nowrap"
+            size="sm"
+          >
+            ALL
+          </Button>
+          <Button
+            variant={activeTab === 'videos' ? 'default' : 'ghost'}
+            onClick={() => setActiveTab('videos')}
+            className="rounded-b-none whitespace-nowrap"
+            size="sm"
+          >
+            <VideoIcon className="mr-2 h-4 w-4" />
+            VIDEOS
+          </Button>
+          <Button
+            variant={activeTab === 'photos' ? 'default' : 'ghost'}
+            onClick={() => setActiveTab('photos')}
+            className="rounded-b-none whitespace-nowrap"
+            size="sm"
+          >
+            <ImageIcon className="mr-2 h-4 w-4" />
+            PHOTOS
+          </Button>
+          <Button
+            variant={activeTab === 'galleries' ? 'default' : 'ghost'}
+            onClick={() => setActiveTab('galleries')}
+            className="rounded-b-none whitespace-nowrap"
+            size="sm"
+          >
+            <FolderOpen className="mr-2 h-4 w-4" />
+            GALLERIES
+          </Button>
+        </div>
+      </div>
+
+      {/* Content Grid */}
+      <div className="w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          {filteredContent.map((item) => (
+            <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-shadow w-full">
+              <div className="relative aspect-video w-full">
                 <img
-                  src={photo.image}
-                  alt={photo.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/api/placeholder/300/400';
-                  }}
+                  src={item.thumbnail}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-2 left-2 text-white text-sm font-medium">
-                    {photo.galleryTitle}
+                {item.type === 'video' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="h-8 w-8 md:h-12 md:w-12 text-white" />
                   </div>
+                )}
+                {item.type === 'gallery' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                    <div className="text-center">
+                      <FolderOpen className="h-8 w-8 md:h-12 md:w-12 text-white mx-auto mb-1" />
+                      <span className="text-white text-sm font-medium">
+                        {(item as any).images?.length || 0} photos
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div className="absolute top-2 right-2">
+                  <Badge variant={
+                    item.type === 'video' ? 'default' : 
+                    item.type === 'gallery' ? 'secondary' : 
+                    'outline'
+                  } className="text-xs">
+                    {item.type === 'video' ? 'Video' : 
+                     item.type === 'gallery' ? 'Gallery' : 'Photo'}
+                  </Badge>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Videos and Galleries Content */}
-      {allContent.length > 0 && (
-        <section>
-          <h3 className="text-2xl font-bold mb-6 text-center">Content</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allContent.map((item) => (
-              <div key={item.id} className="luxury-card p-4 rounded-lg">
-                <div className="relative aspect-video mb-4 overflow-hidden rounded">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/api/placeholder/400/225';
-                    }}
-                  />
-                  <div className="absolute top-2 right-2">
-                    <span className="bg-luxury-gradient text-black px-2 py-1 rounded text-xs font-semibold uppercase">
-                      {item.type}
-                    </span>
-                  </div>
+              <CardContent className="p-3 md:p-4">
+                <h3 className="font-semibold mb-2 line-clamp-1 text-sm md:text-base">{item.title}</h3>
+                <div className="flex items-center text-xs md:text-sm text-muted-foreground mb-2">
+                  <Calendar className="mr-1 h-3 w-3" />
+                  {item.date.toLocaleDateString()}
                 </div>
-                <h4 className="font-semibold text-lg mb-2">{item.title}</h4>
-                <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{item.description}</p>
-                <a 
-                  href={`/${item.type}s/${item.id}`}
-                  className="btn-luxury inline-block px-4 py-2 rounded text-center w-full text-sm"
+                {item.type === 'photo' && (
+                  <p className="text-xs text-muted-foreground mb-2">
+                    From: {(item as any).galleryTitle}
+                  </p>
+                )}
+                {item.type === 'gallery' && (
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {(item as any).images?.length || 0} images
+                  </p>
+                )}
+                <Link 
+                  href={
+                    item.type === 'video' ? `/videos/${item.id}` : 
+                    item.type === 'gallery' ? `/galleries/${item.id}` :
+                    `/galleries/${(item as any).galleryId}`
+                  }
+                  className="block w-full"
                 >
-                  View {item.type === 'video' ? 'Video' : 'Gallery'}
-                </a>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+                  <Button variant="outline" size="sm" className="w-full text-xs md:text-sm">
+                    View {
+                      item.type === 'video' ? 'Video' : 
+                      item.type === 'gallery' ? 'Gallery' : 'Photo'
+                    }
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
 
-      {/* Lightbox */}
-      {lightboxOpen && (
-        <Lightbox
-          images={allPhotos}
-          startIndex={lightboxStartIndex}
-          onClose={() => setLightboxOpen(false)}
-        />
+      {filteredContent.length === 0 && (
+        <div className="text-center py-8 md:py-12 text-muted-foreground">
+          <div className="mb-4">
+            {activeTab === 'videos' && <VideoIcon className="mx-auto h-8 w-8 md:h-12 md:w-12 opacity-50" />}
+            {activeTab === 'photos' && <ImageIcon className="mx-auto h-8 w-8 md:h-12 md:w-12 opacity-50" />}
+            {activeTab === 'galleries' && <FolderOpen className="mx-auto h-8 w-8 md:h-12 md:w-12 opacity-50" />}
+            {activeTab === 'all' && <ImageIcon className="mx-auto h-8 w-8 md:h-12 md:w-12 opacity-50" />}
+          </div>
+          <p className="text-sm md:text-base">No {activeTab === 'all' ? 'content' : activeTab} available for this model.</p>
+        </div>
       )}
     </div>
   );
-
-
-  return (
-    <Tabs defaultValue="all" className="w-full">
-        <div className="border-b border-border mb-8">
-            <TabsList className="bg-transparent p-0 rounded-none">
-                <TabsTrigger value="all" className="data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-                    <Grid3x3 className="mr-2 h-4 w-4" /> ALL ({allContent.length})
-                </TabsTrigger>
-                {hasVideos && (
-                    <TabsTrigger value="videos" className="data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-                        <Film className="mr-2 h-4 w-4" /> VIDEOS ({videos.length})
-                    </TabsTrigger>
-                )}
-                {hasPhotos && (
-                    <TabsTrigger value="photos" className="data-[state=active]:shadow-none data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">
-                        <ImageIcon className="mr-2 h-4 w-4" /> PHOTOS ({allPhotos.length})
-                    </TabsTrigger>
-                )}
-            </TabsList>
-        </div>
-
-        <TabsContent value="all">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {allContent.map((item) => (
-                    <ContentCard 
-                        key={`${item.type}-${item.id}`}
-                        content={item}
-                        type={item.type}
-                    />
-                ))}
-            </div>
-        </TabsContent>
-
-        {hasVideos && (
-            <TabsContent value="videos">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {videos.map((video) => (
-                        <ContentCard 
-                            key={video.id} 
-                            content={video} 
-                            type="video" 
-                        />
-                    ))}
-                </div>
-            </TabsContent>
-        )}
-
-        {hasPhotos && (
-            <TabsContent value="photos">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                     {allPhotos.map((photo) => (
-                       <PhotoCard 
-                        key={photo.id} 
-                        photo={photo}
-                       />
-                    ))}
-                </div>
-            </TabsContent>
-        )}
-    </Tabs>
-  )
 }

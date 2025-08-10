@@ -119,20 +119,25 @@ export default function ModelPage() {
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-12 z-10 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+      <div className="container mx-auto px-4 py-8 md:py-12 z-10 relative">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
             
-            <div className="lg:col-span-1 space-y-6">
-                 {cleanDescription && <p className="text-muted-foreground text-lg" dangerouslySetInnerHTML={{ __html: cleanDescription }} />}
+            <div className="lg:col-span-1 space-y-4 md:space-y-6">
+                 {cleanDescription && (
+                   <div className="prose prose-sm md:prose-base max-w-none">
+                     <p className="text-muted-foreground text-sm md:text-base lg:text-lg" dangerouslySetInnerHTML={{ __html: cleanDescription }} />
+                   </div>
+                 )}
+                 
                  <div className="flex gap-2">
                     {model.instagram && (
-                        <Button variant="ghost" size="icon" asChild>
-                            <a href={`https://instagram.com/${model.instagram}`} target="_blank" rel="noopener noreferrer" aria-label={`${model.name}'s Instagram`}><Instagram/></a>
+                        <Button variant="ghost" size="icon" asChild className="touch-target">
+                            <a href={`https://instagram.com/${model.instagram}`} target="_blank" rel="noopener noreferrer" aria-label={`${model.name}'s Instagram`}><Instagram className="h-5 w-5"/></a>
                         </Button>
                     )}
                      {model.twitter && (
-                        <Button variant="ghost" size="icon" asChild>
-                             <a href={`https://twitter.com/${model.twitter}`} target="_blank" rel="noopener noreferrer" aria-label={`${model.name}'s Twitter`}><Twitter/></a>
+                        <Button variant="ghost" size="icon" asChild className="touch-target">
+                             <a href={`https://twitter.com/${model.twitter}`} target="_blank" rel="noopener noreferrer" aria-label={`${model.name}'s Twitter`}><Twitter className="h-5 w-5"/></a>
                         </Button>
                     )}
                 </div>
@@ -140,14 +145,16 @@ export default function ModelPage() {
                 <MeasurementCard model={model} />
 
                 {cleanFamousFor && (
-                    <section>
-                        <h3 className="text-2xl font-semibold mb-2">Famous For</h3>
-                        <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: cleanFamousFor }}/>
+                    <section className="space-y-2">
+                        <h3 className="text-xl md:text-2xl font-semibold">Famous For</h3>
+                        <div className="prose prose-sm md:prose-base max-w-none">
+                          <p className="text-muted-foreground text-sm md:text-base" dangerouslySetInnerHTML={{ __html: cleanFamousFor }}/>
+                        </div>
                     </section>
                 )}
             </div>
 
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 model-portfolio-container">
                 <ModelPortfolio videos={modelVideos} galleries={modelGalleries} />
             </div>
 

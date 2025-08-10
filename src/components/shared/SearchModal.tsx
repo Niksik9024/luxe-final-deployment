@@ -11,6 +11,10 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import debounce from 'lodash.debounce';
 
 interface SearchModalProps {
   open: boolean;
@@ -315,71 +319,64 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl p-0 bg-black/95 backdrop-blur-xl border-2 border-primary/30 shadow-luxury max-h-[90vh] overflow-hidden">
-        <VisuallyHidden>
-          <DialogTitle>Search Luxury Content</DialogTitle>
-        </VisuallyHidden>
-        <VisuallyHidden>
-          <p>Search through our exclusive collection of models, videos, and galleries using the input field below.</p>
-        </VisuallyHidden>
+      <DialogContent className="w-[95vw] max-w-2xl h-[85vh] max-h-[600px] p-0 gap-0 flex flex-col">
+        <DialogTitle className="sr-only">Search</DialogTitle>
+        <div className="relative border-b border-primary/20 bg-luxury-dark-gradient">
+          <div className="flex items-center px-6 py-4">
+            <Search className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search luxury content, models..."
+              value={query}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              className="flex-1 bg-transparent text-white placeholder:text-gray-400 border-0 outline-none text-base sm:text-lg font-medium min-w-0"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+            />
 
-        <div className="relative">
-          {/* Search Input */}
-          <div className="relative border-b border-primary/20 bg-luxury-dark-gradient">
-            <div className="flex items-center px-6 py-4">
-              <Search className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search luxury content, models..."
-                value={query}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                className="flex-1 bg-transparent text-white placeholder:text-gray-400 border-0 outline-none text-base sm:text-lg font-medium min-w-0"
-                autoComplete="off"
-                autoCapitalize="off"
-                spellCheck={false}
-              />
+            {/* Search Status */}
+            <div className="flex items-center gap-3 ml-3">
+              {isSearching && (
+                <div className="flex items-center gap-2 text-primary">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary/30 border-t-primary"></div>
+                  <span className="text-sm">Searching...</span>
+                </div>
+              )}
 
-              {/* Search Status */}
-              <div className="flex items-center gap-3 ml-3">
-                {isSearching && (
-                  <div className="flex items-center gap-2 text-primary">
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary/30 border-t-primary"></div>
-                    <span className="text-sm">Searching...</span>
+              {/* Keyboard Hints */}
+              {showResults && results.length > 0 && (
+                <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <ArrowUp className="h-3 w-3" />
+                    <ArrowDown className="h-3 w-3" />
+                    <span>navigate</span>
                   </div>
-                )}
-
-                {/* Keyboard Hints */}
-                {showResults && results.length > 0 && (
-                  <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <ArrowUp className="h-3 w-3" />
-                      <ArrowDown className="h-3 w-3" />
-                      <span>navigate</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <CornerDownLeft className="h-3 w-3" />
-                      <span>select</span>
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <CornerDownLeft className="h-3 w-3" />
+                    <span>select</span>
                   </div>
-                )}
+                </div>
+              )}
 
-                <button
-                  onClick={handleClose}
-                  className="p-1 hover:bg-primary/10 rounded-md transition-colors"
-                >
-                  <X className="h-4 w-4 text-gray-400 hover:text-primary" />
-                </button>
-              </div>
+              <button
+                onClick={handleClose}
+                className="p-1 hover:bg-primary/10 rounded-md transition-colors"
+              >
+                <X className="h-4 w-4 text-gray-400 hover:text-primary" />
+              </button>
             </div>
           </div>
+        </div>
 
-          {/* Results Container */}
-          <div 
-            ref={resultsRef}
-            className="max-h-[60vh] overflow-y-auto bg-luxury-dark-gradient scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30"
-          >
+        {/* Results Container */}
+        <div 
+          ref={resultsRef}
+          className="flex-1 overflow-hidden"
+        >
+          <div className="max-h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30">
             {/* Show popular searches when no query */}
             {!query && !showResults && (
               <div className="p-6 space-y-6">

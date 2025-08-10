@@ -58,9 +58,10 @@ export function VideosAdminClient() {
   }
 
   return (
-    <>
-      <div className="flex justify-end mb-8">
-        <Button asChild>
+    <div className="admin-content">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h2 className="text-xl font-semibold md:hidden">Videos</h2>
+        <Button asChild className="w-full sm:w-auto">
           <Link href="/admin/videos/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Video
@@ -68,64 +69,139 @@ export function VideosAdminClient() {
         </Button>
       </div>
 
-      <Card className="bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-        <CardHeader>
+      <Card className="admin-card">
+        <CardHeader className="hidden md:block">
           <CardTitle>Videos</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            {videos.map((video) => (
-              <div key={video.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="relative w-16 h-16 bg-black rounded overflow-hidden">
-                    <img 
-                      src={video.thumbnail} 
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                      <Play className="w-6 h-6 text-white" />
+        <CardContent className="p-0 md:p-6">
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <div className="grid gap-4">
+              {videos.map((video) => (
+                <div key={video.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="relative w-16 h-16 bg-black rounded overflow-hidden flex-shrink-0">
+                      <img 
+                        src={video.thumbnail} 
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                        <Play className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold">{video.title}</h3>
+                      <p className="text-sm text-muted-foreground text-truncate-2 max-w-md">{video.description}</p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <Badge variant="secondary">{video.status}</Badge>
+                        <Badge variant="outline">{video.duration}</Badge>
+                        {video.isFeatured && <Badge variant="default">Featured</Badge>}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">{video.title}</h3>
-                    <p className="text-sm text-muted-foreground">{video.description}</p>
-                    <div className="flex gap-2 mt-2">
-                      <Badge variant="secondary">{video.status}</Badge>
-                      <Badge variant="outline">{video.duration}</Badge>
-                      {video.isFeatured && <Badge variant="default">Featured</Badge>}
-                    </div>
+                  <div className="flex space-x-2 flex-shrink-0">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/videos/${video.id}`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/admin/videos/edit/${video.id}`}>
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDelete(video.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/videos/${video.id}`}>
-                      <Eye className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/admin/videos/edit/${video.id}`}>
-                      <Edit className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm"
-                    onClick={() => handleDelete(video.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4 p-4">
+            {videos.map((video) => (
+              <div key={video.id} className="mobile-card">
+                <div className="mobile-card-header">
+                  <div className="flex items-center space-x-3 flex-1 min-w-0">
+                    <div className="relative w-12 h-12 bg-black rounded overflow-hidden flex-shrink-0">
+                      <img 
+                        src={video.thumbnail} 
+                        alt={video.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                        <Play className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="mobile-card-title">{video.title}</h3>
+                    </div>
+                  </div>
+                  <div className="mobile-card-actions">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/videos/${video.id}`}>
+                        <Eye className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/admin/videos/edit/${video.id}`}>
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDelete(video.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="mobile-card-content">
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Description:</span>
+                    <span className="mobile-card-value text-truncate-2">{video.description}</span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Status:</span>
+                    <span className="mobile-card-value">
+                      <Badge variant="secondary" className="text-xs">{video.status}</Badge>
+                    </span>
+                  </div>
+                  <div className="mobile-card-row">
+                    <span className="mobile-card-label">Duration:</span>
+                    <span className="mobile-card-value">
+                      <Badge variant="outline" className="text-xs">{video.duration}</Badge>
+                    </span>
+                  </div>
+                  {video.isFeatured && (
+                    <div className="mobile-card-row">
+                      <span className="mobile-card-label">Featured:</span>
+                      <span className="mobile-card-value">
+                        <Badge variant="default" className="text-xs">Featured</Badge>
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
-            {videos.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                No videos found. Create your first video to get started.
-              </div>
-            )}
           </div>
+
+          {videos.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No videos found. Create your first video to get started.
+              </div>
+          )}
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
