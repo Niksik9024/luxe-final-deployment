@@ -11,8 +11,6 @@ import Image from 'next/image';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
 
 interface SearchModalProps {
   open: boolean;
@@ -246,12 +244,6 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       onOpenChange={onOpenChange}
       className="bg-black/98 backdrop-blur-xl border-2 border-primary/30 shadow-luxury max-w-3xl"
     >
-      <VisuallyHidden.Root>
-        <DialogTitle>Search Luxury Content</DialogTitle>
-        <DialogDescription>
-          Search for models, videos, galleries and luxury fashion content from our premium collection
-        </DialogDescription>
-      </VisuallyHidden.Root>
       
       <div className="relative border-b border-primary/20 bg-luxury-dark-gradient">
         <CommandInput 

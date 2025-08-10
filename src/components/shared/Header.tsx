@@ -40,29 +40,30 @@ const Logo = () => (
 
 const NavLinks = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void; isMobile?: boolean }) => (
   <nav className={cn(
-    "flex items-center gap-8 text-sm font-medium tracking-wider uppercase",
-    isMobile ? "flex-col items-start gap-6" : "flex-row"
+    "flex items-center text-sm font-medium tracking-wider uppercase",
+    isMobile ? "flex-col items-start gap-4 w-full" : "flex-row gap-8"
   )}>
     {[
-      { href: "/models", label: "Models", icon: <Users className="w-4 h-4" /> },
-      { href: "/videos", label: "Videos", icon: <Film className="w-4 h-4" /> },
-      { href: "/galleries", label: "Galleries", icon: <ImageIcon className="w-4 h-4" /> },
-      { href: "/about", label: "About", icon: <Diamond className="w-4 h-4" /> }
+      { href: "/models", label: "Models", icon: <Users className="w-5 h-5" /> },
+      { href: "/videos", label: "Videos", icon: <Film className="w-5 h-5" /> },
+      { href: "/galleries", label: "Galleries", icon: <ImageIcon className="w-5 h-5" /> },
+      { href: "/about", label: "About", icon: <Diamond className="w-5 h-5" /> }
     ].map((item) => (
       <Link
         key={item.href}
         href={item.href}
         className={cn(
-          "relative group flex items-center gap-2 py-2 px-4 rounded-lg transition-all duration-300",
-          "text-muted-foreground hover:text-primary hover:bg-primary/5",
-          "before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-luxury-gradient before:transition-all before:duration-300 hover:before:w-full",
-          isMobile && "text-lg py-3 px-0 before:bottom-2"
+          "relative group flex items-center transition-all duration-300",
+          "text-muted-foreground hover:text-primary",
+          isMobile 
+            ? "gap-4 py-4 px-6 w-full text-lg font-semibold rounded-xl hover:bg-primary/10 border-l-4 border-transparent hover:border-primary" 
+            : "gap-2 py-2 px-4 rounded-lg hover:bg-primary/5 before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-luxury-gradient before:transition-all before:duration-300 hover:before:w-full"
         )}
         onClick={onLinkClick}
       >
         {isMobile && item.icon}
         <span className="relative z-10">{item.label}</span>
-        <div className="absolute inset-0 rounded-lg bg-luxury-gradient opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+        {!isMobile && <div className="absolute inset-0 rounded-lg bg-luxury-gradient opacity-0 group-hover:opacity-10 transition-opacity duration-300" />}
       </Link>
     ))}
   </nav>
@@ -272,44 +273,49 @@ export const Header = () => {
                     </div>
                   </SheetHeader>
                   
-                  <div className="flex flex-col p-6 space-y-8">
-                    <NavLinks onLinkClick={handleCloseMobileMenu} isMobile />
-                    
-                    {currentUser && (
-                      <>
-                        <Separator className="bg-primary/20" />
-                        <div className="space-y-4">
-                          <Link 
-                            href="/favorites" 
-                            className="flex items-center gap-3 py-3 text-lg text-muted-foreground hover:text-primary transition-colors"
-                            onClick={handleCloseMobileMenu}
-                          >
-                            <Heart className="h-5 w-5" />
-                            Favorites
-                          </Link>
-                          <Link 
-                            href="/history" 
-                            className="flex items-center gap-3 py-3 text-lg text-muted-foreground hover:text-primary transition-colors"
-                            onClick={handleCloseMobileMenu}
-                          >
-                            <History className="h-5 w-5" />
-                            Watch History
-                          </Link>
-                        </div>
-                        
-                        <div className="flex items-center justify-between py-4 px-4 rounded-lg bg-primary/5 border border-primary/20">
-                          <Label htmlFor="data-saver-mode-mobile" className="text-base font-medium text-primary">
-                            Data Saver Mode
-                          </Label>
-                          <Switch 
-                            id="data-saver-mode-mobile" 
-                            checked={isDataSaver} 
-                            onCheckedChange={toggleDataSaver}
-                            className="data-[state=checked]:bg-primary"
-                          />
-                        </div>
-                      </>
-                    )}
+                  <div className="flex flex-col h-full">
+                    <div className="flex-1 p-6 space-y-6">
+                      <NavLinks onLinkClick={handleCloseMobileMenu} isMobile />
+                      
+                      {currentUser && (
+                        <>
+                          <Separator className="bg-primary/30 my-6" />
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4">Account</h4>
+                            <Link 
+                              href="/favorites" 
+                              className="flex items-center gap-4 py-4 px-6 text-lg text-muted-foreground hover:text-primary transition-colors rounded-xl hover:bg-primary/10 border-l-4 border-transparent hover:border-primary font-medium"
+                              onClick={handleCloseMobileMenu}
+                            >
+                              <Heart className="h-5 w-5" />
+                              Favorites
+                            </Link>
+                            <Link 
+                              href="/history" 
+                              className="flex items-center gap-4 py-4 px-6 text-lg text-muted-foreground hover:text-primary transition-colors rounded-xl hover:bg-primary/10 border-l-4 border-transparent hover:border-primary font-medium"
+                              onClick={handleCloseMobileMenu}
+                            >
+                              <History className="h-5 w-5" />
+                              Watch History
+                            </Link>
+                          </div>
+                          
+                          <div className="mt-6 p-4 rounded-xl bg-primary/5 border border-primary/20">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="data-saver-mode-mobile" className="text-base font-medium text-primary">
+                                Data Saver Mode
+                              </Label>
+                              <Switch 
+                                id="data-saver-mode-mobile" 
+                                checked={isDataSaver} 
+                                onCheckedChange={toggleDataSaver}
+                                className="data-[state=checked]:bg-primary"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </SheetContent>

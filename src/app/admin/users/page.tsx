@@ -1,11 +1,9 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -14,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { MoreHorizontal, Search, Filter, UserPlus, Edit, Trash2, Shield, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton'; // Import Skeleton
 
 interface User {
   id: string;
@@ -87,6 +86,28 @@ export default function UsersPage() {
           joinedAt: '2023-07-22T14:30:00Z',
           totalContent: 42,
           totalViews: 23150
+        },
+        {
+          id: '4',
+          name: 'Alice Williams',
+          email: 'alice@example.com',
+          role: 'user',
+          status: 'suspended',
+          lastActive: '2024-01-12T18:00:00Z',
+          joinedAt: '2023-05-01T11:00:00Z',
+          totalContent: 15,
+          totalViews: 6780
+        },
+        {
+          id: '5',
+          name: 'Charlie Brown',
+          email: 'charlie@example.com',
+          role: 'moderator',
+          status: 'active',
+          lastActive: '2024-01-16T09:00:00Z',
+          joinedAt: '2023-09-18T16:45:00Z',
+          totalContent: 30,
+          totalViews: 19500
         }
       ];
       setUsers(mockUsers);
@@ -472,7 +493,7 @@ export default function UsersPage() {
                         className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
                       />
                     </PaginationItem>
-                    
+
                     {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
                       const pageNumber = i + 1;
                       return (
@@ -486,7 +507,7 @@ export default function UsersPage() {
                         </PaginationItem>
                       );
                     })}
-                    
+
                     <PaginationItem>
                       <PaginationNext 
                         onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
@@ -495,7 +516,7 @@ export default function UsersPage() {
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
-                
+
                 <div className="text-center mt-4 responsive-text-sm text-muted-foreground">
                   Showing {startIndex + 1} to {Math.min(startIndex + ITEMS_PER_PAGE, filteredUsers.length)} of {filteredUsers.length} users
                 </div>
