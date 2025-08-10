@@ -18,8 +18,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Crown, Star, Diamond, Sparkles, TrendingUp, Award, Eye, Heart, Play, Image as ImageIcon } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Star, Play, Image as ImageIcon, Crown, Eye, Heart, Sparkles } from 'lucide-react';
 
 function HomePageSkeleton() {
     return (
@@ -49,46 +49,216 @@ function HomePageSkeleton() {
     )
 }
 
-const StatsCard = ({ icon, title, value, description }: { 
-  icon: React.ReactNode, 
-  title: string, 
-  value: string, 
-  description: string 
-}) => (
-  <Card className="luxury-card group">
-    <CardContent className="p-6 text-center">
-      <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-luxury-gradient">
-        {icon}
-      </div>
-      <div className="text-3xl font-bold luxury-text-gradient mb-2">{value}</div>
-      <h3 className="font-semibold text-foreground mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </CardContent>
-  </Card>
-);
+// Dynamic Model Showcase Component
+const DynamicModelShowcase = ({ models }: { models: Model[] }) => {
+  const [featuredModels, setFeaturedModels] = useState<Model[]>([]);
 
-const FeatureCard = ({ icon, title, description, badge }: { 
-  icon: React.ReactNode, 
-  title: string, 
-  description: string,
-  badge?: string 
-}) => (
-  <Card className="luxury-card group relative overflow-hidden">
-    <CardContent className="p-8 text-center relative z-10">
-      {badge && (
-        <Badge className="absolute top-4 right-4 bg-luxury-gradient text-black font-semibold">
-          {badge}
+  useEffect(() => {
+    // Randomize and select models for showcase
+    const shuffled = [...models].sort(() => Math.random() - 0.5);
+    setFeaturedModels(shuffled.slice(0, 8));
+  }, [models]);
+
+  return (
+    <section className="container mx-auto px-4 py-20">
+      <div className="text-center mb-16">
+        <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
+          <Crown className="w-4 h-4 mr-2" />
+          FEATURED MODELS
         </Badge>
-      )}
-      <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 group-hover:border-primary/60 transition-all duration-300">
-        {icon}
+        <h2 className="mb-6">Elite Showcase</h2>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Discover our handpicked selection of world-class models
+        </p>
       </div>
-      <h3 className="text-xl font-bold mb-4 uppercase tracking-wider">{title}</h3>
-      <p className="text-muted-foreground leading-relaxed">{description}</p>
-    </CardContent>
-    <div className="absolute inset-0 bg-luxury-gradient opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
-  </Card>
-);
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6 mb-12">
+        {featuredModels.map((model, index) => (
+          <Card key={model.id} className="luxury-card group overflow-hidden aspect-[3/4] relative">
+            <Link href={`/models/${model.id}`} className="block w-full h-full">
+              <div className="relative w-full h-full">
+                <img
+                  src={model.image}
+                  alt={model.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 w-full p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <h3 className="font-bold text-lg text-white mb-1">{model.name}</h3>
+                  <p className="text-sm text-white/80">View Portfolio</p>
+                </div>
+                <div className="absolute top-4 right-4 bg-luxury-gradient rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Eye className="w-4 h-4 text-black" />
+                </div>
+              </div>
+            </Link>
+          </Card>
+        ))}
+      </div>
+      
+      <div className="text-center">
+        <Button asChild className="btn-luxury px-8 py-3 text-lg">
+          <Link href="/models">Discover All Models</Link>
+        </Button>
+      </div>
+    </section>
+  );
+};
+
+// Interactive Content Mosaic Component
+const InteractiveContentMosaic = ({ videos, galleries }: { videos: Video[], galleries: Gallery[] }) => {
+  const [featuredContent, setFeaturedContent] = useState<(Video | Gallery)[]>([]);
+
+  useEffect(() => {
+    // Mix videos and galleries, randomize selection
+    const allContent = [...videos, ...galleries];
+    const shuffled = allContent.sort(() => Math.random() - 0.5);
+    setFeaturedContent(shuffled.slice(0, 9));
+  }, [videos, galleries]);
+
+  const getContentUrl = (content: Video | Gallery, index: number) => {
+    if ('videoUrl' in content) {
+      return `/videos/${content.id}`;
+    }
+    return `/galleries/${content.id}`;
+  };
+
+  const getGridClass = (index: number) => {
+    // Create varied sizes for masonry-like effect
+    if (index === 0 || index === 4) return "md:col-span-2 md:row-span-2";
+    if (index === 2 || index === 7) return "md:col-span-2";
+    return "";
+  };
+
+  return (
+    <section className="container mx-auto px-4 py-20">
+      <div className="text-center mb-16">
+        <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
+          <Sparkles className="w-4 h-4 mr-2" />
+          CONTENT MOSAIC
+        </Badge>
+        <h2 className="mb-6">Visual Excellence</h2>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          An ever-changing collection of our finest content
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        {featuredContent.map((content, index) => (
+          <Card 
+            key={`${content.id}-${index}`}
+            className={`luxury-card group overflow-hidden relative aspect-square hover:scale-105 transition-all duration-300 ${getGridClass(index)}`}
+          >
+            <Link href={getContentUrl(content, index)} className="block w-full h-full">
+              <div className="relative w-full h-full">
+                <img
+                  src={content.image}
+                  alt={content.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                  {'videoUrl' in content ? (
+                    <Play className="w-12 h-12 text-white" />
+                  ) : (
+                    <ImageIcon className="w-12 h-12 text-white" />
+                  )}
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
+                  <h3 className="font-semibold text-white truncate">{content.title}</h3>
+                  <p className="text-sm text-white/80 truncate">{content.models.join(', ')}</p>
+                </div>
+                <div className="absolute top-2 right-2">
+                  <Badge className={`${('videoUrl' in content) ? 'bg-red-500' : 'bg-blue-500'} text-white text-xs`}>
+                    {'videoUrl' in content ? 'VIDEO' : 'GALLERY'}
+                  </Badge>
+                </div>
+              </div>
+            </Link>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="text-center">
+          <Button asChild className="btn-luxury px-8 py-3 text-lg w-full md:w-auto">
+            <Link href="/videos">Explore All Videos</Link>
+          </Button>
+        </div>
+        <div className="text-center">
+          <Button asChild variant="outline" className="px-8 py-3 text-lg w-full md:w-auto border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+            <Link href="/galleries">Browse Galleries</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// Video Wall Component
+const VideoWall = ({ videos }: { videos: Video[] }) => {
+  const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
+
+  useEffect(() => {
+    // Select recent high-quality videos for the wall
+    const publishedVideos = videos.filter(v => v.status === 'Published');
+    const shuffled = publishedVideos.sort(() => Math.random() - 0.5);
+    setFeaturedVideos(shuffled.slice(0, 6));
+  }, [videos]);
+
+  return (
+    <section className="container mx-auto px-4 py-20">
+      <div className="text-center mb-16">
+        <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
+          <Play className="w-4 h-4 mr-2" />
+          VIDEO WALL
+        </Badge>
+        <h2 className="mb-6">Motion Gallery</h2>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Experience our premium video collection in motion
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {featuredVideos.map((video, index) => (
+          <Card key={video.id} className="luxury-card group overflow-hidden aspect-video relative">
+            <Link href={`/videos/${video.id}`} className="block w-full h-full">
+              <div className="relative w-full h-full">
+                <video
+                  src={video.videoUrl}
+                  poster={video.image}
+                  muted
+                  loop
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.pause();
+                    e.currentTarget.currentTime = 0;
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors duration-300" />
+                <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent">
+                  <h3 className="font-bold text-xl text-white mb-2">{video.title}</h3>
+                  <p className="text-white/80">{video.models.join(', ')}</p>
+                </div>
+                <div className="absolute center-0 inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="bg-luxury-gradient rounded-full p-4">
+                    <Play className="w-8 h-8 text-black fill-black" />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </Card>
+        ))}
+      </div>
+
+      <div className="text-center">
+        <Button asChild className="btn-luxury px-8 py-3 text-lg">
+          <Link href="/videos">View Full Collection</Link>
+        </Button>
+      </div>
+    </section>
+  );
+};
 
 export default function Home() {
   const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
@@ -148,45 +318,8 @@ export default function Home() {
     <main className="overflow-x-hidden luxury-dark-gradient">
       <HeroCarousel items={heroItems} />
 
-      {/* Luxury Stats Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
-            EXCLUSIVE PLATFORM
-          </Badge>
-          <h2 className="mb-6">Platform Excellence</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Join the world's most exclusive fashion and modeling platform
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <StatsCard 
-            icon={<Crown className="w-8 h-8 text-black" />}
-            title="Elite Models"
-            value={`${topModels.length}+`}
-            description="Verified professionals"
-          />
-          <StatsCard 
-            icon={<Play className="w-8 h-8 text-black" />}
-            title="Premium Videos"
-            value={`${featuredVideos.length + latestVideos.length}+`}
-            description="High-quality content"
-          />
-          <StatsCard 
-            icon={<ImageIcon className="w-8 h-8 text-black" />}
-            title="Exclusive Galleries"
-            value={`${latestGalleries.length}+`}
-            description="Curated collections"
-          />
-          <StatsCard 
-            icon={<Award className="w-8 h-8 text-black" />}
-            title="Premium Features"
-            value="100%"
-            description="Luxury experience"
-          />
-        </div>
-      </section>
+      {/* Dynamic Model Showcase - Replaces Stats Section */}
+      <DynamicModelShowcase models={topModels} />
 
       <div className="space-y-32 my-32">
         {/* Featured Content Section */}
@@ -215,54 +348,11 @@ export default function Home() {
             </section>
         )}
 
-        {/* Premium Features Section */}
-        <section className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
-              <Diamond className="w-4 h-4 mr-2" />
-              LUXURY FEATURES
-            </Badge>
-            <h2 className="mb-6">Premium Experience</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover what makes our platform the choice of luxury brands worldwide
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <FeatureCard 
-              icon={<Eye className="w-10 h-10 text-primary"/>}
-              title="4K Ultra HD"
-              description="Crystal clear visuals with professional-grade quality and cinematic excellence."
-              badge="NEW"
-            />
-            <FeatureCard 
-              icon={<Heart className="w-10 h-10 text-primary"/>}
-              title="Curated Content"
-              description="Every piece of content is carefully selected and reviewed by our luxury standards team."
-            />
-            <FeatureCard 
-              icon={<Sparkles className="w-10 h-10 text-primary"/>}
-              title="Exclusive Access"
-              description="Premium members get early access to new content and exclusive behind-the-scenes material."
-              badge="VIP"
-            />
-            <FeatureCard 
-              icon={<TrendingUp className="w-10 h-10 text-primary"/>}
-              title="Trending Now"
-              description="Stay ahead with real-time trending content and personalized recommendations."
-            />
-            <FeatureCard 
-              icon={<Crown className="w-10 h-10 text-primary"/>}
-              title="Elite Network"
-              description="Connect with top models, photographers, and industry professionals."
-            />
-            <FeatureCard 
-              icon={<Award className="w-10 h-10 text-primary"/>}
-              title="Premium Support"
-              description="24/7 concierge-level support with dedicated account management."
-            />
-          </div>
-        </section>
+        {/* Interactive Content Mosaic - Replaces Premium Features */}
+        <InteractiveContentMosaic videos={latestVideos} galleries={latestGalleries} />
+
+        {/* Video Wall Section */}
+        <VideoWall videos={[...featuredVideos, ...latestVideos]} />
         
         {/* Galleries Section */}
         {latestGalleries.length > 0 && (
