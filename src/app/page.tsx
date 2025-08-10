@@ -4,7 +4,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Model, Video, Gallery } from '@/lib/types';
 import Link from 'next/link';
-import Image from 'next/image';
 import { HeroCarousel } from '@/components/client/HeroCarousel';
 import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -68,7 +67,28 @@ const StatsCard = ({ icon, title, value, description }: {
   </Card>
 );
 
-
+const FeatureCard = ({ icon, title, description, badge }: { 
+  icon: React.ReactNode, 
+  title: string, 
+  description: string,
+  badge?: string 
+}) => (
+  <Card className="luxury-card group relative overflow-hidden">
+    <CardContent className="p-8 text-center relative z-10">
+      {badge && (
+        <Badge className="absolute top-4 right-4 bg-luxury-gradient text-black font-semibold">
+          {badge}
+        </Badge>
+      )}
+      <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 group-hover:border-primary/60 transition-all duration-300">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold mb-4 uppercase tracking-wider">{title}</h3>
+      <p className="text-muted-foreground leading-relaxed">{description}</p>
+    </CardContent>
+    <div className="absolute inset-0 bg-luxury-gradient opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+  </Card>
+);
 
 export default function Home() {
   const [featuredVideos, setFeaturedVideos] = useState<Video[]>([]);
@@ -195,123 +215,52 @@ export default function Home() {
             </section>
         )}
 
-        {/* Promotional Showcase Section */}
+        {/* Premium Features Section */}
         <section className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
-              <Sparkles className="w-4 h-4 mr-2" />
-              FEATURED SHOWCASE
+              <Diamond className="w-4 h-4 mr-2" />
+              LUXURY FEATURES
             </Badge>
-            <h2 className="mb-6">Luxury Experience</h2>
+            <h2 className="mb-6">Premium Experience</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Immerse yourself in our world of exclusive content and elite talent
+              Discover what makes our platform the choice of luxury brands worldwide
             </p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[600px]">
-            {/* Large Featured Model Promo */}
-            <div className="lg:col-span-8 relative overflow-hidden rounded-2xl luxury-glow group">
-              {topModels[0] && (
-                <>
-                  <Image
-                    src={topModels[0].image}
-                    alt={topModels[0].name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-8">
-                    <Badge className="mb-4 bg-luxury-gradient text-black font-bold">
-                      <Crown className="w-4 h-4 mr-2" />
-                      FEATURED MODEL
-                    </Badge>
-                    <h3 className="text-4xl font-bold text-white mb-2">{topModels[0].name}</h3>
-                    <p className="text-xl text-white/80 mb-6">Elite Fashion Model</p>
-                    <Button asChild className="btn-luxury">
-                      <Link href={`/models/${topModels[0].id}`}>
-                        View Portfolio
-                      </Link>
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Right Side - Video and Gallery Promos */}
-            <div className="lg:col-span-4 space-y-8">
-              {/* Premium Video Promo */}
-              {topVideos[0] && (
-                <div className="relative h-[280px] overflow-hidden rounded-2xl luxury-glow group">
-                  <Image
-                    src={topVideos[0].thumbnail}
-                    alt={topVideos[0].title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-luxury-gradient flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Play className="w-8 h-8 text-black ml-1" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <Badge className="mb-2 bg-red-600 text-white font-bold text-xs">
-                      <Play className="w-3 h-3 mr-1" />
-                      PREMIUM VIDEO
-                    </Badge>
-                    <h4 className="text-lg font-bold text-white leading-tight">{topVideos[0].title}</h4>
-                  </div>
-                  <Link href={`/videos/${topVideos[0].id}`} className="absolute inset-0" />
-                </div>
-              )}
-
-              {/* Gallery Collection Promo */}
-              {latestGalleries[0] && (
-                <div className="relative h-[280px] overflow-hidden rounded-2xl luxury-glow group">
-                  <Image
-                    src={latestGalleries[0].image}
-                    alt={latestGalleries[0].title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <ImageIcon className="w-8 h-8 text-white" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <Badge className="mb-2 bg-purple-600 text-white font-bold text-xs">
-                      <ImageIcon className="w-3 h-3 mr-1" />
-                      GALLERY COLLECTION
-                    </Badge>
-                    <h4 className="text-lg font-bold text-white leading-tight">{latestGalleries[0].title}</h4>
-                    <p className="text-sm text-white/70">{latestGalleries[0].album?.length || 0} Photos</p>
-                  </div>
-                  <Link href={`/galleries/${latestGalleries[0].id}`} className="absolute inset-0" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom CTA Banner */}
-          <div className="mt-16 relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 border border-primary/30">
-            <div className="absolute inset-0 bg-luxury-gradient opacity-5" />
-            <div className="relative z-10 p-8 md:p-12 text-center">
-              <Crown className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-3xl font-bold mb-4">Experience Luxury Like Never Before</h3>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of members who trust us for premium fashion content and exclusive model portfolios
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Button asChild className="btn-luxury text-lg px-8 py-3">
-                  <Link href="/models">Explore Models</Link>
-                </Button>
-                <Button asChild variant="outline" className="border-primary/40 hover:bg-primary/10 text-lg px-8 py-3">
-                  <Link href="/videos">Watch Videos</Link>
-                </Button>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard 
+              icon={<Eye className="w-10 h-10 text-primary"/>}
+              title="4K Ultra HD"
+              description="Crystal clear visuals with professional-grade quality and cinematic excellence."
+              badge="NEW"
+            />
+            <FeatureCard 
+              icon={<Heart className="w-10 h-10 text-primary"/>}
+              title="Curated Content"
+              description="Every piece of content is carefully selected and reviewed by our luxury standards team."
+            />
+            <FeatureCard 
+              icon={<Sparkles className="w-10 h-10 text-primary"/>}
+              title="Exclusive Access"
+              description="Premium members get early access to new content and exclusive behind-the-scenes material."
+              badge="VIP"
+            />
+            <FeatureCard 
+              icon={<TrendingUp className="w-10 h-10 text-primary"/>}
+              title="Trending Now"
+              description="Stay ahead with real-time trending content and personalized recommendations."
+            />
+            <FeatureCard 
+              icon={<Crown className="w-10 h-10 text-primary"/>}
+              title="Elite Network"
+              description="Connect with top models, photographers, and industry professionals."
+            />
+            <FeatureCard 
+              icon={<Award className="w-10 h-10 text-primary"/>}
+              title="Premium Support"
+              description="24/7 concierge-level support with dedicated account management."
+            />
           </div>
         </section>
         
