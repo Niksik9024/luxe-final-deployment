@@ -2,17 +2,13 @@
 
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ContentCard } from '@/components/shared/ContentCard';
-import type { Video, Gallery } from '@/lib/types';
+import type { Video, Gallery, Photo } from '@/lib/types';
 import { Film, ImageIcon, Grid3x3 } from 'lucide-react';
 import { PhotoCard } from '../shared/PhotoCard';
-
-import React, { useState } from 'react';
 import { Lightbox } from '@/components/shared/Lightbox';
-import type { Video, Gallery, Photo } from '@/lib/types';
-import { ContentCard } from '@/components/shared/ContentCard';
 
 interface ModelPortfolioProps {
     videos: Video[];

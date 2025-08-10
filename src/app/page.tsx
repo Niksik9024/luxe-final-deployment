@@ -176,6 +176,18 @@ export default function Home() {
   const [topModels, setTopModels] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Generate dynamic hero content that changes on refresh - moved before early return
+  const heroContentSource = useMemo(() => {
+    if (topModels.length === 0) return [];
+    const shuffledForHero = [...topModels].sort(() => Math.random() - 0.5);
+    return shuffledForHero.slice(0, 5).map(m => ({ 
+      id: m.id, 
+      image: m.image, 
+      name: m.name, 
+      type: 'model' as const 
+    }));
+  }, [topModels]);
+
   useEffect(() => {
     // Generate dynamic seed based on current time for true randomization on each refresh
     const generateDynamicSeed = () => {
@@ -220,17 +232,6 @@ export default function Home() {
   if (loading) {
     return <HomePageSkeleton />;
   }
-
-  // Generate dynamic hero content that changes on refresh
-  const heroContentSource = useMemo(() => {
-    const shuffledForHero = [...topModels].sort(() => Math.random() - 0.5);
-    return shuffledForHero.slice(0, 5).map(m => ({ 
-      id: m.id, 
-      image: m.image, 
-      name: m.name, 
-      type: 'model' as const 
-    }));
-  }, [topModels]);
 
   const heroItems = heroContentSource.map(item => ({
       id: item.id,

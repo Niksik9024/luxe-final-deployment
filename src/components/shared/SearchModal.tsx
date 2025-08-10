@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -26,10 +25,10 @@ type SearchResult = (Video | Gallery | Model) & {
 
 const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' | 'model'): number => {
   if (!query || query.length < 1) return 0;
-  
+
   const lowerQuery = query.toLowerCase().trim();
   let score = 0;
-  
+
   try {
     const title = item?.title || '';
     const name = item?.name || '';
@@ -44,7 +43,7 @@ const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' 
     } else if ((type === 'video' || type === 'gallery') && title.toLowerCase().includes(lowerQuery)) {
       score += 100;
     }
-    
+
     // Keyword matches
     if (keywords.length > 0) {
       const keywordMatch = keywords.some((k: string) => {
@@ -52,58 +51,58 @@ const calculateRelevance = (item: any, query: string, type: 'video' | 'gallery' 
       });
       if (keywordMatch) score += 80;
     }
-    
+
     // Description matches
     if (description && description.toLowerCase().includes(lowerQuery)) {
       score += 60;
     }
-    
+
     // Model-specific matches
     if (type === 'model') {
       if (famousFor && famousFor.toLowerCase().includes(lowerQuery)) score += 70;
       if (instagram && instagram.toLowerCase().includes(lowerQuery)) score += 30;
     }
-    
+
     // Featured content bonus
     if (type === 'video' && item?.isFeatured) {
       score += 20;
     }
-    
+
     // Word-based matching
     const words = lowerQuery.split(' ').filter(w => w.length > 0);
     words.forEach(word => {
       const itemText = (type === 'model' ? name : title).toLowerCase();
       if (itemText.includes(word)) score += 10;
     });
-    
+
   } catch (error) {
     console.error('Error calculating relevance for item:', item?.id, error);
     return 0;
   }
-  
+
   return score;
 };
 
 const getMatchType = (item: any, query: string, type: 'video' | 'gallery' | 'model'): SearchResult['matchType'] => {
   if (!query || !item) return 'fuzzy';
-  
+
   try {
     const lowerQuery = query.toLowerCase().trim();
     const title = item?.title || '';
     const name = item?.name || '';
     const keywords = Array.isArray(item?.keywords) ? item.keywords : [];
     const description = item?.description || '';
-    
+
     // Exact matches
     if (type === 'model' && name.toLowerCase() === lowerQuery) return 'exact';
     if ((type === 'video' || type === 'gallery') && title.toLowerCase() === lowerQuery) return 'exact';
-    
+
     // Keyword matches
     if (keywords.some((k: string) => k && k.toLowerCase() === lowerQuery)) return 'tag';
-    
+
     // Description matches
     if (description && description.toLowerCase().includes(lowerQuery)) return 'description';
-    
+
     return 'fuzzy';
   } catch (error) {
     console.error('Error determining match type:', error);
@@ -143,10 +142,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         setIsSearching(false);
         return;
       }
-      
+
       setIsSearching(true);
       setShowResults(true);
-      
+
       try {
         const allVideos = (getVideos() || []).filter(v => v && v.id && v.status === 'Published');
         const allGalleries = (getGalleries() || []).filter(g => g && g.id && g.status === 'Published');
@@ -211,7 +210,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         const sorted = searchableItems
           .sort((a, b) => b.relevanceScore - a.relevanceScore)
           .slice(0, 8); // Limit to 8 results for better UX
-        
+
         setResults(sorted);
         setSelectedIndex(-1);
       } catch (error) {
@@ -261,7 +260,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     const url = result.resultType === 'model' 
       ? `/models/${result.id}` 
       : `/${result.resultType}s/${result.id}`;
-    
+
     router.push(url);
     handleClose();
   }, [router]);
@@ -323,7 +322,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         <VisuallyHidden>
           <p>Search through our exclusive collection of models, videos, and galleries using the input field below.</p>
         </VisuallyHidden>
-        
+
         <div className="relative">
           {/* Search Input */}
           <div className="relative border-b border-primary/20 bg-luxury-dark-gradient">
@@ -341,7 +340,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                 autoCapitalize="off"
                 spellCheck={false}
               />
-              
+
               {/* Search Status */}
               <div className="flex items-center gap-3 ml-3">
                 {isSearching && (
@@ -350,7 +349,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     <span className="text-sm">Searching...</span>
                   </div>
                 )}
-                
+
                 {/* Keyboard Hints */}
                 {showResults && results.length > 0 && (
                   <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
@@ -365,7 +364,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     </div>
                   </div>
                 )}
-                
+
                 <button
                   onClick={handleClose}
                   className="p-1 hover:bg-primary/10 rounded-md transition-colors"
@@ -393,7 +392,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     Search our exclusive collection of models, videos, and galleries
                   </p>
                 </div>
-                
+
                 <div>
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <TrendingUp className="h-4 w-4 text-primary" />
@@ -422,7 +421,9 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   <Sparkles className="h-8 w-8 text-black" />
                 </div>
                 <h3 className="text-lg font-semibold mb-2 text-white">No matches found</h3>
-                <p className="text-gray-400 mb-4">for "{query}"</p>
+                <p className="text-gray-400 mb-4">
+                  for "{query}"
+                </p>
                 <p className="text-sm text-gray-500">
                   Try refining your search terms or explore our collections
                 </p>
@@ -441,10 +442,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     </Badge>
                   </div>
                 </div>
-                
+
                 {results.map((item, index) => {
                   const isSelected = index === selectedIndex;
-                  
+
                   return (
                     <button
                       key={`${item.resultType}-${item.id}-${index}`}
@@ -482,12 +483,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                               />
                             </div>
                           )}
-                          
+
                           <div className="absolute -bottom-1 -right-1 bg-luxury-gradient rounded-full p-1 border-2 border-black">
                             {getResultIcon(item.resultType)}
                           </div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-semibold text-white truncate text-sm">
@@ -501,11 +502,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                                item.matchType === 'description' ? 'DESC' : 'MATCH'}
                             </Badge>
                           </div>
-                          
+
                           <p className="text-xs text-gray-400 truncate leading-relaxed">
                             {item.description || (item.resultType === 'model' ? item.famousFor : 'Premium luxury content')}
                           </p>
-                          
+
                           <div className="flex items-center gap-2 mt-1">
                             <span className="capitalize text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
                               {item.resultType}
@@ -520,7 +521,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center">
                           <div className={`w-2 h-2 bg-luxury-gradient rounded-full transition-opacity duration-300 ${
                             isSelected ? 'opacity-100 animate-pulse' : 'opacity-0'

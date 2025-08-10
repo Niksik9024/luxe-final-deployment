@@ -1,15 +1,14 @@
-
-
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, Download, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Photo } from '@/lib/types';
 import { useAuth } from '@/lib/auth';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 
 interface LightboxProps {
@@ -35,7 +34,17 @@ export const Lightbox: React.FC<LightboxProps> = ({ images, startIndex, onClose 
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [isZoomed, setIsZoomed] = useState(false);
   const { currentUser, updateUserFavorites } = useAuth();
-  
+
+  // Generate dynamic hero content that changes on refresh
+  const heroContentSource = useMemo(() => {
+    const shuffledForHero = [...images].sort(() => Math.random() - 0.5);
+    return shuffledForHero.slice(0, 5).map(m => ({
+      id: m.id,
+      image: m.image,
+      title: m.title,
+    }));
+  }, [images]);
+
   const currentImage = images[currentIndex];
   const isFavorite = currentUser?.favorites?.some(fav => fav.id === currentImage?.id) || false;
 
@@ -67,7 +76,7 @@ export const Lightbox: React.FC<LightboxProps> = ({ images, startIndex, onClose 
     e.stopPropagation();
     setIsZoomed(!isZoomed);
   };
-  
+
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
     const link = document.createElement('a');
@@ -90,11 +99,14 @@ export const Lightbox: React.FC<LightboxProps> = ({ images, startIndex, onClose 
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="bg-black/90 border-none p-0 w-screen h-screen max-w-full flex flex-col items-center justify-center">
+        <VisuallyHidden>
+          <DialogTitle>Photo Gallery Viewer</DialogTitle>
+        </VisuallyHidden>
         {/* Close Button */}
         <ActionButton onClick={onClose} className="absolute top-4 right-4 z-50">
             <X size={24} />
         </ActionButton>
-        
+
         {/* Main Image */}
         <div className="relative w-full h-full flex-grow flex items-center justify-center overflow-hidden" onClick={() => isZoomed && setIsZoomed(false)}>
           <div className="relative w-full h-full">
