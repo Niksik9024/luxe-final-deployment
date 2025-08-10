@@ -166,7 +166,7 @@ const MobileAdminSidebar = () => {
                         )}
                     >
                         <item.icon className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate">{item.label}</span>
+                        <span className="truncate">{item.name}</span>
                     </Link>
                 </SheetClose>
             </li>
@@ -187,7 +187,7 @@ const MobileAdminSidebar = () => {
                                     )}
                                 >
                                     <item.icon className="h-4 w-4 flex-shrink-0" />
-                                    <span className="truncate">{item.label}</span>
+                                    <span className="truncate">{item.name}</span>
                                 </Link>
                             </SheetClose>
                         </li>

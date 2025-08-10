@@ -13,6 +13,163 @@ import DOMPurify from 'isomorphic-dompurify';
 import { getModelById, getVideos, getGalleries } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
 
+export default function ModelPage() {
+  const params = useParams();
+  const [model, setModel] = useState<Model | null>(null);
+  const [modelVideos, setModelVideos] = useState<Video[]>([]);
+  const [modelGalleries, setModelGalleries] = useState<Gallery[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadModelData = async () => {
+      try {
+        if (!params.id || typeof params.id !== 'string') {
+          notFound();
+          return;
+        }
+
+        const foundModel = getModelById(params.id);
+        if (!foundModel) {
+          notFound();
+          return;
+        }
+
+        setModel(foundModel);
+
+        const allVideos = getVideos();
+        const allGalleries = getGalleries();
+
+        const filteredVideos = allVideos.filter(video => 
+          video.models && video.models.includes(foundModel.name)
+        );
+
+        const filteredGalleries = allGalleries.filter(gallery => 
+          gallery.models && gallery.models.includes(foundModel.name)
+        );
+
+        setModelVideos(filteredVideos);
+        setModelGalleries(filteredGalleries);
+      } catch (error) {
+        console.error('Error loading model data:', error);
+        notFound();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadModelData();
+  }, [params.id]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 space-y-8">
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-8 w-1/3" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  if (!model) {
+    notFound();
+    return null;
+  }
+
+  const MeasurementCard = ({ model }: { model: Model }) => {
+    const measurements = [
+      { label: 'Height', value: model.height },
+      { label: 'Weight', value: model.weight },
+      { label: 'Eyes', value: model.eyes },
+      { label: 'Hair', value: model.hair },
+    ].filter(m => m.value);
+
+    if (measurements.length === 0) return null;
+
+    return (
+      <Card className="w-full">
+        <CardContent className="p-4 md:p-6">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4">Measurements</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {measurements.map((measurement, index) => (
+              <div key={index} className="text-center">
+                <div className="text-xs md:text-sm text-muted-foreground uppercase tracking-wider">
+                  {measurement.label}
+                </div>
+                <div className="text-sm md:text-base font-medium mt-1">
+                  {measurement.value}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const cleanFamousFor = model.famousFor ? DOMPurify.sanitize(model.famousFor) : '';
+
+  return (
+    <div className="min-h-screen bg-background text-foreground w-full">
+      <div className="relative w-full">
+        <div className="relative h-[70vh] w-full">
+          <Image
+            src={model.image}
+            alt={`${model.name} - Professional Model`}
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
+            <div className="max-w-7xl mx-auto">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-2 md:mb-4">
+                {model.name}
+              </h1>
+              <div className="flex flex-wrap gap-2 md:gap-4 items-center">
+                <span className="text-lg md:text-xl text-primary font-medium">
+                  {model.category}
+                </span>
+                <span className="text-sm md:text-base text-muted-foreground">
+                  Age: {model.age}
+                </span>
+                <span className="text-sm md:text-base text-muted-foreground">
+                  {model.location}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 py-8 md:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            <div className="space-y-6 md:space-y-8 w-full">
+                <section className="space-y-2 w-full">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-semibold">About</h3>
+                    <p className="text-muted-foreground text-sm md:text-base leading-relaxed break-words">
+                        {model.biography}
+                    </p>
+                </section>
+
+                <div className="flex flex-wrap gap-3">
+                    {model.socialMedia?.instagram && (
+                        <Button variant="outline" size="sm" asChild>
+                            <a href={model.socialMedia.instagram} target="_blank" rel="noopener noreferrer">
+                                <Instagram className="w-4 h-4 mr-2" />
+                                Instagram
+                            </a>
+                        </Button>
+                    )}
+                    {model.socialMedia?.twitter && (
+                        <Button variant="outline" size="sm" asChild>
+                            <a href={model.socialMedia.twitter} target="_blank" rel="noopener noreferrer">
+                                <Twitter className="w-4 h-4 mr-2" />
+                                Twitter
+                            </a>
+                        </Button>
+                    )}
+                </div>
+
 function ModelPageSkeleton() {
     return (
         <div className="flex flex-col relative bg-background">

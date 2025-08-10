@@ -17,14 +17,14 @@ export function ModelPortfolio({ videos, galleries }: ModelPortfolioProps) {
   const [activeTab, setActiveTab] = useState<'all' | 'videos' | 'photos' | 'galleries'>('all');
 
   const allContent = useMemo(() => {
-    const videoContent = videos.map(video => ({
+    const videoContent = (videos || []).map(video => ({
       ...video,
       type: 'video' as const,
       date: new Date(video.date)
     }));
 
-    const photoContent = galleries.flatMap(gallery => 
-      gallery.images.map(image => ({
+    const photoContent = (galleries || []).flatMap(gallery => 
+      (gallery.images || []).map(image => ({
         id: `${gallery.id}-${image.id}`,
         title: image.title || gallery.title,
         thumbnail: image.url,
@@ -35,11 +35,11 @@ export function ModelPortfolio({ videos, galleries }: ModelPortfolioProps) {
       }))
     );
 
-    const galleryContent = galleries.map(gallery => ({
+    const galleryContent = (galleries || []).map(gallery => ({
       ...gallery,
       type: 'gallery' as const,
       date: new Date(gallery.date),
-      thumbnail: gallery.images[0]?.url || '/default-avatar.png'
+      thumbnail: gallery.images?.[0]?.url || '/default-avatar.png'
     }));
 
     return [...videoContent, ...photoContent, ...galleryContent].sort((a, b) => b.date.getTime() - a.date.getTime());
