@@ -63,37 +63,6 @@ export const ModelProfileForm: React.FC = () => {
                 </FormItem>
               )}
             />
-            
-            <FormField
-              control={control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Fashion, Commercial, Portrait" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Brief description of the model..." {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This will be displayed in the hero section.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </CardContent>
         </Card>
 

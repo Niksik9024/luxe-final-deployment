@@ -2,8 +2,6 @@
 interface ModelProfile {
   id: string;
   name: string;
-  description: string | null;
-  category: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,8 +22,6 @@ interface ModelProfileWithImages extends ModelProfile {
 export const sampleModelData: ModelProfileWithImages = {
   id: 'sample-1',
   name: 'Sophia Martinez',
-  description: 'Fashion and commercial model with 5+ years experience',
-  category: 'Fashion',
   createdAt: new Date('2024-01-15'),
   updatedAt: new Date('2024-01-15'),
   images: [

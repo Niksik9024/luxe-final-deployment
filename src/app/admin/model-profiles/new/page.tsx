@@ -13,8 +13,6 @@ import type { ModelProfileWithImages } from '@/lib/hero-sample-data';
 
 const modelProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  category: z.string().min(1, "Category is required."),
-  description: z.string().optional(),
   backgroundImage: z.string().url("Please provide a valid background image URL.").optional(),
   mainImage: z.string().url("Please provide a valid main image URL.").optional(),
   carouselImages: z.array(z.object({
@@ -39,8 +37,6 @@ export default function NewModelProfilePage() {
     resolver: zodResolver(modelProfileSchema),
     defaultValues: {
       name: "",
-      category: "",
-      description: "",
       backgroundImage: "",
       mainImage: "",
       carouselImages: []

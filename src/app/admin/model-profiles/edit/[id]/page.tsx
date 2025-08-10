@@ -17,8 +17,6 @@ import type { ModelProfileWithImages } from '@/lib/hero-sample-data';
 
 const modelProfileSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  category: z.string().min(1, "Category is required"),
-  description: z.string().optional(),
   backgroundImage: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   mainImage: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   carouselImages: z.array(z.object({

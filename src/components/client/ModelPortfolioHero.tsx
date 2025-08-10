@@ -6,8 +6,6 @@ import React from 'react';
 interface ModelProfile {
   id: string;
   name: string;
-  description: string | null;
-  category: string;
   createdAt: Date;
   updatedAt: Date;
 }
