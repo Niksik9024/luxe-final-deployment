@@ -105,94 +105,7 @@ const DynamicModelShowcase = ({ models }: { models: Model[] }) => {
   );
 };
 
-// Interactive Content Mosaic Component
-const InteractiveContentMosaic = ({ videos, galleries }: { videos: Video[], galleries: Gallery[] }) => {
-  const [featuredContent, setFeaturedContent] = useState<(Video | Gallery)[]>([]);
 
-  useEffect(() => {
-    // Mix videos and galleries, randomize selection
-    const allContent = [...videos, ...galleries];
-    const shuffled = allContent.sort(() => Math.random() - 0.5);
-    setFeaturedContent(shuffled.slice(0, 9));
-  }, [videos, galleries]);
-
-  const getContentUrl = (content: Video | Gallery, index: number) => {
-    if ('videoUrl' in content) {
-      return `/videos/${content.id}`;
-    }
-    return `/galleries/${content.id}`;
-  };
-
-  const getGridClass = (index: number) => {
-    // Create varied sizes for masonry-like effect
-    if (index === 0 || index === 4) return "md:col-span-2 md:row-span-2";
-    if (index === 2 || index === 7) return "md:col-span-2";
-    return "";
-  };
-
-  return (
-    <section className="container mx-auto px-4 py-20">
-      <div className="text-center mb-16">
-        <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
-          <Sparkles className="w-4 h-4 mr-2" />
-          CONTENT MOSAIC
-        </Badge>
-        <h2 className="mb-6">Visual Excellence</h2>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          An ever-changing collection of our finest content
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-        {featuredContent.map((content, index) => (
-          <Card 
-            key={`${content.id}-${index}`}
-            className={`luxury-card group overflow-hidden relative aspect-square hover:scale-105 transition-all duration-300 ${getGridClass(index)}`}
-          >
-            <Link href={getContentUrl(content, index)} className="block w-full h-full">
-              <div className="relative w-full h-full">
-                <img
-                  src={content.image}
-                  alt={content.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  {'videoUrl' in content ? (
-                    <Play className="w-12 h-12 text-white" />
-                  ) : (
-                    <ImageIcon className="w-12 h-12 text-white" />
-                  )}
-                </div>
-                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/80 to-transparent">
-                  <h3 className="font-semibold text-white truncate">{content.title}</h3>
-                  <p className="text-sm text-white/80 truncate">{content.models.join(', ')}</p>
-                </div>
-                <div className="absolute top-2 right-2">
-                  <Badge className={`${('videoUrl' in content) ? 'bg-red-500' : 'bg-blue-500'} text-white text-xs`}>
-                    {'videoUrl' in content ? 'VIDEO' : 'GALLERY'}
-                  </Badge>
-                </div>
-              </div>
-            </Link>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="text-center">
-          <Button asChild className="btn-luxury px-8 py-3 text-lg w-full md:w-auto">
-            <Link href="/videos">Explore All Videos</Link>
-          </Button>
-        </div>
-        <div className="text-center">
-          <Button asChild variant="outline" className="px-8 py-3 text-lg w-full md:w-auto border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-            <Link href="/galleries">Browse Galleries</Link>
-          </Button>
-        </div>
-      </div>
-    </section>
-  );
-};
 
 // Video Wall Component
 const VideoWall = ({ videos }: { videos: Video[] }) => {
@@ -348,8 +261,7 @@ export default function Home() {
             </section>
         )}
 
-        {/* Interactive Content Mosaic - Replaces Premium Features */}
-        <InteractiveContentMosaic videos={latestVideos} galleries={latestGalleries} />
+        
 
         {/* Video Wall Section */}
         <VideoWall videos={[...featuredVideos, ...latestVideos]} />
