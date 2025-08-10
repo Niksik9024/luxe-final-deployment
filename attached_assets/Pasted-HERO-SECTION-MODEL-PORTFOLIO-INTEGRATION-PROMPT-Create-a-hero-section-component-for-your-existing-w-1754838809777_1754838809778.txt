@@ -1,0 +1,455 @@
+HERO SECTION MODEL PORTFOLIO INTEGRATION PROMPT
+Create a hero section component for your existing website's models page that integrates the exact 3D rotating carousel model portfolio system. This will be a drop-in component that maintains all the visual effects and responsiveness.
+
+INTEGRATION REQUIREMENTS
+Component Structure
+Create a reusable ModelPortfolioHero component that can be imported into your models page:
+
+// components/ModelPortfolioHero.tsx
+interface ModelPortfolioHeroProps {
+  modelProfile?: ModelProfileWithImages;
+  className?: string;
+  showNavigation?: boolean;
+}
+Required Dependencies
+Add these exact packages to your existing project:
+
+npm install @tanstack/react-query@^5.60.5 nanoid@^5.1.5 react-hook-form@^7.55.0 @hookform/resolvers@^3.10.0 zod@^3.24.2 class-variance-authority@^0.7.1 clsx@^2.1.1 tailwind-merge@^2.6.0
+EXACT CSS INTEGRATION
+Required Font Imports
+Add to your main CSS file:
+
+@import url('https://fonts.cdnfonts.com/css/ica-rubrik-black');
+@import url('https://fonts.cdnfonts.com/css/poppins');
+Exact 3D Carousel Styles
+/* Hero Section Styles */
+.hero-body {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background-color: hsl(220 10% 82%);
+  background-image:
+    repeating-linear-gradient(
+      to right, transparent 0 100px,
+      hsl(217 24% 24% / 0.13) 100px 101px
+    ),
+    repeating-linear-gradient(
+      to bottom, transparent 0 100px,
+      hsl(217 24% 24% / 0.13) 100px 101px
+    );
+}
+.hero-body::before {
+  position: absolute;
+  width: min(1400px, 90vw);
+  top: 10%;
+  left: 50%;
+  height: 90%;
+  transform: translateX(-50%);
+  content: '';
+  background-image: var(--bg-image);
+  background-size: 100%;
+  background-repeat: no-repeat;
+  background-position: top center;
+  pointer-events: none;
+  z-index: 0;
+}
+.banner {
+  width: 100%;
+  height: 100vh;
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+.banner .slider {
+  position: absolute;
+  width: 200px;
+  height: 250px;
+  top: 10%;
+  left: calc(50% - 100px);
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+  animation: autoRun 20s linear infinite;
+  z-index: 2;
+}
+@keyframes autoRun {
+  from {
+    transform: perspective(1000px) rotateX(-16deg) rotateY(0deg);
+  }
+  to {
+    transform: perspective(1000px) rotateX(-16deg) rotateY(360deg);
+  }
+}
+.banner .slider .item {
+  position: absolute;
+  inset: 0 0 0 0;
+  transform: 
+    rotateY(calc( (var(--position) - 1) * (360 / var(--quantity)) * 1deg))
+    translateZ(550px);
+}
+.banner .slider .item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.banner .content {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1400px, 100vw);
+  height: max-content;
+  padding-bottom: 100px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1;
+}
+.banner .content h1 {
+  font-family: 'ICA Rubrik', sans-serif;
+  font-size: 16em;
+  line-height: 1em;
+  color: hsl(217 24% 24%);
+  position: relative;
+}
+.banner .content h1::after {
+  position: absolute;
+  inset: 0 0 0 0;
+  content: attr(data-content);
+  z-index: 2;
+  -webkit-text-stroke: 2px hsl(220 10% 82%);
+  color: transparent;
+}
+.banner .content .author {
+  font-family: 'Poppins', sans-serif;
+  text-align: right;
+  max-width: 200px;
+}
+.banner .content h2 {
+  font-size: 3em;
+}
+.banner .content .model {
+  background-image: var(--model-image);
+  width: 100%;
+  height: 75vh;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-size: auto 130%;
+  background-repeat: no-repeat;
+  background-position: top center;
+  z-index: 1;
+}
+/* RESPONSIVE BREAKPOINTS - EXACT SAME */
+@media screen and (max-width: 1023px) {
+  .banner .slider {
+    width: 160px;
+    height: 200px;
+    left: calc(50% - 80px);
+    top: 15%;
+  }
+  
+  .banner .slider .item {
+    transform: 
+      rotateY(calc( (var(--position) - 1) * (360 / var(--quantity)) * 1deg))
+      translateZ(300px);
+  }
+  
+  .banner .content {
+    padding-bottom: 50px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .banner .content h1 {
+    text-align: center;
+    width: 100%;
+    text-shadow: 0 10px 20px hsl(0 0% 0%);
+    font-size: clamp(4em, 8vw, 7em);
+    margin-bottom: 20px;
+  }
+  
+  .banner .content .author {
+    color: hsl(0 0% 100%);
+    padding: 20px;
+    text-shadow: 0 10px 20px hsl(0 0% 0%);
+    z-index: 2;
+    max-width: unset;
+    width: 100%;
+    text-align: center;
+    padding: 0 30px;
+  }
+  
+  .banner .content .model {
+    background-size: auto 100%;
+    height: 60vh;
+  }
+}
+@media screen and (max-width: 767px) {
+  .banner .slider {
+    width: 120px;
+    height: 150px;
+    left: calc(50% - 60px);
+    top: 20%;
+  }
+  
+  .banner .slider .item {
+    transform: 
+      rotateY(calc( (var(--position) - 1) * (360 / var(--quantity)) * 1deg))
+      translateZ(180px);
+  }
+  
+  .banner .content {
+    padding-bottom: 30px;
+  }
+  
+  .banner .content h1 {
+    font-size: clamp(3em, 10vw, 5em);
+    margin-bottom: 15px;
+  }
+  
+  .banner .content .author {
+    padding: 0 15px;
+  }
+  
+  .banner .content .author h2 {
+    font-size: clamp(1.5em, 6vw, 2.5em);
+  }
+  
+  .banner .content .author p {
+    font-size: clamp(0.9em, 4vw, 1.1em);
+  }
+  
+  .banner .content .model {
+    background-size: auto 90%;
+    height: 50vh;
+  }
+  
+  .hero-body::before {
+    background-size: cover;
+    width: 100vw;
+  }
+}
+@media screen and (max-width: 480px) {
+  .banner .slider {
+    width: 100px;
+    height: 120px;
+    left: calc(50% - 50px);
+    top: 25%;
+  }
+  
+  .banner .slider .item {
+    transform: 
+      rotateY(calc( (var(--position) - 1) * (360 / var(--quantity)) * 1deg))
+      translateZ(150px);
+  }
+  
+  .banner .content h1 {
+    font-size: clamp(2.5em, 12vw, 4em);
+  }
+  
+  .banner .content .author h2 {
+    font-size: clamp(1.2em, 8vw, 2em);
+  }
+  
+  .banner .content .model {
+    height: 40vh;
+  }
+}
+EXACT DATA STRUCTURE
+TypeScript Interfaces
+interface ModelProfile {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+interface ModelImage {
+  id: string;
+  modelProfileId: string;
+  imageType: 'background' | 'main' | 'carousel';
+  imagePosition: number | null; // 1-10 for carousel
+  imageUrl: string;
+  createdAt: Date;
+}
+interface ModelProfileWithImages extends ModelProfile {
+  images: ModelImage[];
+}
+Sample Data (Exact Same)
+const sampleModelData: ModelProfileWithImages = {
+  id: 'sample-1',
+  name: 'Sophia Martinez',
+  description: 'Fashion and commercial model with 5+ years experience',
+  category: 'Fashion',
+  createdAt: new Date('2024-01-15'),
+  updatedAt: new Date('2024-01-15'),
+  images: [
+    {
+      id: 'img-1',
+      modelProfileId: 'sample-1',
+      imageType: 'background',
+      imagePosition: null,
+      imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1600',
+      createdAt: new Date()
+    },
+    {
+      id: 'img-2',
+      modelProfileId: 'sample-1',
+      imageType: 'main',
+      imagePosition: null,
+      imageUrl: 'https://images.unsplash.com/photo-1494790108755-2616c0763c87?w=800',
+      createdAt: new Date()
+    },
+    {
+      id: 'img-3',
+      modelProfileId: 'sample-1',
+      imageType: 'carousel',
+      imagePosition: 1,
+      imageUrl: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400',
+      createdAt: new Date()
+    },
+    {
+      id: 'img-4',
+      modelProfileId: 'sample-1',
+      imageType: 'carousel',
+      imagePosition: 2,
+      imageUrl: 'https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?w=400',
+      createdAt: new Date()
+    },
+    {
+      id: 'img-5',
+      modelProfileId: 'sample-1',
+      imageType: 'carousel',
+      imagePosition: 3,
+      imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+      createdAt: new Date()
+    },
+    {
+      id: 'img-6',
+      modelProfileId: 'sample-1',
+      imageType: 'carousel',
+      imagePosition: 4,
+      imageUrl: 'https://images.unsplash.com/photo-1506863530036-1efeddceb993?w=400',
+      createdAt: new Date()
+    },
+    {
+      id: 'img-7',
+      modelProfileId: 'sample-1',
+      imageType: 'carousel',
+      imagePosition: 5,
+      imageUrl: 'https://images.unsplash.com/photo-1617922001439-4a2e6562f328?w=400',
+      createdAt: new Date()
+    }
+  ]
+};
+EXACT HERO COMPONENT
+// components/ModelPortfolioHero.tsx
+import React from 'react';
+interface ModelPortfolioHeroProps {
+  modelProfile: ModelProfileWithImages;
+  className?: string;
+}
+export default function ModelPortfolioHero({ modelProfile, className = "" }: ModelPortfolioHeroProps) {
+  // Get images by type - EXACT SAME LOGIC
+  const backgroundImage = modelProfile.images.find(img => img.imageType === 'background');
+  const mainImage = modelProfile.images.find(img => img.imageType === 'main');
+  const carouselImages = modelProfile.images
+    .filter(img => img.imageType === 'carousel')
+    .sort((a, b) => (a.imagePosition || 0) - (b.imagePosition || 0))
+    .slice(0, 10); // Ensure max 10 images
+  const bgImageUrl = backgroundImage?.imageUrl || '';
+  const modelImageUrl = mainImage?.imageUrl || '';
+  return (
+    <div 
+      className={`hero-body ${className}`}
+      style={{
+        '--bg-image': bgImageUrl ? `url(${bgImageUrl})` : 'none',
+        '--model-image': modelImageUrl ? `url(${modelImageUrl})` : 'none',
+      } as React.CSSProperties}
+    >
+      <div className="banner">
+        <div className="slider" style={{ '--quantity': carouselImages.length } as React.CSSProperties}>
+          {carouselImages.map((image, index) => (
+            <div 
+              key={image.id}
+              className="item" 
+              style={{ '--position': index + 1 } as React.CSSProperties}
+            >
+              <img 
+                src={image.imageUrl} 
+                alt={`${modelProfile.name} - Carousel ${index + 1}`}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="content">
+          <h1 data-content={modelProfile.name.toUpperCase()}>
+            {modelProfile.name.toUpperCase()}
+          </h1>
+          <div className="author">
+            <h2>{modelProfile.name}</h2>
+            <p><b>{modelProfile.category}</b></p>
+            <p>
+              {modelProfile.description || "Professional model portfolio"}
+            </p>
+          </div>
+          <div className="model"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+INTEGRATION INTO YOUR MODELS PAGE
+// pages/models.tsx or components/ModelsPage.tsx
+import ModelPortfolioHero from '@/components/ModelPortfolioHero';
+export default function ModelsPage() {
+  return (
+    <div>
+      {/* Your existing page content */}
+      
+      {/* Insert Hero Section */}
+      <ModelPortfolioHero 
+        modelProfile={sampleModelData}
+        className="w-full"
+      />
+      
+      {/* Rest of your models page content */}
+    </div>
+  );
+}
+USAGE VARIATIONS
+With Multiple Models (Random Display)
+const [currentModel, setCurrentModel] = useState(0);
+const models = [sampleModelData1, sampleModelData2, sampleModelData3];
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentModel(prev => (prev + 1) % models.length);
+  }, 30000); // Change every 30 seconds
+  
+  return () => clearInterval(interval);
+}, [models.length]);
+return <ModelPortfolioHero modelProfile={models[currentModel]} />;
+With API Integration
+const { data: randomModel } = useQuery({
+  queryKey: ['randomModel'],
+  queryFn: () => fetchRandomModel(),
+  staleTime: 30000
+});
+if (!randomModel) return <div>Loading...</div>;
+return <ModelPortfolioHero modelProfile={randomModel} />;
+CRITICAL REQUIREMENTS
+CSS Must Be Exact - Copy all carousel styles exactly as provided
+Responsive Breakpoints - Use identical media queries (1023px, 767px, 480px)
+Font Imports - Include ICA Rubrik and Poppins fonts
+Image Structure - Maintain background/main/carousel(1-10) system
+3D Animation - 20s linear infinite rotation with preserve-3d
+CSS Custom Properties - Use --bg-image, --model-image, --position, --quantity
+NO MODIFICATIONS ALLOWED
+Keep exact carousel animation timing (20s)
+Maintain exact transform values and translateZ distances
+Use identical responsive breakpoints and sizing
+Preserve exact font families and typography scaling
+Keep same image URL structure and sample data
+This creates the exact same 3D model portfolio effect as a drop-in component for your website's models page.
