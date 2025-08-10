@@ -59,24 +59,24 @@ const AdminSidebar = () => {
     const pathname = usePathname();
 
     return (
-        <aside className="hidden md:flex flex-col w-64 bg-card text-card-foreground border-r border-border">
+        <aside className="hidden md:flex flex-col w-64 bg-card text-card-foreground border-r border-border h-full">
             <div className="p-4 border-b border-border">
                 <Logo />
             </div>
-            <nav className="flex-1 p-4 space-y-2">
+            <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn(
-                        'flex items-center p-2 rounded-md transition-colors',
+                        'flex items-center p-2 rounded-md transition-colors w-full',
                         pathname === item.href
                           ? 'bg-primary text-primary-foreground'
                           : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       )}
                     >
-                      <item.icon className="mr-3 h-5 w-5" />
-                      <span>{item.label}</span>
+                      <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                      <span className="truncate">{item.label}</span>
                   </Link>
                 ))}
                 {process.env.NODE_ENV === 'development' && (
@@ -87,14 +87,14 @@ const AdminSidebar = () => {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                'flex items-center p-2 rounded-md transition-colors',
+                                'flex items-center p-2 rounded-md transition-colors w-full',
                                 pathname === item.href
                                   ? 'bg-primary text-primary-foreground'
                                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                               )}
                             >
-                              <item.icon className="mr-3 h-5 w-5" />
-                              <span>{item.label}</span>
+                              <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                              <span className="truncate">{item.label}</span>
                           </Link>
                         ))}
                     </>
@@ -113,78 +113,105 @@ const AdminSidebar = () => {
 
 const MobileAdminSidebar = () => {
     const pathname = usePathname();
+    const [isOpen, setIsOpen] = React.useState(false);
 
-    return (
-        <Sheet>
-            <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden h-11 w-11 min-h-[44px] min-w-[44px] touch-manipulation">
-                    <PanelLeft className="h-5 w-5" />
-                </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-black/95 backdrop-blur-xl border-primary/20 p-0 w-full max-w-sm">
-                <div className="absolute inset-0 bg-luxury-dark-gradient opacity-50"></div>
-                <div className="relative h-full flex flex-col">
-                  <div className="p-4 sm:p-6 border-b border-primary/20 flex-shrink-0">
-                      <Logo />
-                  </div>
-                  <nav className="flex-1 overflow-y-auto p-4 sm:p-6">
-                      <ul className="space-y-1">
-                        {navItems.map((item) => (
+  const navigationItems = [
+    { name: 'Dashboard', href: '/admin', icon: BarChart },
+    { name: 'Videos', href: '/admin/videos', icon: Video },
+    { name: 'Galleries', href: '/admin/galleries', icon: ImageIcon },
+    { name: 'Models', href: '/admin/models', icon: Users },
+    { name: 'Model Profiles', href: '/admin/model-profiles', icon: Users },
+    { name: 'Users', href: '/admin/users', icon: UserCog },
+    { name: 'Tags', href: '/admin/tags', icon: Tags },
+  ];
+
+  const handleLinkClick = () => {
+    setIsOpen(false);
+  };
+
+  return (
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="md:hidden touch-manipulation">
+          <PanelLeft className="h-5 w-5" />
+          <span className="sr-only">Open navigation menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-full max-w-xs p-0 flex flex-col bg-card/95 backdrop-blur-xl border-primary/20">
+        <div className="p-6 border-b border-primary/20 flex-shrink-0">
+          <Link href="/admin" className="flex items-center gap-3" onClick={handleLinkClick}>
+            <div className="relative">
+              <div className="w-8 h-8 bg-luxury-gradient rounded-xl flex items-center justify-center shadow-lg">
+                <Crown className="h-4 w-4 text-black" />
+              </div>
+            </div>
+            <span className="font-headline font-black text-xl tracking-wider bg-luxury-gradient bg-clip-text text-transparent">
+              LUXE
+            </span>
+          </Link>
+        </div>
+
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          <ul className="space-y-1">
+            {navigationItems.map((item) => (
+            <li key={item.href}>
+                <SheetClose asChild>
+                    <Link
+                        href={item.href}
+                        className={cn(
+                            'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm font-medium min-h-[44px] touch-manipulation w-full',
+                            pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/admin')
+                              ? 'bg-primary text-primary-foreground border-l-4 border-primary'
+                              : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-l-4 border-transparent hover:border-primary'
+                        )}
+                    >
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                    </Link>
+                </SheetClose>
+            </li>
+            ))}
+            {process.env.NODE_ENV === 'development' && (
+                <>
+                    <div className="px-4 pt-4 pb-2 text-xs uppercase text-primary tracking-wider font-semibold">Development</div>
+                    {devNavItems.map((item) => (
                         <li key={item.href}>
                             <SheetClose asChild>
                                 <Link
                                     href={item.href}
                                     className={cn(
-                                        'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium min-h-[44px] touch-manipulation',
+                                        'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm font-medium min-h-[44px] touch-manipulation w-full',
                                         pathname === item.href
                                           ? 'bg-primary text-primary-foreground border-l-4 border-primary'
                                           : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-l-4 border-transparent hover:border-primary'
                                     )}
                                 >
-                                    <item.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                    <item.icon className="h-4 w-4 flex-shrink-0" />
                                     <span className="truncate">{item.label}</span>
                                 </Link>
                             </SheetClose>
                         </li>
-                        ))}
-                        {process.env.NODE_ENV === 'development' && (
-                        <>
-                            <div className="px-4 pt-4 pb-2 text-xs uppercase text-primary tracking-wider font-semibold">Development</div>
-                            {devNavItems.map((item) => (
-                            <li key={item.href}>
-                                <SheetClose asChild>
-                                    <Link
-                                        href={item.href}
-                                        className={cn(
-                                            'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium min-h-[44px] touch-manipulation',
-                                            pathname === item.href
-                                              ? 'bg-primary text-primary-foreground border-l-4 border-primary'
-                                              : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-l-4 border-transparent hover:border-primary'
-                                        )}
-                                    >
-                                        <item.icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                                        <span className="truncate">{item.label}</span>
-                                    </Link>
-                                </SheetClose>
-                            </li>
-                            ))}
-                        </>
-                    )}
-                    </ul>
-                  </nav>
-                  <div className="flex-shrink-0 p-4 sm:p-6 border-t border-primary/20">
-                      <SheetClose asChild>
-                          <Link href="/" className="flex items-center gap-3 py-3 px-4 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 border-l-4 border-transparent hover:border-primary text-sm sm:text-base font-medium min-h-[44px] touch-manipulation">
-                              <Home className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                              <span className="truncate">View Site</span>
-                          </Link>
-                    </SheetClose>
-                  </div>
-                </div>
-            </SheetContent>
-        </Sheet>
-    );
-  };
+                    ))}
+                </>
+            )}
+          </ul>
+        </nav>
+
+        <div className="p-4 border-t border-primary/20 flex-shrink-0">
+          <SheetClose asChild>
+              <Link 
+                href="/" 
+                className="flex items-center gap-3 py-3 px-4 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 border-l-4 border-transparent hover:border-primary text-sm font-medium min-h-[44px] touch-manipulation w-full"
+              >
+                  <Home className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">View Site</span>
+              </Link>
+          </SheetClose>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
 
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -199,7 +226,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-screen p-4">
             <div className="space-y-4 w-full max-w-md">
                 <Skeleton className="h-12 w-full" />
                 <Skeleton className="h-32 w-full" />
@@ -210,41 +237,45 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   if (!isAdmin) {
-    return null; // or a more friendly "access denied" page
+    return null;
   }
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen bg-background text-foreground w-full overflow-x-hidden">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col">
-            <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm border-b border-border">
-            <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-8">
-                <div className="flex items-center">
-                    <MobileAdminSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+            <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-sm border-b border-border flex-shrink-0">
+                <div className="flex h-16 items-center justify-between px-4 w-full max-w-full overflow-hidden">
+                    <div className="flex items-center min-w-0">
+                        <MobileAdminSidebar />
+                    </div>
+                    <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                        <Badge variant="secondary" className="bg-luxury-gradient text-black font-semibold text-xs sm:text-sm hidden sm:inline-flex">
+                            Admin Panel
+                        </Badge>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 touch-manipulation">
+                                    <UserCog className="h-5 w-5" />
+                                    <span className="sr-only">Open user menu</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-xl border-primary/20 shadow-luxury">
+                                <DropdownMenuLabel className="text-primary font-semibold">{currentUser?.name || 'Admin'}</DropdownMenuLabel>
+                                <DropdownMenuSeparator className="bg-primary/20" />
+                                <DropdownMenuItem className="text-muted-foreground">{currentUser?.email}</DropdownMenuItem>
+                                <DropdownMenuSeparator className="bg-primary/20" />
+                                <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:bg-destructive/10 hover:bg-destructive/10 focus:text-destructive">
+                                    Sign Out
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
-
-                <div className="flex items-center gap-4">
-                     <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300">
-                            <UserCog className="h-5 w-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-xl border-primary/20 shadow-luxury">
-                          <DropdownMenuLabel className="text-primary font-semibold">{currentUser?.name || 'Admin'}</DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-primary/20" />
-                          <DropdownMenuItem className="text-muted-foreground">{currentUser?.email}</DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-primary/20" />
-                          <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:bg-destructive/10 hover:bg-destructive/10 focus:text-destructive">
-                            Sign Out
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                </div>
-            </div>
             </header>
-            <main className="flex-1 p-4 md:p-6 lg:p-8 bg-muted/40 w-full max-w-full overflow-x-hidden">
-                <div className="w-full max-w-full mx-auto px-0">
+
+            <main className="flex-1 w-full max-w-full overflow-x-hidden">
+                <div className="p-4 sm:p-6 md:p-8 w-full max-w-full">
                     {children}
                 </div>
             </main>

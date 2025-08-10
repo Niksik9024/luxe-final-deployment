@@ -59,10 +59,10 @@ export function ModelsAdminClient() {
   }
 
   return (
-    <div className="admin-content">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <h2 className="text-xl font-semibold md:hidden">Models</h2>
-        <Button asChild className="w-full sm:w-auto">
+        <Button asChild className="w-full sm:w-auto touch-manipulation">
           <Link href="/admin/models/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Model
@@ -70,29 +70,29 @@ export function ModelsAdminClient() {
         </Button>
       </div>
       
-      <Card className="admin-card">
+      <Card className="w-full max-w-full overflow-hidden">
         <CardHeader className="hidden md:block">
           <CardTitle>Models</CardTitle>
         </CardHeader>
-        <CardContent className="p-0 md:p-6">
+        <CardContent className="p-0 md:p-6 w-full overflow-x-auto">
           {/* Desktop Table View */}
           <div className="hidden md:block">
-            <div className="grid gap-4">
+            <div className="grid gap-4 w-full">
               {models.map((model) => (
-                <div key={model.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
+                <div key={model.id} className="flex items-center justify-between p-4 border rounded-lg w-full min-w-0">
+                  <div className="flex items-center space-x-4 flex-1 min-w-0">
                     <img 
                       src={model.image} 
                       alt={model.name}
-                      className="w-16 h-16 object-cover rounded-full"
+                      className="w-16 h-16 object-cover rounded-full flex-shrink-0"
                     />
-                    <div>
-                      <h3 className="font-semibold">{model.name}</h3>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold truncate">{model.name}</h3>
                       <p className="text-sm text-muted-foreground text-truncate-2 max-w-md">{model.description}</p>
-                      <div className="flex gap-2 mt-2">
-                        <Badge variant="secondary">{model.status}</Badge>
+                      <div className="flex gap-2 mt-2 flex-wrap">
+                        <Badge variant="secondary" className="text-xs">{model.status}</Badge>
                         {model.isFeatured && (
-                          <Badge variant="default" className="bg-luxury-gradient text-black">
+                          <Badge variant="default" className="bg-luxury-gradient text-black text-xs">
                             <Crown className="w-3 h-3 mr-1" />
                             Featured
                           </Badge>
@@ -100,7 +100,7 @@ export function ModelsAdminClient() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 flex-shrink-0 ml-4">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/models/${model.id}`}>
                         <Eye className="h-4 w-4" />
@@ -125,9 +125,9 @@ export function ModelsAdminClient() {
           </div>
 
           {/* Mobile Card View */}
-          <div className="md:hidden space-y-4 p-4">
+          <div className="md:hidden space-y-4 p-4 w-full">
             {models.map((model) => (
-              <div key={model.id} className="mobile-card">
+              <div key={model.id} className="mobile-card w-full">
                 <div className="mobile-card-header">
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
                     <img 
@@ -140,12 +140,12 @@ export function ModelsAdminClient() {
                     </div>
                   </div>
                   <div className="mobile-card-actions">
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
                       <Link href={`/models/${model.id}`}>
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
                       <Link href={`/admin/models/edit/${model.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -154,6 +154,7 @@ export function ModelsAdminClient() {
                       variant="destructive" 
                       size="sm"
                       onClick={() => handleDelete(model.id)}
+                      className="touch-manipulation"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -188,7 +189,7 @@ export function ModelsAdminClient() {
           </div>
 
           {models.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground px-4">
               No models found. Create your first model to get started.
             </div>
           )}

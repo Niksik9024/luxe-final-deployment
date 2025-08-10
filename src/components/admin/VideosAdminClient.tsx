@@ -58,10 +58,10 @@ export function VideosAdminClient() {
   }
 
   return (
-    <div className="admin-content">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div className="w-full max-w-full overflow-x-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <h2 className="text-xl font-semibold md:hidden">Videos</h2>
-        <Button asChild className="w-full sm:w-auto">
+        <Button asChild className="w-full sm:w-auto touch-manipulation">
           <Link href="/admin/videos/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Video
@@ -69,17 +69,17 @@ export function VideosAdminClient() {
         </Button>
       </div>
 
-      <Card className="admin-card">
+      <Card className="w-full max-w-full overflow-hidden">
         <CardHeader className="hidden md:block">
           <CardTitle>Videos</CardTitle>
         </CardHeader>
-        <CardContent className="p-0 md:p-6">
+        <CardContent className="p-0 md:p-6 w-full overflow-x-auto">
           {/* Desktop Table View */}
           <div className="hidden md:block">
-            <div className="grid gap-4">
+            <div className="grid gap-4 w-full">
               {videos.map((video) => (
-                <div key={video.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
+                <div key={video.id} className="flex items-center justify-between p-4 border rounded-lg w-full min-w-0">
+                  <div className="flex items-center space-x-4 flex-1 min-w-0">
                     <div className="relative w-16 h-16 bg-black rounded overflow-hidden flex-shrink-0">
                       <img 
                         src={video.thumbnail} 
@@ -91,16 +91,16 @@ export function VideosAdminClient() {
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold">{video.title}</h3>
+                      <h3 className="font-semibold truncate">{video.title}</h3>
                       <p className="text-sm text-muted-foreground text-truncate-2 max-w-md">{video.description}</p>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        <Badge variant="secondary">{video.status}</Badge>
-                        <Badge variant="outline">{video.duration}</Badge>
-                        {video.isFeatured && <Badge variant="default">Featured</Badge>}
+                        <Badge variant="secondary" className="text-xs">{video.status}</Badge>
+                        <Badge variant="outline" className="text-xs">{video.duration}</Badge>
+                        {video.isFeatured && <Badge variant="default" className="text-xs">Featured</Badge>}
                       </div>
                     </div>
                   </div>
-                  <div className="flex space-x-2 flex-shrink-0">
+                  <div className="flex space-x-2 flex-shrink-0 ml-4">
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/videos/${video.id}`}>
                         <Eye className="h-4 w-4" />
@@ -125,9 +125,9 @@ export function VideosAdminClient() {
           </div>
 
           {/* Mobile Card View */}
-          <div className="md:hidden space-y-4 p-4">
+          <div className="md:hidden space-y-4 p-4 w-full">
             {videos.map((video) => (
-              <div key={video.id} className="mobile-card">
+              <div key={video.id} className="mobile-card w-full">
                 <div className="mobile-card-header">
                   <div className="flex items-center space-x-3 flex-1 min-w-0">
                     <div className="relative w-12 h-12 bg-black rounded overflow-hidden flex-shrink-0">
@@ -145,12 +145,12 @@ export function VideosAdminClient() {
                     </div>
                   </div>
                   <div className="mobile-card-actions">
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
                       <Link href={`/videos/${video.id}`}>
                         <Eye className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
                       <Link href={`/admin/videos/edit/${video.id}`}>
                         <Edit className="h-4 w-4" />
                       </Link>
@@ -159,6 +159,7 @@ export function VideosAdminClient() {
                       variant="destructive" 
                       size="sm"
                       onClick={() => handleDelete(video.id)}
+                      className="touch-manipulation"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -196,9 +197,9 @@ export function VideosAdminClient() {
           </div>
 
           {videos.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground px-4">
               No videos found. Create your first video to get started.
-              </div>
+            </div>
           )}
         </CardContent>
       </Card>

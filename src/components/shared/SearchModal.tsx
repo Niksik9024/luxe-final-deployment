@@ -319,11 +319,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-2xl h-[85vh] max-h-[600px] p-0 gap-0 flex flex-col">
+      <DialogContent className="w-[96vw] max-w-2xl h-[90vh] max-h-[700px] p-0 gap-0 flex flex-col top-[5%] translate-y-0 max-sm:top-4">
         <DialogTitle className="sr-only">Search</DialogTitle>
-        <div className="relative border-b border-primary/20 bg-luxury-dark-gradient">
-          <div className="flex items-center px-6 py-4">
-            <Search className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
+        <div className="relative border-b border-primary/20 bg-luxury-dark-gradient flex-shrink-0">
+          <div className="flex items-center px-4 sm:px-6 py-3 sm:py-4 gap-3">
+            <Search className="h-5 w-5 text-primary flex-shrink-0" />
             <input
               ref={inputRef}
               type="text"
@@ -338,17 +338,17 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
             />
 
             {/* Search Status */}
-            <div className="flex items-center gap-3 ml-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               {isSearching && (
                 <div className="flex items-center gap-2 text-primary">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary/30 border-t-primary"></div>
-                  <span className="text-sm">Searching...</span>
+                  <span className="text-sm hidden sm:inline">Searching...</span>
                 </div>
               )}
 
               {/* Keyboard Hints */}
               {showResults && results.length > 0 && (
-                <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                <div className="hidden lg:flex items-center gap-2 text-xs text-gray-500">
                   <div className="flex items-center gap-1">
                     <ArrowUp className="h-3 w-3" />
                     <ArrowDown className="h-3 w-3" />
@@ -363,7 +363,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
               <button
                 onClick={handleClose}
-                className="p-1 hover:bg-primary/10 rounded-md transition-colors"
+                className="p-1.5 hover:bg-primary/10 rounded-md transition-colors touch-manipulation"
               >
                 <X className="h-4 w-4 text-gray-400 hover:text-primary" />
               </button>
@@ -374,18 +374,18 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         {/* Results Container */}
         <div 
           ref={resultsRef}
-          className="flex-1 overflow-hidden"
+          className="flex-1 overflow-hidden min-h-0"
         >
-          <div className="max-h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30">
+          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30">
             {/* Show popular searches when no query */}
             {!query && !showResults && (
-              <div className="p-6 space-y-6">
+              <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-luxury-gradient flex items-center justify-center">
-                    <Filter className="h-8 w-8 text-black" />
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-luxury-gradient flex items-center justify-center">
+                    <Filter className="h-6 w-6 sm:h-8 sm:w-8 text-black" />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-white">Discover Premium Content</h3>
-                  <p className="text-gray-400 mb-6">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Discover Premium Content</h3>
+                  <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base px-2">
                     Search our exclusive collection of models, videos, and galleries
                   </p>
                 </div>
@@ -395,12 +395,12 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     <TrendingUp className="h-4 w-4 text-primary" />
                     <span className="text-sm font-medium text-primary">Popular Searches</span>
                   </div>
-                  <div className="flex flex-wrap gap-2 justify-center">
+                  <div className="flex flex-wrap gap-2 justify-center px-2">
                     {popularSearches.map(({ term, icon }) => (
                       <button
                         key={term}
                         onClick={() => handlePopularSearch(term)}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/40 rounded-lg text-primary/90 hover:text-primary transition-all duration-300 hover:scale-105 text-sm font-medium"
+                        className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/40 rounded-lg text-primary/90 hover:text-primary transition-all duration-300 hover:scale-105 text-xs sm:text-sm font-medium touch-manipulation"
                       >
                         {icon}
                         <span>{term}</span>
@@ -413,15 +413,15 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
             {/* No results */}
             {showResults && !isSearching && results.length === 0 && query && (
-              <div className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-luxury-gradient flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-black" />
+              <div className="p-4 sm:p-6 text-center">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 rounded-full bg-luxury-gradient flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-black" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-white">No matches found</h3>
-                <p className="text-gray-400 mb-4">
+                <h3 className="text-base sm:text-lg font-semibold mb-2 text-white">No matches found</h3>
+                <p className="text-gray-400 mb-4 text-sm">
                   for "{query}"
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs sm:text-sm text-gray-500">
                   Try refining your search terms or explore our collections
                 </p>
               </div>
@@ -429,8 +429,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
 
             {/* Search Results */}
             {showResults && results.length > 0 && (
-              <div className="py-2">
-                <div className="px-4 py-2 border-b border-primary/20">
+              <div>
+                <div className="px-3 sm:px-4 py-2 border-b border-primary/20 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-primary" />
                     <span className="text-primary font-semibold text-sm">Search Results</span>
@@ -440,94 +440,98 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                   </div>
                 </div>
 
-                {results.map((item, index) => {
-                  const isSelected = index === selectedIndex;
+                <div className="overflow-y-auto">
+                  {results.map((item, index) => {
+                    const isSelected = index === selectedIndex;
 
-                  return (
-                    <button
-                      key={`${item.resultType}-${item.id}-${index}`}
-                      onClick={() => handleSelect(item)}
-                      className={`w-full px-4 py-3 text-left hover:bg-primary/10 transition-all duration-200 border-b border-gray-800/30 last:border-0 ${
-                        isSelected ? 'bg-primary/15 border-primary/30' : ''
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="relative flex-shrink-0">
-                          {item.resultType === 'model' ? (
-                            <Avatar className="w-12 h-12 border-2 border-primary/40">
-                              <AvatarImage 
-                                src={item.image} 
-                                className="object-cover" 
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '/api/placeholder/48/48';
-                                }}
-                              />
-                              <AvatarFallback className="bg-luxury-gradient text-black font-semibold">
-                                <User className="h-6 w-6" />
-                              </AvatarFallback>
-                            </Avatar>
-                          ) : (
-                            <div className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-primary/40">
-                              <Image 
-                                src={item.image} 
-                                alt={item.title || item.name || 'Content'} 
-                                width={48} 
-                                height={48} 
-                                className="object-cover w-full h-full"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '/api/placeholder/48/48';
-                                }}
-                              />
-                            </div>
-                          )}
-
-                          <div className="absolute -bottom-1 -right-1 bg-luxury-gradient rounded-full p-1 border-2 border-black">
-                            {getResultIcon(item.resultType)}
-                          </div>
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-white truncate text-sm">
-                              {item.resultType === 'model' ? item.name : item.title}
-                            </h4>
-                            <Badge 
-                              className={`text-xs px-2 py-0.5 font-semibold ${getMatchBadgeStyle(item.matchType)}`}
-                            >
-                              {item.matchType === 'exact' ? 'PERFECT' : 
-                               item.matchType === 'tag' ? 'TAG' : 
-                               item.matchType === 'description' ? 'DESC' : 'MATCH'}
-                            </Badge>
-                          </div>
-
-                          <p className="text-xs text-gray-400 truncate leading-relaxed">
-                            {item.description || (item.resultType === 'model' ? item.famousFor : 'Premium luxury content')}
-                          </p>
-
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="capitalize text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                              {item.resultType}
-                            </span>
-                            {item.keywords && Array.isArray(item.keywords) && item.keywords.length > 0 && (
-                              <>
-                                <Separator orientation="vertical" className="h-3 bg-gray-600" />
-                                <span className="truncate text-xs text-gray-500">
-                                  {item.keywords.slice(0, 2).join(', ')}
-                                </span>
-                              </>
+                    return (
+                      <button
+                        key={`${item.resultType}-${item.id}-${index}`}
+                        onClick={() => handleSelect(item)}
+                        className={`w-full px-3 sm:px-4 py-3 text-left hover:bg-primary/10 transition-all duration-200 border-b border-gray-800/30 last:border-0 touch-manipulation ${
+                          isSelected ? 'bg-primary/15 border-primary/30' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 w-full min-w-0">
+                          <div className="relative flex-shrink-0">
+                            {item.resultType === 'model' ? (
+                              <Avatar className="w-10 h-10 sm:w-12 sm:h-12 border-2 border-primary/40">
+                                <AvatarImage 
+                                  src={item.image} 
+                                  className="object-cover" 
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/api/placeholder/48/48';
+                                  }}
+                                />
+                                <AvatarFallback className="bg-luxury-gradient text-black font-semibold">
+                                  <User className="h-5 w-5 sm:h-6 sm:w-6" />
+                                </AvatarFallback>
+                              </Avatar>
+                            ) : (
+                              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden border-2 border-primary/40">
+                                <Image 
+                                  src={item.image} 
+                                  alt={item.title || item.name || 'Content'} 
+                                  width={48} 
+                                  height={48} 
+                                  className="object-cover w-full h-full"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = '/api/placeholder/48/48';
+                                  }}
+                                />
+                              </div>
                             )}
+
+                            <div className="absolute -bottom-1 -right-1 bg-luxury-gradient rounded-full p-1 border-2 border-black">
+                              {getResultIcon(item.resultType)}
+                            </div>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start gap-2 mb-1 flex-wrap sm:flex-nowrap">
+                              <h4 className="font-semibold text-white text-sm leading-tight min-w-0 flex-1">
+                                <span className="block sm:truncate">
+                                  {item.resultType === 'model' ? item.name : item.title}
+                                </span>
+                              </h4>
+                              <Badge 
+                                className={`text-xs px-2 py-0.5 font-semibold flex-shrink-0 ${getMatchBadgeStyle(item.matchType)}`}
+                              >
+                                {item.matchType === 'exact' ? 'PERFECT' : 
+                                 item.matchType === 'tag' ? 'TAG' : 
+                                 item.matchType === 'description' ? 'DESC' : 'MATCH'}
+                              </Badge>
+                            </div>
+
+                            <p className="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-1">
+                              {item.description || (item.resultType === 'model' ? item.famousFor : 'Premium luxury content')}
+                            </p>
+
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="capitalize text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded flex-shrink-0">
+                                {item.resultType}
+                              </span>
+                              {item.keywords && Array.isArray(item.keywords) && item.keywords.length > 0 && (
+                                <>
+                                  <Separator orientation="vertical" className="h-3 bg-gray-600 hidden sm:block" />
+                                  <span className="truncate text-xs text-gray-500 max-w-[120px] sm:max-w-none">
+                                    {item.keywords.slice(0, 2).join(', ')}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center flex-shrink-0">
+                            <div className={`w-2 h-2 bg-luxury-gradient rounded-full transition-opacity duration-300 ${
+                              isSelected ? 'opacity-100 animate-pulse' : 'opacity-0'
+                            }`}></div>
                           </div>
                         </div>
-
-                        <div className="flex items-center">
-                          <div className={`w-2 h-2 bg-luxury-gradient rounded-full transition-opacity duration-300 ${
-                            isSelected ? 'opacity-100 animate-pulse' : 'opacity-0'
-                          }`}></div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

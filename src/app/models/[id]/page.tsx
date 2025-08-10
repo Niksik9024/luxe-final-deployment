@@ -104,8 +104,8 @@ export default function ModelPage() {
   const cleanFamousFor = model.famousFor ? DOMPurify.sanitize(model.famousFor) : '';
 
   return (
-    <div className="flex flex-col relative bg-background">
-      <div className="relative w-full h-[70vh] min-h-[400px] max-h-[700px]">
+    <div className="flex flex-col relative bg-background w-full overflow-x-hidden">
+      <div className="relative w-full h-[60vh] sm:h-[70vh] min-h-[300px] sm:min-h-[400px] max-h-[700px]">
         <Image
           src={model.image}
           alt={`Hero image for ${model.name}`}
@@ -113,30 +113,30 @@ export default function ModelPage() {
           className="object-cover object-center"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 p-4 md:p-8">
-            <h1 className="text-4xl md:text-6xl lg:text-8xl text-white font-headline font-bold [text-shadow:0_2px_10px_rgba(0,0,0,0.5)]">{model.name}</h1>
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 p-4 sm:p-6 md:p-8 w-full">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl text-white font-headline font-bold [text-shadow:0_2px_10px_rgba(0,0,0,0.7)] break-words">{model.name}</h1>
         </div>
       </div>
       
-      <div className="container mx-auto px-4 py-8 md:py-12 z-10 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12 z-10 relative max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12 w-full">
             
-            <div className="lg:col-span-1 space-y-4 md:space-y-6">
+            <div className="lg:col-span-1 space-y-4 md:space-y-6 w-full">
                  {cleanDescription && (
-                   <div className="prose prose-sm md:prose-base max-w-none">
-                     <p className="text-muted-foreground text-sm md:text-base lg:text-lg" dangerouslySetInnerHTML={{ __html: cleanDescription }} />
+                   <div className="prose prose-sm md:prose-base max-w-none w-full">
+                     <p className="text-muted-foreground text-sm md:text-base lg:text-lg break-words" dangerouslySetInnerHTML={{ __html: cleanDescription }} />
                    </div>
                  )}
                  
-                 <div className="flex gap-2">
+                 <div className="flex gap-2 flex-wrap">
                     {model.instagram && (
-                        <Button variant="ghost" size="icon" asChild className="touch-target">
+                        <Button variant="ghost" size="icon" asChild className="touch-manipulation">
                             <a href={`https://instagram.com/${model.instagram}`} target="_blank" rel="noopener noreferrer" aria-label={`${model.name}'s Instagram`}><Instagram className="h-5 w-5"/></a>
                         </Button>
                     )}
                      {model.twitter && (
-                        <Button variant="ghost" size="icon" asChild className="touch-target">
+                        <Button variant="ghost" size="icon" asChild className="touch-manipulation">
                              <a href={`https://twitter.com/${model.twitter}`} target="_blank" rel="noopener noreferrer" aria-label={`${model.name}'s Twitter`}><Twitter className="h-5 w-5"/></a>
                         </Button>
                     )}
@@ -145,16 +145,16 @@ export default function ModelPage() {
                 <MeasurementCard model={model} />
 
                 {cleanFamousFor && (
-                    <section className="space-y-2">
-                        <h3 className="text-xl md:text-2xl font-semibold">Famous For</h3>
-                        <div className="prose prose-sm md:prose-base max-w-none">
-                          <p className="text-muted-foreground text-sm md:text-base" dangerouslySetInnerHTML={{ __html: cleanFamousFor }}/>
+                    <section className="space-y-2 w-full">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-semibold">Famous For</h3>
+                        <div className="prose prose-sm md:prose-base max-w-none w-full">
+                          <p className="text-muted-foreground text-sm md:text-base break-words" dangerouslySetInnerHTML={{ __html: cleanFamousFor }}/>
                         </div>
                     </section>
                 )}
             </div>
 
-            <div className="lg:col-span-2 model-portfolio-container">
+            <div className="lg:col-span-2 w-full min-w-0">
                 <ModelPortfolio videos={modelVideos} galleries={modelGalleries} />
             </div>
 
