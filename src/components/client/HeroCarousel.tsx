@@ -117,43 +117,50 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ items: initialItems 
           left: 50%;
           transform: translate(-50%, -50%);
           width: 1140px;
-          max-width: 80%;
-          padding-right: 30%;
+          max-width: 85%;
+          padding-right: 25%;
           box-sizing: border-box;
           color: #fff;
-          text-shadow: 0 5px 10px #0004;
+          text-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
           display: flex;
           flex-direction: column;
         }
         .carousel .list .item .model-name {
-          font-size: 5em;
+          font-family: 'Inter', sans-serif;
+          font-size: 4.5rem;
           font-weight: 700;
-          line-height: 1.1em;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
         }
         .carousel .list .item .model-label {
-          font-size: 3em;
-          font-weight: 300;
-          color: #f1683a;
+          font-family: 'Inter', sans-serif;
+          font-size: 2.5rem;
+          font-weight: 400;
+          color: #d4af37;
           text-transform: uppercase;
+          letter-spacing: 0.1em;
         }
         .carousel .list .item .buttons {
           margin-top: 20px;
         }
         .carousel .list .item .buttons a {
           display: inline-block;
-          border: 1px solid #fff;
-          background-color: transparent;
-          color: #eee;
-          padding: 5px 10px;
-          font-family: 'Poppins', sans-serif;
-          font-weight: 500;
-          letter-spacing: 1px;
+          border: 2px solid #d4af37;
+          background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+          color: #000;
+          padding: 12px 24px;
+          font-family: 'Inter', sans-serif;
+          font-weight: 600;
+          letter-spacing: 0.05em;
           text-decoration: none;
-          transition: 0.3s;
+          text-transform: uppercase;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+          font-size: 0.9rem;
         }
         .carousel .list .item .buttons a:hover {
-            background-color: #fff;
-            color: #000;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
         }
         .thumbnail {
           position: absolute;
@@ -338,15 +345,36 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ items: initialItems 
             opacity: 0;
           }
         }
-        @media screen and (max-width: 678px) {
+        @media screen and (max-width: 768px) {
           .carousel .list .item .content {
-            padding-right: 0;
+            padding-right: 5%;
+            max-width: 90%;
           }
           .carousel .list .item .content .model-name {
-            font-size: 2.0em;
+            font-size: 2.5rem;
           }
           .carousel .list .item .content .model-label {
-            font-size: 1.2em;
+            font-size: 1.5rem;
+          }
+          .carousel .list .item .buttons a {
+            padding: 10px 20px;
+            font-size: 0.8rem;
+          }
+        }
+        @media screen and (max-width: 480px) {
+          .carousel .list .item .content {
+            padding-right: 0;
+            max-width: 95%;
+          }
+          .carousel .list .item .content .model-name {
+            font-size: 2rem;
+          }
+          .carousel .list .item .content .model-label {
+            font-size: 1.2rem;
+          }
+          .carousel .list .item .buttons a {
+            padding: 8px 16px;
+            font-size: 0.75rem;
           }
         }
       `}</style>
