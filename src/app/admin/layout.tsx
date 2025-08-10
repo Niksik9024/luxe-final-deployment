@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown } from 'lucide-react';
+import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
