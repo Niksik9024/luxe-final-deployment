@@ -20,18 +20,18 @@ import { useDataSaver } from '@/contexts/DataSaverContext';
 import { SearchModal } from './SearchModal';
 
 const Logo = () => (
-  <Link href="/" className="flex items-center gap-3 group">
+  <Link href="/" className="flex items-center gap-2 lg:gap-3 group">
     <div className="relative">
-      <div className="w-10 h-10 bg-luxury-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-luxury transition-all duration-300 group-hover:scale-105">
-        <Crown className="h-6 w-6 text-black" />
+      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-luxury-gradient rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-luxury transition-all duration-300 group-hover:scale-105">
+        <Crown className="h-4 w-4 lg:h-6 lg:w-6 text-black" />
       </div>
-      <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse"></div>
+      <div className="absolute -top-1 -right-1 w-2 h-2 lg:w-3 lg:h-3 bg-primary rounded-full animate-pulse"></div>
     </div>
     <div className="flex flex-col">
-      <span className="font-headline font-black text-2xl tracking-wider bg-luxury-gradient bg-clip-text text-transparent">
+      <span className="font-headline font-black text-xl lg:text-2xl tracking-wider bg-luxury-gradient bg-clip-text text-transparent">
         LUXE
       </span>
-      <span className="text-[10px] text-muted-foreground font-medium tracking-[0.2em] uppercase -mt-1">
+      <span className="hidden lg:block text-[10px] text-muted-foreground font-medium tracking-[0.2em] uppercase -mt-1">
         Premium Collection
       </span>
     </div>
@@ -205,7 +205,7 @@ export const Header = () => {
     <>
       <header className="sticky top-0 z-50 w-full bg-black/90 backdrop-blur-xl border-b border-primary/20 shadow-luxury">
         <div className="absolute inset-0 bg-luxury-dark-gradient opacity-30"></div>
-        <div className="relative container mx-auto flex h-20 items-center justify-between px-6">
+        <div className="relative container mx-auto flex h-16 lg:h-20 items-center justify-between px-4 lg:px-6">
           
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-12">
@@ -217,13 +217,12 @@ export const Header = () => {
           <div className="hidden lg:flex items-center gap-6">
             <Button 
               variant="outline" 
-              className="h-12 px-6 border-primary/40 hover:border-primary hover:bg-primary/10 transition-all duration-300 group"
+              className="h-12 px-4 lg:px-6 border-primary/40 hover:border-primary hover:bg-primary/10 transition-all duration-300 group"
               onClick={() => setIsSearchOpen(true)}
             >
-              <Search className="h-5 w-5 mr-3 text-primary group-hover:scale-110 transition-transform" />
-              <span className="hidden xl:inline font-medium">Search luxury content...</span>
-              <span className="xl:hidden font-medium">Search...</span>
-              <kbd className="pointer-events-none ml-4 inline-flex h-6 select-none items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-2 font-mono text-xs font-medium text-primary">
+              <Search className="h-5 w-5 mr-2 lg:mr-3 text-primary group-hover:scale-110 transition-transform" />
+              <span className="hidden lg:inline font-medium">Search</span>
+              <kbd className="pointer-events-none ml-2 lg:ml-4 inline-flex h-6 select-none items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-2 font-mono text-xs font-medium text-primary">
                 ⌘K
               </kbd>
             </Button>
@@ -247,12 +246,13 @@ export const Header = () => {
 
           {/* Mobile Navigation */}
           <div className="flex lg:hidden items-center justify-between w-full">
-            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-12 w-12 hover:bg-primary/10 transition-colors">
-                  <Menu className="h-6 w-6 text-primary" />
-                </Button>
-              </SheetTrigger>
+            <div className="flex items-center gap-2">
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-primary/10 transition-colors">
+                    <Menu className="h-5 w-5 text-primary" />
+                  </Button>
+                </SheetTrigger>
               <SheetContent 
                 side="left" 
                 className="w-full bg-black/95 backdrop-blur-xl border-primary/20 p-0"
@@ -315,22 +315,19 @@ export const Header = () => {
               </SheetContent>
             </Sheet>
 
-            <div className="lg:hidden">
-              <Logo />
+            <Logo />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-12 w-12 hover:bg-primary/10 transition-colors group"
+                className="h-10 w-10 hover:bg-primary/10 transition-colors group"
                 onClick={() => setIsSearchOpen(true)}
               >
-                <Search className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
+                <Search className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
               </Button>
-              <div className="lg:hidden">
-                <AuthElement />
-              </div>
+              <AuthElement />
             </div>
           </div>
         </div>
