@@ -19,9 +19,23 @@ const config = {
       },
     },
     extend: {
+      screens: {
+        'xs': '320px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Playfair Display', 'serif'],
+      },
+      spacing: {
+        'safe': 'max(1rem, env(safe-area-inset-left, 1rem))',
+      },
+      maxWidth: {
+        'screen-safe': '100vw',
       },
       colors: {
         border: "hsl(var(--border))",
