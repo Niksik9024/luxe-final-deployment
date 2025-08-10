@@ -9,6 +9,8 @@ import { getModels } from '@/lib/localStorage';
 import { useSearchParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Users } from 'lucide-react';
+import ModelPortfolioHero from '@/components/client/ModelPortfolioHero';
+import { sampleModelData } from '@/lib/hero-sample-data';
 
 const MODELS_PER_PAGE = 18;
 
@@ -70,6 +72,12 @@ export default function ModelsPage() {
 
   return (
     <div className="w-full-safe max-w-screen-safe">
+      {/* Hero Section */}
+      <ModelPortfolioHero 
+        modelProfile={sampleModelData}
+        className="w-full"
+      />
+      
       <div className="container mx-auto responsive-padding py-16">
         <div className="text-center mb-12 sm:mb-16">
           <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
