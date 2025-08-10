@@ -43,6 +43,7 @@ const navItems = [
     { href: '/admin/videos', label: 'Videos', icon: Video },
     { href: '/admin/galleries', label: 'Galleries', icon: ImageIcon },
     { href: '/admin/models', label: 'Models', icon: Users },
+    { href: '/admin/model-profiles', label: 'Model Profiles', icon: Users },
     { href: '/admin/users', label: 'Users', icon: UserCog },
     { href: '/admin/tags', label: 'Tags', icon: Tags },
 ];
@@ -61,9 +62,9 @@ const AdminSidebar = () => {
             </div>
             <nav className="flex-1 p-4 space-y-2">
                 {navItems.map((item) => (
-                  <Link 
-                    key={item.href} 
-                    href={item.href} 
+                  <Link
+                    key={item.href}
+                    href={item.href}
                     className={cn(
                         'flex items-center p-2 rounded-md transition-colors',
                         pathname === item.href
@@ -79,9 +80,9 @@ const AdminSidebar = () => {
                     <>
                         <div className="px-2 pt-4 pb-2 text-xs uppercase text-muted-foreground">Development</div>
                         {devNavItems.map((item) => (
-                          <Link 
-                            key={item.href} 
-                            href={item.href} 
+                          <Link
+                            key={item.href}
+                            href={item.href}
                             className={cn(
                                 'flex items-center p-2 rounded-md transition-colors',
                                 pathname === item.href
@@ -128,12 +129,12 @@ const MobileAdminSidebar = () => {
                         {navItems.map((item) => (
                         <li key={item.href}>
                             <SheetClose asChild>
-                                <Link 
+                                <Link
                                     href={item.href}
                                     className={cn(
                                         'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium min-h-[44px] touch-manipulation',
-                                        pathname === item.href 
-                                          ? 'bg-primary text-primary-foreground border-l-4 border-primary' 
+                                        pathname === item.href
+                                          ? 'bg-primary text-primary-foreground border-l-4 border-primary'
                                           : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-l-4 border-transparent hover:border-primary'
                                     )}
                                 >
@@ -149,12 +150,12 @@ const MobileAdminSidebar = () => {
                             {devNavItems.map((item) => (
                             <li key={item.href}>
                                 <SheetClose asChild>
-                                    <Link 
+                                    <Link
                                         href={item.href}
                                         className={cn(
                                             'flex items-center gap-3 py-3 px-4 rounded-lg transition-all duration-300 text-sm sm:text-base font-medium min-h-[44px] touch-manipulation',
-                                            pathname === item.href 
-                                              ? 'bg-primary text-primary-foreground border-l-4 border-primary' 
+                                            pathname === item.href
+                                              ? 'bg-primary text-primary-foreground border-l-4 border-primary'
                                               : 'text-muted-foreground hover:text-primary hover:bg-primary/10 border-l-4 border-transparent hover:border-primary'
                                         )}
                                     >

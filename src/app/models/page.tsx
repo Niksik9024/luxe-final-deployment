@@ -29,26 +29,37 @@ function ModelsGridSkeleton() {
     );
 }
 
-function ModelsListContent() {
+function ModelsContent() {
     const searchParams = useSearchParams();
     const currentPage = Number(searchParams.get('page')) || 1;
 
     const [models, setModels] = useState<Model[]>([]);
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [heroModel, setHeroModel] = useState(sampleModelData);
 
     useEffect(() => {
-        setLoading(true);
-        const allModels = getModels();
-        const total = allModels.length;
-        const pages = Math.ceil(total / MODELS_PER_PAGE);
-        const startIndex = (currentPage - 1) * MODELS_PER_PAGE;
-        const endIndex = startIndex + MODELS_PER_PAGE;
+        setModels(getModels());
 
-        setModels(allModels.slice(startIndex, endIndex));
-        setTotalPages(pages);
+        // Try to get a random model profile, fallback to sample data
+        const randomProfile = getRandomModelProfile();
+        if (randomProfile) {
+            setHeroModel(randomProfile);
+        }
+
         setLoading(false);
-    }, [currentPage]);
+    }, []);
+
+    const totalModels = getModels().length;
+    const pages = Math.ceil(totalModels / MODELS_PER_PAGE);
+    const startIndex = (currentPage - 1) * MODELS_PER_PAGE;
+    const endIndex = startIndex + MODELS_PER_PAGE;
+
+    useEffect(() => {
+        setTotalPages(pages);
+        setModels(getModels().slice(startIndex, endIndex));
+    }, [currentPage, pages, startIndex, endIndex]);
+
 
     if (loading) {
         return <ModelsGridSkeleton />;
@@ -66,6 +77,16 @@ function ModelsListContent() {
   );
 }
 
+// Helper function to get a random model profile
+function getRandomModelProfile(): Model | undefined {
+    const allModels = getModels();
+    if (allModels.length === 0) {
+        return undefined;
+    }
+    const randomIndex = Math.floor(Math.random() * allModels.length);
+    return allModels[randomIndex];
+}
+
 
 export default function ModelsPage() {
   const models = getModels();
@@ -73,11 +94,11 @@ export default function ModelsPage() {
   return (
     <div className="w-full-safe max-w-screen-safe">
       {/* Hero Section */}
-      <ModelPortfolioHero 
+      <ModelPortfolioHero
         modelProfile={sampleModelData}
         className="w-full"
       />
-      
+
       <div className="container mx-auto responsive-padding py-16">
         <div className="text-center mb-12 sm:mb-16">
           <Badge className="mb-4 bg-luxury-gradient text-black font-semibold text-sm px-4 py-2">
