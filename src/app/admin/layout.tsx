@@ -7,7 +7,6 @@ import { BarChart, Video as VideoIcon, ImageIcon, Users, PanelLeft, Home, UserCo
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +14,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -54,6 +52,7 @@ const navItems = [
 const devNavItems = [
     { href: '/admin/seed', label: 'Seed Data', icon: DatabaseZap },
     { href: '/admin/qa-testing', label: 'QA Testing', icon: CheckCircle },
+    { href: '/admin/final-qa-test', label: 'Final QA Test', icon: Database },
     { href: '/admin/qa-report', label: 'QA Report', icon: FileText },
     { href: '/admin/crud-test', label: 'CRUD Test', icon: TestTube },
 ]
@@ -190,7 +189,7 @@ const MobileAdminSidebar = () => {
                                     )}
                                 >
                                     <item.icon className="h-5 w-5 flex-shrink-0" />
-                                    <span className="truncate font-medium">{item.name}</span>
+                                    <span className="truncate font-medium">{item.label}</span>
                                 </Link>
                             </SheetClose>
                         </li>
