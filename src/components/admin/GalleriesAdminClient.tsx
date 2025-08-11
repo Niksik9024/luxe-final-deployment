@@ -80,48 +80,48 @@ export function GalleriesAdminClient() {
                 const hasValidImages = safeImages.length > 0 && safeImages[0] && safeImages[0].url;
                 
                 return (
-                <div key={gallery.id} className="flex items-center justify-between p-4 border rounded-lg w-full min-w-0">
-                  <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    {hasValidImages && (
-                      <img
-                        src={safeImages[0].url}
-                        alt={gallery.title || 'Gallery image'}
-                        className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-semibold truncate">{gallery.title || 'Untitled Gallery'}</h3>
-                      <p className="text-sm text-muted-foreground text-truncate-2 max-w-md">{gallery.description || 'No description'}</p>
-                      <div className="flex gap-2 mt-2 flex-wrap">
-                        <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className="text-xs">
-                          {gallery.status || 'Draft'}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {safeImages.length} images
-                        </Badge>
+                  <div key={gallery.id} className="flex items-center justify-between p-4 border rounded-lg w-full min-w-0">
+                    <div className="flex items-center space-x-4 flex-1 min-w-0">
+                      {hasValidImages && (
+                        <img
+                          src={safeImages[0].url}
+                          alt={gallery.title || 'Gallery image'}
+                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold truncate">{gallery.title || 'Untitled Gallery'}</h3>
+                        <p className="text-sm text-muted-foreground text-truncate-2 max-w-md">{gallery.description || 'No description'}</p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className="text-xs">
+                            {gallery.status || 'Draft'}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {safeImages.length} images
+                          </Badge>
+                        </div>
                       </div>
                     </div>
+                    <div className="flex space-x-2 flex-shrink-0 ml-4">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/galleries/${gallery.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/admin/galleries/edit/${gallery.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDelete(gallery.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex space-x-2 flex-shrink-0 ml-4">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/galleries/${gallery.id}`}>
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/admin/galleries/edit/${gallery.id}`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => handleDelete(gallery.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
                 );
               })}
             </div>
@@ -134,71 +134,71 @@ export function GalleriesAdminClient() {
               const hasValidImages = safeImages.length > 0 && safeImages[0] && safeImages[0].url;
               
               return (
-              <div key={gallery.id} className="mobile-card w-full">
-                <div className="mobile-card-header">
-                  <div className="flex items-center space-x-3 flex-1 min-w-0">
-                    {hasValidImages && (
-                      <img
-                        src={safeImages[0].url}
-                        alt={gallery.title || 'Gallery image'}
-                        className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
-                      />
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h3 className="mobile-card-title">{gallery.title || 'Untitled Gallery'}</h3>
+                <div key={gallery.id} className="mobile-card w-full">
+                  <div className="mobile-card-header">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      {hasValidImages && (
+                        <img
+                          src={safeImages[0].url}
+                          alt={gallery.title || 'Gallery image'}
+                          className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                        />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <h3 className="mobile-card-title">{gallery.title || 'Untitled Gallery'}</h3>
+                      </div>
+                    </div>
+                    <div className="mobile-card-actions">
+                      <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                        <Link href={`/galleries/${gallery.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                        <Link href={`/admin/galleries/edit/${gallery.id}`}>
+                          <Edit className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleDelete(gallery.id)}
+                        className="touch-manipulation"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="mobile-card-actions">
-                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
-                      <Link href={`/galleries/${gallery.id}`}>
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
-                      <Link href={`/admin/galleries/edit/${gallery.id}`}>
-                        <Edit className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => handleDelete(gallery.id)}
-                      className="touch-manipulation"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
 
-                <div className="mobile-card-content">
-                  <div className="mobile-card-row">
-                    <span className="mobile-card-label">Description:</span>
-                    <span className="mobile-card-value text-truncate-2">{gallery.description || 'No description'}</span>
-                  </div>
-                  <div className="mobile-card-row">
-                    <span className="mobile-card-label">Status:</span>
-                    <span className="mobile-card-value">
-                      <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className="text-xs">
-                        {gallery.status || 'Draft'}
-                      </Badge>
-                    </span>
-                  </div>
-                  <div className="mobile-card-row">
-                    <span className="mobile-card-label">Images:</span>
-                    <span className="mobile-card-value">
-                      <Badge variant="outline" className="text-xs">
-                        {safeImages.length} images
-                      </Badge>
-                    </span>
-                  </div>
-                  <div className="mobile-card-row">
-                    <span className="mobile-card-label">Created:</span>
-                    <span className="mobile-card-value text-xs">
-                      {new Date(gallery.date).toLocaleDateString()}
-                    </span>
+                  <div className="mobile-card-content">
+                    <div className="mobile-card-row">
+                      <span className="mobile-card-label">Description:</span>
+                      <span className="mobile-card-value text-truncate-2">{gallery.description || 'No description'}</span>
+                    </div>
+                    <div className="mobile-card-row">
+                      <span className="mobile-card-label">Status:</span>
+                      <span className="mobile-card-value">
+                        <Badge variant={gallery.status === 'Published' ? 'default' : 'secondary'} className="text-xs">
+                          {gallery.status || 'Draft'}
+                        </Badge>
+                      </span>
+                    </div>
+                    <div className="mobile-card-row">
+                      <span className="mobile-card-label">Images:</span>
+                      <span className="mobile-card-value">
+                        <Badge variant="outline" className="text-xs">
+                          {safeImages.length} images
+                        </Badge>
+                      </span>
+                    </div>
+                    <div className="mobile-card-row">
+                      <span className="mobile-card-label">Created:</span>
+                      <span className="mobile-card-value text-xs">
+                        {new Date(gallery.date).toLocaleDateString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
               );
             })}
           </div>

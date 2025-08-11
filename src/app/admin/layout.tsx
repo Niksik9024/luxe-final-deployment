@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut, BarChart3, Image, CheckCircle, FileText } from 'lucide-react';
+import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut, BarChart3, Image, CheckCircle, FileText, TestTube, Database } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -312,6 +312,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link href="/admin/model-profiles" className="text-center">
                     <Crown className="h-4 w-4 mx-auto mb-1" />
                     <span className="text-[10px] leading-tight">Profiles</span>
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild className="flex flex-col items-center justify-center p-2 min-h-[60px] touch-manipulation">
+                  <Link href="/admin/crud-test" className="text-center">
+                    <Database className="h-4 w-4 mx-auto mb-1" />
+                    <span className="text-[10px] leading-tight">CRUD</span>
                   </Link>
                 </Button>
               </div>
