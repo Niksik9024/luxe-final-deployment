@@ -91,29 +91,38 @@ export function FinalQATest() {
     clearResults();
     setCurrentTest('Starting comprehensive tests...');
 
-    // Run all tests with error handling
-    await runTestSafely('Data Layer', testDataLayer);
-    await runTestSafely('Authentication', testAuthentication);
-    await runTestSafely('Navigation', testNavigation);
-    await runTestSafely('Core Features', testCoreFeatures);
-    await runTestSafely('Admin Functionality', testAdminFunctionality);
-    await runTestSafely('User Interface', testUserInterface);
-    await runTestSafely('Mobile Responsiveness', testMobileResponsiveness);
-    await runTestSafely('Performance & Accessibility', testPerformanceAccessibility);
-    await runTestSafely('Error Handling', testErrorHandling);
-    await runTestSafely('SEO & Meta Tags', testSEOMetaTags);
-    await runTestSafely('Form Validation', testFormValidation);
-    await runTestSafely('Security', testSecurity);
+    try {
+      // Run all tests with error handling
+      await runTestSafely('Data Layer', testDataLayer);
+      await runTestSafely('Authentication', testAuthentication);
+      await runTestSafely('Navigation', testNavigation);
+      await runTestSafely('Core Features', testCoreFeatures);
+      await runTestSafely('Admin Functionality', testAdminFunctionality);
+      await runTestSafely('User Interface', testUserInterface);
+      await runTestSafely('Mobile Responsiveness', testMobileResponsiveness);
+      await runTestSafely('Performance & Accessibility', testPerformanceAccessibility);
+      await runTestSafely('Error Handling', testErrorHandling);
+      await runTestSafely('SEO & Meta Tags', testSEOMetaTags);
+      await runTestSafely('Form Validation', testFormValidation);
+      await runTestSafely('Security', testSecurity);
 
-    setCurrentTest('All tests completed successfully!');
-    
-    // Wait for all test results to be processed
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    toast({
-      title: "Comprehensive Testing Complete",
-      description: "All test categories have been executed successfully",
-    }); finally {
+      setCurrentTest('All tests completed successfully!');
+      
+      // Wait for all test results to be processed
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      toast({
+        title: "Comprehensive Testing Complete",
+        description: "All test categories have been executed successfully",
+      });
+    } catch (error) {
+      console.error('Error during testing:', error);
+      toast({
+        title: "Testing Error",
+        description: "An error occurred during testing execution",
+        variant: "destructive",
+      });
+    } finally {
       setIsRunning(false);
       setCurrentTest('');
     }
