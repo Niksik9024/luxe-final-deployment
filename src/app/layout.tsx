@@ -46,7 +46,7 @@ export default function RootLayout({
     // Global error handler for chunk loading errors
     const handleGlobalError = (event: ErrorEvent) => {
       const error = event.error;
-      if (error && (error.name === 'ChunkLoadError' || 
+      if (error && (error.name === 'ChunkLoadError' ||
           error.message?.includes('Loading chunk') ||
           error.message?.includes('timeout'))) {
         console.log('Chunk loading error detected, reloading...');
@@ -56,8 +56,8 @@ export default function RootLayout({
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       const error = event.reason;
-      if (error && typeof error === 'object' && 
-          (error.name === 'ChunkLoadError' || 
+      if (error && typeof error === 'object' &&
+          (error.name === 'ChunkLoadError' ||
            error.message?.includes('Loading chunk'))) {
         console.log('Chunk loading promise rejection detected, reloading...');
         window.location.reload();
@@ -96,8 +96,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={bodyClasses}>
-        <ErrorBoundary>
-          <Providers>
+        <Providers>
+          <ErrorBoundary>
             {isClient ? (
               isAccessGranted || pathname.startsWith('/admin') ? AppContent : <LandingPage onAccessGranted={handleAccessGranted} />
             ) : (
@@ -105,8 +105,8 @@ export default function RootLayout({
               null
             )}
             <Toaster />
-          </Providers>
-        </ErrorBoundary>
+          </ErrorBoundary>
+        </Providers>
       </body>
     </html>
   );
