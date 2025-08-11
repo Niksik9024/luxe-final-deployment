@@ -10,7 +10,7 @@ import { Providers } from '@/components/shared/Providers';
 import { Header } from '@/components/shared/Header';
 import LandingPage from '@/components/client/LandingPage';
 import { usePathname } from 'next/navigation';
-import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 const inter = Inter({
   subsets: ['latin'],
