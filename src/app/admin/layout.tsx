@@ -55,6 +55,7 @@ const devNavItems = [
     { href: '/admin/seed', label: 'Seed Data', icon: DatabaseZap },
     { href: '/admin/qa-testing', label: 'QA Testing', icon: CheckCircle },
     { href: '/admin/qa-report', label: 'QA Report', icon: FileText },
+    { href: '/admin/crud-test', label: 'CRUD Test', icon: TestTube },
 ]
 
 const AdminSidebar = () => {
@@ -277,7 +278,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </header>
 
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-6 lg:p-8 admin-content pb-20 md:pb-6">
+            <main className="flex-1 p-4 md:p-6 lg:p-8 admin-content pb-24 md:pb-6">
               {children}
             </main>
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -78,7 +77,7 @@ export function GalleriesAdminClient() {
               {galleries.map((gallery) => {
                 const safeImages = Array.isArray(gallery.images) ? gallery.images : [];
                 const hasValidImages = safeImages.length > 0 && safeImages[0] && safeImages[0].url;
-                
+
                 return (
                   <div key={gallery.id} className="flex items-center justify-between p-4 border rounded-lg w-full min-w-0">
                     <div className="flex items-center space-x-4 flex-1 min-w-0">
@@ -132,7 +131,7 @@ export function GalleriesAdminClient() {
             {galleries.map((gallery) => {
               const safeImages = Array.isArray(gallery.images) ? gallery.images : [];
               const hasValidImages = safeImages.length > 0 && safeImages[0] && safeImages[0].url;
-              
+
               return (
                 <div key={gallery.id} className="mobile-card w-full">
                   <div className="mobile-card-header">
@@ -149,23 +148,26 @@ export function GalleriesAdminClient() {
                       </div>
                     </div>
                     <div className="mobile-card-actions">
-                      <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                      <Button variant="outline" size="sm" asChild className="touch-manipulation min-w-[44px] min-h-[44px]">
                         <Link href={`/galleries/${gallery.id}`}>
                           <Eye className="h-4 w-4" />
+                          <span className="sr-only">View</span>
                         </Link>
                       </Button>
-                      <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                      <Button variant="outline" size="sm" asChild className="touch-manipulation min-w-[44px] min-h-[44px]">
                         <Link href={`/admin/galleries/edit/${gallery.id}`}>
                           <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
                         </Link>
                       </Button>
                       <Button 
                         variant="destructive" 
                         size="sm"
                         onClick={() => handleDelete(gallery.id)}
-                        className="touch-manipulation"
+                        className="touch-manipulation min-w-[44px] min-h-[44px]"
                       >
                         <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete</span>
                       </Button>
                     </div>
                   </div>

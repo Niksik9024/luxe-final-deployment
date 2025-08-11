@@ -140,23 +140,26 @@ export function ModelsAdminClient() {
                     </div>
                   </div>
                   <div className="mobile-card-actions">
-                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation min-w-[44px] min-h-[44px]">
                       <Link href={`/models/${model.id}`}>
                         <Eye className="h-4 w-4" />
+                        <span className="sr-only">View</span>
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation min-w-[44px] min-h-[44px]">
                       <Link href={`/admin/models/edit/${model.id}`}>
                         <Edit className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
                       </Link>
                     </Button>
                     <Button 
                       variant="destructive" 
                       size="sm"
                       onClick={() => handleDelete(model.id)}
-                      className="touch-manipulation"
+                      className="touch-manipulation min-w-[44px] min-h-[44px]"
                     >
                       <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
                     </Button>
                   </div>
                 </div>

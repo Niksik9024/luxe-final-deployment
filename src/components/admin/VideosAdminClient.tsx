@@ -145,23 +145,26 @@ export function VideosAdminClient() {
                     </div>
                   </div>
                   <div className="mobile-card-actions">
-                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation min-w-[44px] min-h-[44px]">
                       <Link href={`/videos/${video.id}`}>
                         <Eye className="h-4 w-4" />
+                        <span className="sr-only">View</span>
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" asChild className="touch-manipulation">
+                    <Button variant="outline" size="sm" asChild className="touch-manipulation min-w-[44px] min-h-[44px]">
                       <Link href={`/admin/videos/edit/${video.id}`}>
                         <Edit className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
                       </Link>
                     </Button>
                     <Button 
                       variant="destructive" 
                       size="sm"
                       onClick={() => handleDelete(video.id)}
-                      className="touch-manipulation"
+                      className="touch-manipulation min-w-[44px] min-h-[44px]"
                     >
                       <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete</span>
                     </Button>
                   </div>
                 </div>
