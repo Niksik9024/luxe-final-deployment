@@ -26,6 +26,13 @@ export interface Model {
     name: string;
     image: string;
     description: string;
+    status: 'Active' | 'Inactive';
+    isFeatured?: boolean;
+    stats?: {
+        videos: number;
+        galleries: number;
+        likes: number;
+    };
     instagram?: string;
     twitter?: string;
     height?: string;
@@ -47,19 +54,43 @@ export interface BaseContent {
     status: 'Published' | 'Draft';
 }
 
-export interface Video extends BaseContent {
-    videoUrl: string;
+export interface Video {
+    id: string;
+    title: string;
+    description: string;
+    url?: string;
+    videoUrl?: string;
+    thumbnail?: string;
+    image?: string;
+    duration?: string;
+    modelId?: string;
+    models?: string[];
+    status: 'Published' | 'Draft';
     isFeatured?: boolean;
-    duration?: number;
+    tags: string[];
+    keywords?: string[];
+    date: string;
+    category?: string;
     resolution?: string;
     fileSize?: string;
-    category?: string;
 }
 
-export interface Gallery extends BaseContent {
-    album: string[];
-    resolution?: string;
+export interface Gallery {
+    id: string;
+    title: string;
+    description: string;
+    images: Array<{
+        url: string;
+        alt: string;
+    }>;
+    modelId?: string;
+    models?: string[];
+    status: 'Published' | 'Draft';
+    tags: string[];
+    keywords?: string[];
+    date: string;
     category?: string;
+    resolution?: string;
 }
 
 export interface Photo {

@@ -341,5 +341,93 @@ export const getFavoritesLegacy = (): string[] => {
   return favorites.map(fav => fav.id);
 };
 
+// CRUD Functions with proper return types for testing
+export const createVideo = (videoData: Omit<Video, 'id'>): Video => {
+  const newVideo: Video = {
+    ...videoData,
+    id: Date.now().toString()
+  };
+  addVideo(newVideo);
+  return newVideo;
+};
+
+export const createGallery = (galleryData: Omit<Gallery, 'id'>): Gallery => {
+  const newGallery: Gallery = {
+    ...galleryData,
+    id: Date.now().toString()
+  };
+  addGallery(newGallery);
+  return newGallery;
+};
+
+export const createModel = (modelData: Omit<Model, 'id'>): Model => {
+  const newModel: Model = {
+    ...modelData,
+    id: Date.now().toString()
+  };
+  addModel(newModel);
+  return newModel;
+};
+
+export const updateVideoFunc = (id: string, updates: Partial<Video>): Video | null => {
+  const videos = getVideos();
+  const videoIndex = videos.findIndex(v => v.id === id);
+  if (videoIndex === -1) return null;
+  
+  const updatedVideo = { ...videos[videoIndex], ...updates };
+  videos[videoIndex] = updatedVideo;
+  setVideos(videos);
+  return updatedVideo;
+};
+
+export const updateGalleryFunc = (id: string, updates: Partial<Gallery>): Gallery | null => {
+  const galleries = getGalleries();
+  const galleryIndex = galleries.findIndex(g => g.id === id);
+  if (galleryIndex === -1) return null;
+  
+  const updatedGallery = { ...galleries[galleryIndex], ...updates };
+  galleries[galleryIndex] = updatedGallery;
+  setGalleries(galleries);
+  return updatedGallery;
+};
+
+export const updateModelFunc = (id: string, updates: Partial<Model>): Model | null => {
+  const models = getModels();
+  const modelIndex = models.findIndex(m => m.id === id);
+  if (modelIndex === -1) return null;
+  
+  const updatedModel = { ...models[modelIndex], ...updates };
+  models[modelIndex] = updatedModel;
+  setModels(models);
+  return updatedModel;
+};
+
+export const deleteVideoFunc = (id: string): boolean => {
+  const videos = getVideos();
+  const filteredVideos = videos.filter(v => v.id !== id);
+  if (filteredVideos.length === videos.length) return false;
+  
+  setVideos(filteredVideos);
+  return true;
+};
+
+export const deleteGalleryFunc = (id: string): boolean => {
+  const galleries = getGalleries();
+  const filteredGalleries = galleries.filter(g => g.id !== id);
+  if (filteredGalleries.length === galleries.length) return false;
+  
+  setGalleries(filteredGalleries);
+  return true;
+};
+
+export const deleteModelFunc = (id: string): boolean => {
+  const models = getModels();
+  const filteredModels = models.filter(m => m.id !== id);
+  if (filteredModels.length === models.length) return false;
+  
+  setModels(filteredModels);
+  return true;
+};
+
 // Initialize on first load
 initializeLocalStorage();

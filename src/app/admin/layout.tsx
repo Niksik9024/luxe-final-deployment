@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut, BarChart3, Image, CheckCircle, FileText, TestTube, Database } from 'lucide-react';
+import { BarChart, Video as VideoIcon, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut, BarChart3, Image, CheckCircle, FileText, TestTube, Database } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +43,7 @@ const Logo = () => (
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', icon: BarChart },
-    { href: '/admin/videos', label: 'Videos', icon: Video },
+    { href: '/admin/videos', label: 'Videos', icon: VideoIcon },
     { href: '/admin/galleries', label: 'Galleries', icon: ImageIcon },
     { href: '/admin/models', label: 'Models', icon: Users },
     { href: '/admin/model-profiles', label: 'Model Profiles', icon: Users },
@@ -120,7 +120,7 @@ const MobileAdminSidebar = () => {
 
   const navigationItems = [
     { name: 'Dashboard', href: '/admin', icon: BarChart },
-    { name: 'Videos', href: '/admin/videos', icon: Video },
+    { name: 'Videos', href: '/admin/videos', icon: VideoIcon },
     { name: 'Galleries', href: '/admin/galleries', icon: ImageIcon },
     { name: 'Models', href: '/admin/models', icon: Users },
     { name: 'Model Profiles', href: '/admin/model-profiles', icon: Users },
@@ -299,7 +299,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </Button>
                 <Button variant="ghost" size="sm" asChild className="flex flex-col items-center justify-center p-2 min-h-[60px] touch-manipulation">
                   <Link href="/admin/videos" className="text-center">
-                    <Video className="h-4 w-4 mx-auto mb-1" />
+                    <VideoIcon className="h-4 w-4 mx-auto mb-1" />
                     <span className="text-[10px] leading-tight">Videos</span>
                   </Link>
                 </Button>

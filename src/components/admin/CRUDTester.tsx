@@ -18,7 +18,7 @@ import {
   CheckCircle, 
   XCircle, 
   AlertCircle,
-  Video,
+  Video as VideoIcon,
   ImageIcon,
   Users,
   RefreshCw
@@ -30,12 +30,12 @@ import {
   createVideo,
   createGallery,
   createModel,
-  updateVideo,
-  updateGallery,
-  updateModel,
-  deleteVideo,
-  deleteGallery,
-  deleteModel
+  updateVideoFunc as updateVideo,
+  updateGalleryFunc as updateGallery,
+  updateModelFunc as updateModel,
+  deleteVideoFunc as deleteVideo,
+  deleteGalleryFunc as deleteGallery,
+  deleteModelFunc as deleteModel
 } from '@/lib/localStorage';
 import { Video, Gallery, Model } from '@/lib/types';
 
@@ -464,7 +464,7 @@ export function CRUDTester() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Video className="h-5 w-5" />
+                  <VideoIcon className="h-5 w-5" />
                   Videos
                 </CardTitle>
               </CardHeader>
