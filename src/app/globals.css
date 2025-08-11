@@ -617,18 +617,65 @@
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  }
+
+  @media (min-width: 768px) {
+    .admin-content {
+      padding-bottom: 1.5rem;
+    }
   }
 
   .admin-card {
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
   }
 
   .admin-table-container {
     width: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Enhanced Mobile Admin Styles */
+  @media (max-width: 768px) {
+    .admin-mobile-header {
+      padding: 0.75rem;
+      height: 56px;
+    }
+
+    .admin-mobile-nav {
+      height: calc(64px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .admin-mobile-card {
+      margin: 0.5rem;
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid hsl(var(--border));
+      background: hsl(var(--card));
+    }
+
+    .admin-mobile-button-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .admin-mobile-button-group > * {
+      min-height: 44px;
+      touch-action: manipulation;
+      flex: 1;
+      min-width: 80px;
+    }
   }
 
   /* Text Truncation Utilities */

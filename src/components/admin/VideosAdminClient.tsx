@@ -9,6 +9,11 @@ import Link from 'next/link';
 import { Video } from '@/lib/types';
 import { getVideos, deleteVideo } from '@/lib/localStorage';
 import { useToast } from '@/lib/use-toast';
+import { Dialog, DialogContent, DialogTrigger, DialogClose, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 export function VideosAdminClient() {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -53,6 +58,21 @@ export function VideosAdminClient() {
     }
   };
 
+  // Placeholder for handleCreate function, assuming it's defined elsewhere or will be added.
+  const handleCreate = async (formData: FormData) => {
+    // Logic to handle video creation would go here.
+    // For now, we'll just log the data and close the dialog.
+    console.log("Creating video with data:", formData);
+    toast({
+      title: "Success",
+      description: "Video created successfully (simulated)",
+    });
+    // You would typically add the new video and then call loadVideos()
+    // await newVideoApiCall(formData);
+    // await loadVideos();
+  };
+
+
   if (loading) {
     return <div className="flex justify-center items-center min-h-64">Loading...</div>;
   }
@@ -61,12 +81,68 @@ export function VideosAdminClient() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <h2 className="text-xl font-semibold md:hidden">Videos</h2>
-        <Button asChild className="w-full sm:w-auto touch-manipulation">
-          <Link href="/admin/videos/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Video
-          </Link>
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="w-full sm:w-auto touch-manipulation">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Video
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Video</DialogTitle>
+              <DialogDescription>
+                Add a new video to your collection with details and metadata.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              handleCreate(formData);
+            }} className="space-y-4">
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="title">Title</Label>
+                <Input type="text" id="title" name="title" required />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="description">Description</Label>
+                <Textarea id="description" name="description" />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="thumbnail">Thumbnail URL</Label>
+                <Input type="url" id="thumbnail" name="thumbnail" required />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="videoUrl">Video URL</Label>
+                <Input type="url" id="videoUrl" name="videoUrl" required />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="duration">Duration (e.g., 5:30)</Label>
+                <Input type="text" id="duration" name="duration" placeholder="5:30" required />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="category">Category</Label>
+                <Select name="category" defaultValue="fashion" required>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fashion">Fashion</SelectItem>
+                    <SelectItem value="lifestyle">Lifestyle</SelectItem>
+                    <SelectItem value="commercial">Commercial</SelectItem>
+                    <SelectItem value="artistic">Artistic</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button type="submit">Create Video</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card className="w-full max-w-full overflow-hidden">
@@ -168,7 +244,7 @@ export function VideosAdminClient() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="mobile-card-content">
                   <div className="mobile-card-row">
                     <span className="mobile-card-label">Description:</span>

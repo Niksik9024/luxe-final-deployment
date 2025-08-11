@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,6 +9,10 @@ import Link from 'next/link';
 import { Model } from '@/lib/types';
 import { getModels, deleteModel } from '@/lib/localStorage';
 import { useToast } from '@/lib/use-toast';
+import { Dialog, DialogContent, DialogTrigger, DialogClose, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 
 export function ModelsAdminClient() {
   const [models, setModels] = useState<Model[]>([]);
@@ -54,6 +57,20 @@ export function ModelsAdminClient() {
     }
   };
 
+  // Dummy handleCreate function for the dialog form
+  const handleCreate = (formData: FormData) => {
+    // This function would typically handle creating a new model
+    // For now, it just logs the data and closes the dialog
+    console.log("Creating model with data:", formData);
+    toast({
+      title: "Model creation simulated",
+      description: "New model data logged to console.",
+    });
+    // In a real app, you would add logic here to add the model,
+    // then potentially call loadModels() and close the dialog.
+  };
+
+
   if (loading) {
     return <div className="flex justify-center items-center min-h-64">Loading...</div>;
   }
@@ -62,14 +79,56 @@ export function ModelsAdminClient() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <h2 className="text-xl font-semibold md:hidden">Models</h2>
-        <Button asChild className="w-full sm:w-auto touch-manipulation">
-          <Link href="/admin/models/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Model
-          </Link>
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="w-full sm:w-auto touch-manipulation">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Model
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Model</DialogTitle>
+              <DialogDescription>
+                Add a new model to your roster with profile information and details.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              handleCreate(formData);
+            }} className="space-y-4">
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="name">Name</Label>
+                <Input type="text" id="name" name="name" required />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea id="bio" name="bio" />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="image">Profile Image URL</Label>
+                <Input type="url" id="image" name="image" required />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="location">Location</Label>
+                <Input type="text" id="location" name="location" />
+              </div>
+              <div className="grid w-full max-w-sm items-center gap-1.5">
+                <Label htmlFor="specialties">Specialties (comma-separated)</Label>
+                <Input type="text" id="specialties" name="specialties" placeholder="Fashion, Portrait, Commercial" />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button type="submit">Create Model</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
-      
+
       <Card className="w-full max-w-full overflow-hidden">
         <CardHeader className="hidden md:block">
           <CardTitle>Models</CardTitle>
@@ -163,7 +222,7 @@ export function ModelsAdminClient() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="mobile-card-content">
                   <div className="mobile-card-row">
                     <span className="mobile-card-label">Description:</span>

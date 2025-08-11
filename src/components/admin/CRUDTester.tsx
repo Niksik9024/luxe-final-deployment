@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -10,13 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/lib/use-toast';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Database, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Database,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   Video as VideoIcon,
   ImageIcon,
@@ -106,7 +105,7 @@ export function CRUDTester() {
   const runAllTests = async () => {
     setLoading(true);
     clearResults();
-    
+
     try {
       // Test Videos CRUD
       await testVideoCRUD();
@@ -116,7 +115,7 @@ export function CRUDTester() {
       await testModelCRUD();
       // Test Read Operations
       await testReadOperations();
-      
+
       toast({
         title: "CRUD Testing Complete",
         description: "All CRUD operations have been tested",
@@ -382,8 +381,8 @@ export function CRUDTester() {
           <p className="text-muted-foreground">Test all Create, Read, Update, Delete operations</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button 
-            onClick={runAllTests} 
+          <Button
+            onClick={runAllTests}
             disabled={loading}
             className="w-full sm:w-auto touch-manipulation"
           >
@@ -399,8 +398,8 @@ export function CRUDTester() {
               </>
             )}
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={clearResults}
             className="w-full sm:w-auto touch-manipulation"
           >
@@ -469,8 +468,8 @@ export function CRUDTester() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start touch-manipulation"
                   onClick={() => testVideoCRUD()}
                 >
@@ -491,8 +490,8 @@ export function CRUDTester() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start touch-manipulation"
                   onClick={() => testGalleryCRUD()}
                 >
@@ -513,8 +512,8 @@ export function CRUDTester() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start touch-manipulation"
                   onClick={() => testModelCRUD()}
                 >
