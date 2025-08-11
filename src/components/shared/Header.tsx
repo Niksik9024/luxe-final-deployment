@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -71,7 +70,7 @@ const NavLinks = ({ onLinkClick, isMobile = false }: { onLinkClick?: () => void;
 const UserMenu = () => {
     const { currentUser, isAdmin, logout } = useAuth();
     const [changeImageOpen, setChangeImageOpen] = useState(false);
-    
+
     if (!currentUser) return null;
 
     return (
@@ -170,7 +169,7 @@ const AuthElement = () => {
     if (loading) {
         return <Skeleton className="h-11 w-24 sm:h-12 sm:w-32" />
     }
-    
+
     return (
         <>
             {currentUser ? <UserMenu /> : (
@@ -192,7 +191,7 @@ export const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { currentUser } = useAuth();
   const { isDataSaver, toggleDataSaver } = useDataSaver();
-  
+
   const handleCloseMobileMenu = () => setIsMobileMenuOpen(false);
 
   useEffect(() => {
@@ -211,19 +210,21 @@ export const Header = () => {
       <header className="sticky top-0 z-50 w-full bg-black/90 backdrop-blur-xl border-b border-primary/20 shadow-luxury">
         <div className="absolute inset-0 bg-luxury-dark-gradient opacity-30"></div>
         <div className="relative container mx-auto flex h-16 sm:h-18 lg:h-20 items-center justify-between px-4 sm:px-6">
-          
+
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8 xl:gap-12">
             <Logo />
             <NavLinks />
           </div>
-          
+
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-4 xl:gap-6">
             <Button 
               variant="outline" 
               className="h-10 xl:h-12 px-4 xl:px-6 border-primary/40 hover:border-primary hover:bg-primary/10 transition-all duration-300 group min-h-[44px] touch-manipulation"
               onClick={() => setIsSearchOpen(true)}
+              data-testid="search-button"
+              aria-label="Search"
             >
               <Search className="h-4 w-4 xl:h-5 xl:w-5 mr-2 xl:mr-3 text-primary group-hover:scale-110 transition-transform" />
               <span className="font-medium text-sm xl:text-base">Search</span>
@@ -231,7 +232,7 @@ export const Header = () => {
                 ⌘K
               </kbd>
             </Button>
-            
+
             {currentUser && (
               <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20">
                 <Switch 
@@ -245,7 +246,7 @@ export const Header = () => {
                 </Label>
               </div>
             )}
-            
+
             <AuthElement />
           </div>
 
@@ -254,7 +255,14 @@ export const Header = () => {
             <div className="flex items-center gap-3">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-primary/10 transition-colors touch-manipulation min-h-[44px] min-w-[44px]">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-10 w-10 hover:bg-primary/10 transition-colors touch-manipulation min-h-[44px] min-w-[44px]"
+                    onClick={() => setIsMobileMenuOpen(true)}
+                    data-testid="mobile-menu-button"
+                    aria-label="Open navigation menu"
+                  >
                     <Menu className="h-5 w-5 text-primary" />
                     <span className="sr-only">Open navigation menu</span>
                   </Button>
@@ -278,11 +286,11 @@ export const Header = () => {
                       </SheetClose>
                     </div>
                   </SheetHeader>
-                  
+
                   <div className="flex-1 flex flex-col overflow-hidden">
                     <div className="flex-1 overflow-y-auto p-6 space-y-6">
                       <NavLinks onLinkClick={handleCloseMobileMenu} isMobile />
-                      
+
                       {currentUser && (
                         <>
                           <div className="border-t border-primary/30 my-6 pt-6">
@@ -306,7 +314,7 @@ export const Header = () => {
                               </Link>
                             </div>
                           </div>
-                          
+
                           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
                             <div className="flex items-center justify-between">
                               <Label htmlFor="data-saver-mode-mobile" className="text-base font-medium text-primary">
@@ -337,6 +345,8 @@ export const Header = () => {
                 size="icon" 
                 className="h-10 w-10 hover:bg-primary/10 transition-colors group touch-manipulation min-h-[44px] min-w-[44px]"
                 onClick={() => setIsSearchOpen(true)}
+                data-testid="search-button"
+                aria-label="Search"
               >
                 <Search className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                 <span className="sr-only">Open search</span>
