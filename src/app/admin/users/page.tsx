@@ -504,7 +504,7 @@ export default function UsersPage() {
                     </PaginationItem>
 
                     {/* Show limited pages on mobile */}
-                    {Array.from({ length: Math.min(totalPages, window.innerWidth < 640 ? 3 : 5) }, (_, i) => {
+                    {Array.from({ length: Math.min(totalPages, typeof window !== 'undefined' && window.innerWidth < 640 ? 3 : 5) }, (_, i) => {
                       let pageNumber;
                       if (totalPages <= 5) {
                         pageNumber = i + 1;
@@ -531,6 +531,7 @@ export default function UsersPage() {
                           </PaginationItem>
                         );
                       }
+                      return null;
                     })}
 
                     {/* Mobile page indicator */}

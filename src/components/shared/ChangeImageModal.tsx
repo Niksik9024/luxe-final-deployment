@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState } from 'react';
@@ -16,81 +15,89 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/lib/use-toast';
-import { Image } from 'lucide-react';
+import { ImageIcon, Upload } from 'lucide-react';
 
 interface ChangeImageModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const ChangeImageModal: React.FC<ChangeImageModalProps> = ({ open, onOpenChange }) => {
-  const { currentUser, updateUserImage } = useAuth();
-  const [imageUrl, setImageUrl] = useState(currentUser?.image || '');
-  const [error, setError] = useState('');
+export function ChangeImageModal({ open, onOpenChange }: ChangeImageModalProps) {
+  const [imageUrl, setImageUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { updateUserImage } = useAuth();
   const { toast } = useToast();
 
-  const handleSave = async () => {
-    setError('');
-    if (!imageUrl || !imageUrl.startsWith('http')) {
-        setError('Please enter a valid image URL.');
-        return;
-    }
-    await updateUserImage(imageUrl);
-    toast({
-        title: 'Profile Picture Updated',
-        description: 'Your new profile picture has been saved.',
-    });
-    onOpenChange(false);
-  };
-  
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    handleSave();
-  }
+    if (!imageUrl.trim()) return;
 
-  // Update local state if the modal is reopened and the user image has changed elsewhere
-  React.useEffect(() => {
-    if (open) {
-      setImageUrl(currentUser?.image || '');
+    setLoading(true);
+    try {
+      await updateUserImage(imageUrl);
+      toast({
+        title: "Avatar updated!",
+        description: "Your profile image has been updated successfully.",
+      });
+      onOpenChange(false);
+      setImageUrl('');
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: "Failed to update your avatar. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  }, [open, currentUser?.image]);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card text-card-foreground border-border">
-        <DialogHeader className="text-center items-center">
-            <div className="bg-muted p-3 rounded-full border border-border mb-2">
-                <Image className="h-6 w-6 text-accent" />
-            </div>
-          <DialogTitle className="text-2xl">Change Profile Picture</DialogTitle>
+      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-primary/20">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            <ImageIcon className="h-5 w-5" />
+            Change Avatar
+          </DialogTitle>
           <DialogDescription>
-            Enter a new image URL to update your profile picture.
+            Enter a URL to update your profile image. The image should be publicly accessible.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleFormSubmit}>
-            <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                    <Label htmlFor="image-url-input">
-                    Image URL
-                    </Label>
-                    <Input
-                    id="image-url-input"
-                    type="text"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://example.com/image.png"
-                    autoFocus
-                    />
-                </div>
-                {error && <p className="text-destructive text-sm text-center">{error}</p>}
-            </div>
-            <DialogFooter>
-            <Button type="submit" className="w-full bg-accent hover:bg-accent/90">
-                Save Changes
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="imageUrl">Image URL</Label>
+            <Input
+              id="imageUrl"
+              type="url"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              required
+              placeholder="https://example.com/your-image.jpg"
+              className="min-h-[44px] text-base"
+            />
+          </div>
+
+          <DialogFooter className="flex-col gap-3 sm:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto min-h-[44px] text-base"
+            >
+              Cancel
             </Button>
-            </DialogFooter>
+            <Button 
+              type="submit" 
+              disabled={loading || !imageUrl.trim()}
+              className="w-full sm:w-auto btn-luxury min-h-[44px] text-base font-semibold"
+            >
+              {loading ? 'Updating...' : 'Update Avatar'}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
+}

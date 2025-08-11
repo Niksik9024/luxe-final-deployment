@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -23,119 +22,150 @@ interface AuthModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ open, onOpenChange }) => {
-  const [isLoginView, setIsLoginView] = useState(true);
-  const [name, setName] = useState('');
+export function AuthModal({ open, onOpenChange }: AuthModalProps) {
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (open) {
-      setError('');
-      setName('');
+    if (!open) {
       setEmail('');
       setPassword('');
-      setIsLoginView(true);
+      setName('');
+      setLoading(false);
     }
   }, [open]);
 
-  const handleAuthAction = async () => {
-    setIsLoading(true);
-    setError('');
-
-    let result;
-    if (isLoginView) {
-      result = await login(email, password);
-    } else {
-      result = await register(name, email, password);
-    }
-
-    if (result.success) {
-      toast({
-        title: isLoginView ? 'Login Successful' : 'Registration Successful',
-        description: `Welcome!`,
-      });
-      onOpenChange(false);
-    } else {
-      setError(result.error || 'An unexpected error occurred.');
-      setPassword(''); // Clear password on failure
-    }
-
-    setIsLoading(false);
-  };
-  
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    handleAuthAction();
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const result = await login(email, password);
+        if (result.success) {
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in.",
+          });
+          onOpenChange(false);
+        } else {
+          toast({
+            title: "Sign in failed",
+            description: result.error || "Please check your credentials.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        const result = await register(name, email, password);
+        if (result.success) {
+          toast({
+            title: "Account created!",
+            description: "Welcome to LUXE. You have been signed in.",
+          });
+          onOpenChange(false);
+        } else {
+          toast({
+            title: "Registration failed",
+            description: result.error || "Please try again.",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-card text-card-foreground border-border">
-        <DialogHeader className="text-center items-center">
-            <div className="bg-muted p-3 rounded-full border border-border mb-2">
-                {isLoginView ? <Lock className="h-6 w-6 text-accent" /> : <UserPlus className="h-6 w-6 text-accent" />}
-            </div>
-          <DialogTitle className="text-2xl">{isLoginView ? 'Sign In' : 'Create Account'}</DialogTitle>
+      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-primary/20">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            {isLogin ? <Lock className="h-5 w-5" /> : <UserPlus className="h-5 w-5" />}
+            {isLogin ? 'Sign In' : 'Create Account'}
+          </DialogTitle>
           <DialogDescription>
-            {isLoginView ? 'Enter your credentials to access your account.' : 'Create an account to get started.'}
+            {isLogin 
+              ? 'Enter your credentials to access your LUXE account.' 
+              : 'Create a new LUXE account to get started.'
+            }
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleFormSubmit}>
-            <div className="grid gap-4 py-4">
-                {!isLoginView && (
-                    <div className="space-y-2">
-                        <Label htmlFor="name-input">Name</Label>
-                        <Input
-                            id="name-input"
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Jane Doe"
-                            required
-                        />
-                    </div>
-                )}
-                <div className="space-y-2">
-                    <Label htmlFor="email-input">Email</Label>
-                    <Input
-                        id="email-input"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        required
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="password-input">Password</Label>
-                    <Input
-                        id="password-input"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        required
-                    />
-                </div>
-                {error && <p className="text-destructive text-sm text-center">{error}</p>}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required={!isLogin}
+                placeholder="Enter your full name"
+                className="min-h-[44px] text-base"
+              />
             </div>
-            <DialogFooter className="flex flex-col gap-2">
-            <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
-                {isLoading 
-                    ? (isLoginView ? 'Signing In...' : 'Creating Account...') 
-                    : (isLoginView ? 'Sign In' : 'Create Account')}
+          )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+              className="min-h-[44px] text-base"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder={isLogin ? "Enter your password" : "Create a password (min 6 characters)"}
+              minLength={isLogin ? undefined : 6}
+              className="min-h-[44px] text-base"
+            />
+          </div>
+
+          <DialogFooter className="flex-col gap-3 sm:flex-col">
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full btn-luxury min-h-[44px] text-base font-semibold"
+            >
+              {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
             </Button>
-            <Button type="button" variant="link" onClick={() => setIsLoginView(!isLoginView)}>
-                {isLoginView ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+            
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsLogin(!isLogin)}
+              className="w-full min-h-[44px] text-base"
+            >
+              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
             </Button>
-            </DialogFooter>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
+}

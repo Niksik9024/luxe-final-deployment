@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut, BarChart3, Image } from 'lucide-react';
+import { BarChart, Video, ImageIcon, Users, PanelLeft, Home, UserCog, Tags, DatabaseZap, Crown, LogOut, BarChart3, Image, CheckCircle, FileText } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,6 +53,8 @@ const navItems = [
 
 const devNavItems = [
     { href: '/admin/seed', label: 'Seed Data', icon: DatabaseZap },
+    { href: '/admin/qa-testing', label: 'QA Testing', icon: CheckCircle },
+    { href: '/admin/qa-report', label: 'QA Report', icon: FileText },
 ]
 
 const AdminSidebar = () => {
