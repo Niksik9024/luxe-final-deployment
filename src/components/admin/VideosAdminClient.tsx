@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Eye, Plus, Play } from 'lucide-react';
 import Link from 'next/link';
@@ -20,11 +21,7 @@ export function VideosAdminClient() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadVideos();
-  }, []);
-
-  const loadVideos = async () => {
+  const loadVideos = useCallback(async () => {
     try {
       const allVideos = getVideos();
       setVideos(allVideos);
@@ -37,7 +34,17 @@ export function VideosAdminClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadVideos();
+  }, [loadVideos]);
+
+  useRealtimeSync(useCallback((event) => {
+    if (event.key === 'videos') {
+      loadVideos();
+    }
+  }, [loadVideos]));
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this video?')) {

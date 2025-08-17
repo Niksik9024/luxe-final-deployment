@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { Trash2, Edit, Eye, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Gallery } from '@/lib/types';
@@ -20,11 +21,7 @@ export function GalleriesAdminClient() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadGalleries();
-  }, []);
-
-  const loadGalleries = async () => {
+  const loadGalleries = useCallback(async () => {
     try {
       const allGalleries = getGalleries();
       setGalleries(allGalleries);
@@ -37,7 +34,17 @@ export function GalleriesAdminClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadGalleries();
+  }, [loadGalleries]);
+
+  useRealtimeSync(useCallback((event) => {
+    if (event.key === 'galleries') {
+      loadGalleries();
+    }
+  }, [loadGalleries]));
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this gallery?')) {

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Model, Video, Gallery } from '@/lib/types';
 import Link from 'next/link';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { HeroCarousel } from '@/components/client/HeroCarousel';
 import { getVideos, getGalleries, getModels } from '@/lib/localStorage';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -188,7 +189,7 @@ export default function Home() {
     }));
   }, [topModels]);
 
-  useEffect(() => {
+  const loadHomePageData = useCallback(() => {
     // Generate dynamic seed based on current time for true randomization on each refresh
     const generateDynamicSeed = () => {
       return Math.floor(Date.now() / 1000) + Math.random() * 1000;
@@ -228,6 +229,16 @@ export default function Home() {
     setTopModels(shuffledModels.slice(0, 12)); 
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    loadHomePageData();
+  }, [loadHomePageData]);
+
+  useRealtimeSync(useCallback((event) => {
+    if (['videos', 'galleries', 'models'].includes(event.key || '')) {
+        loadHomePageData();
+    }
+  }, [loadHomePageData]));
 
   if (loading) {
     return <HomePageSkeleton />;

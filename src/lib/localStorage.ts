@@ -20,6 +20,8 @@ function setItem<T>(key: string, value: T): void {
     if (!isBrowser) return;
     try {
         window.localStorage.setItem(key, JSON.stringify(value));
+        // Dispatch a custom event for in-tab reactivity
+        window.dispatchEvent(new CustomEvent('custom-storage', { detail: { key } }));
     } catch (error) {
         console.error(`Error writing to localStorage key “${key}”:`, error);
     }

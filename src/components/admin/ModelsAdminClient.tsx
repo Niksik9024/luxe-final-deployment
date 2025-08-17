@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useRealtimeSync } from '@/hooks/useRealtimeSync';
 import { Trash2, Edit, Eye, Plus, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { Model } from '@/lib/types';
@@ -19,11 +20,7 @@ export function ModelsAdminClient() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadModels();
-  }, []);
-
-  const loadModels = async () => {
+  const loadModels = useCallback(async () => {
     try {
       const allModels = getModels();
       setModels(allModels);
@@ -36,7 +33,17 @@ export function ModelsAdminClient() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    loadModels();
+  }, [loadModels]);
+
+  useRealtimeSync(useCallback((event) => {
+    if (event.key === 'models') {
+      loadModels();
+    }
+  }, [loadModels]));
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this model?')) {
