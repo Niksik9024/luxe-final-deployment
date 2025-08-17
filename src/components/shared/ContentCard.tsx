@@ -4,6 +4,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import type { Video, Gallery } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ export const ContentCard = ({
   const [isHovering, setIsHovering] = useState(false);
   const { isDataSaver } = useDataSaver();
   const { currentUser, isAdmin, loading, updateUserFavorites } = useAuth();
+  const pathname = usePathname();
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [animate, setAnimate] = useState(false);
@@ -93,7 +95,7 @@ export const ContentCard = ({
       onMouseLeave={handleMouseLeave}
     >
         <div className="absolute top-2 left-2 z-20">
-            {isAdmin && (
+            {isAdmin && pathname.startsWith('/admin') && (
             <Button asChild size="sm" className="bg-background/70 text-foreground hover:bg-accent hover:text-accent-foreground">
                 <Link href={editLinkUrl}>
                 <Edit className="mr-2 h-4 w-4" /> Edit

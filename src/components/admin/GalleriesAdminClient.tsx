@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Eye, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { Gallery } from '@/lib/types';
-import { getGalleries, deleteGallery } from '@/lib/localStorage';
+import { getGalleries, deleteGallery, addGallery } from '@/lib/localStorage';
 import { useToast } from '@/lib/use-toast';
 import { Dialog, DialogContent, DialogTrigger, DialogClose, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -58,29 +58,28 @@ export function GalleriesAdminClient() {
     }
   };
 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const handleCreate = async (formData: FormData) => {
     try {
       const newGallery: Gallery = {
-        id: Date.now().toString(), // Simple ID generation
+        id: `gallery_${Date.now()}`,
         title: formData.get('title') as string,
         description: formData.get('description') as string,
-        images: (formData.get('images') as string).split(',').map(url => ({ url: url.trim() })),
-        coverImage: formData.get('image') as string,
-        category: formData.get('category') as string,
-        status: 'Draft', // Default status
+        image: formData.get('image') as string,
+        album: (formData.get('images') as string).split(',').map(url => url.trim()),
+        models: ['Alina'], // FIX: Add a default model to satisfy schema
+        tags: [],
+        keywords: [],
         date: new Date().toISOString(),
+        status: 'Published',
       };
-      // In a real app, you'd save this to a backend or more persistent storage
-      // For this example, we'll simulate adding it locally if localStorage is used
-      // For simplicity, this example doesn't persist the 'create' operation in localStorage.
-      // A full implementation would involve an API call or local storage update.
+      addGallery(newGallery);
+      await loadGalleries();
       toast({
         title: "Success",
-        description: "Gallery created successfully (simulated)",
+        description: "Gallery created successfully",
       });
-      // To actually see the created gallery, you might need to refresh or re-fetch
-      // For now, we'll just show a success message.
-      // await loadGalleries(); // Uncomment if create operation updates the list immediately
+      setIsCreateModalOpen(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -99,9 +98,9 @@ export function GalleriesAdminClient() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <h2 className="text-xl sm:text-2xl font-bold">Galleries</h2>
-        <Dialog>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto touch-manipulation">
+            <Button className="w-full sm:w-auto touch-manipulation" onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Gallery
             </Button>
@@ -149,9 +148,7 @@ export function GalleriesAdminClient() {
                 </Select>
               </div>
               <div className="flex justify-end space-x-2">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
+                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
                 <Button type="submit">Create Gallery</Button>
               </div>
             </form>

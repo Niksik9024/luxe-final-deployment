@@ -77,7 +77,7 @@ const UserMenu = () => {
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-full hover:ring-2 hover:ring-primary/30 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] p-0">
+                    <Button data-testid="user-menu-button" variant="ghost" className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-full hover:ring-2 hover:ring-primary/30 transition-all duration-300 touch-manipulation min-h-[44px] min-w-[44px] p-0">
                         <Avatar className="h-10 w-10 sm:h-11 sm:w-11 border-2 border-primary/40 hover:border-primary transition-colors">
                             <AvatarImage 
                                 src={currentUser.image || '/default-avatar.png'} 

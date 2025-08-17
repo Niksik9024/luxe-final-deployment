@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Eye, Plus, Play } from 'lucide-react';
 import Link from 'next/link';
 import { Video } from '@/lib/types';
-import { getVideos, deleteVideo } from '@/lib/localStorage';
+import { getVideos, deleteVideo, addVideo } from '@/lib/localStorage';
 import { useToast } from '@/lib/use-toast';
 import { Dialog, DialogContent, DialogTrigger, DialogClose, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -58,18 +58,38 @@ export function VideosAdminClient() {
     }
   };
 
-  // Placeholder for handleCreate function, assuming it's defined elsewhere or will be added.
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const handleCreate = async (formData: FormData) => {
-    // Logic to handle video creation would go here.
-    // For now, we'll just log the data and close the dialog.
-    console.log("Creating video with data:", formData);
-    toast({
-      title: "Success",
-      description: "Video created successfully (simulated)",
-    });
-    // You would typically add the new video and then call loadVideos()
-    // await newVideoApiCall(formData);
-    // await loadVideos();
+    try {
+        const newVideo: Omit<Video, 'id'> = {
+            title: formData.get('title') as string,
+            description: formData.get('description') as string,
+            image: formData.get('thumbnail') as string,
+            videoUrl: formData.get('videoUrl') as string,
+            duration: formData.get('duration') as string,
+            category: formData.get('category') as string,
+            models: ['Alina'], // FIX: Add a default model to satisfy schema
+            tags: [], // Assuming no tags for now
+            keywords: [],
+            date: new Date().toISOString(),
+            status: 'Published',
+            isFeatured: false,
+        };
+        // A real implementation would have proper validation here
+        addVideo({ ...newVideo, id: `video_${Date.now()}` });
+        await loadVideos();
+        toast({
+            title: "Success",
+            description: "Video created successfully",
+        });
+        setIsCreateModalOpen(false); // Close the modal
+    } catch (error) {
+        toast({
+            title: "Error",
+            description: "Failed to create video",
+            variant: "destructive",
+        });
+    }
   };
 
 
@@ -81,9 +101,9 @@ export function VideosAdminClient() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <h2 className="text-xl font-semibold md:hidden">Videos</h2>
-        <Dialog>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto touch-manipulation">
+            <Button className="w-full sm:w-auto touch-manipulation" onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Video
             </Button>
@@ -135,9 +155,7 @@ export function VideosAdminClient() {
                 </Select>
               </div>
               <div className="flex justify-end space-x-2">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
+                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
                 <Button type="submit">Create Video</Button>
               </div>
             </form>

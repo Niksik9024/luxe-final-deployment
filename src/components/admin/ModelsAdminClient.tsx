@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit, Eye, Plus, Crown } from 'lucide-react';
 import Link from 'next/link';
 import { Model } from '@/lib/types';
-import { getModels, deleteModel } from '@/lib/localStorage';
+import { getModels, deleteModel, addModel } from '@/lib/localStorage';
 import { useToast } from '@/lib/use-toast';
 import { Dialog, DialogContent, DialogTrigger, DialogClose, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
@@ -57,17 +57,31 @@ export function ModelsAdminClient() {
     }
   };
 
-  // Dummy handleCreate function for the dialog form
-  const handleCreate = (formData: FormData) => {
-    // This function would typically handle creating a new model
-    // For now, it just logs the data and closes the dialog
-    console.log("Creating model with data:", formData);
-    toast({
-      title: "Model creation simulated",
-      description: "New model data logged to console.",
-    });
-    // In a real app, you would add logic here to add the model,
-    // then potentially call loadModels() and close the dialog.
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const handleCreate = async (formData: FormData) => {
+    try {
+        const newModel: Model = {
+            id: `model_${Date.now()}`,
+            name: formData.get('name') as string,
+            description: formData.get('bio') as string,
+            image: formData.get('image') as string,
+            status: 'Published',
+            isFeatured: false,
+        };
+        addModel(newModel);
+        await loadModels();
+        toast({
+            title: "Success",
+            description: "Model created successfully",
+        });
+        setIsCreateModalOpen(false);
+    } catch (error) {
+        toast({
+            title: "Error",
+            description: "Failed to create model",
+            variant: "destructive",
+        });
+    }
   };
 
 
@@ -79,9 +93,9 @@ export function ModelsAdminClient() {
     <div className="w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <h2 className="text-xl font-semibold md:hidden">Models</h2>
-        <Dialog>
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto touch-manipulation">
+            <Button className="w-full sm:w-auto touch-manipulation" onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Model
             </Button>
@@ -119,9 +133,7 @@ export function ModelsAdminClient() {
                 <Input type="text" id="specialties" name="specialties" placeholder="Fashion, Portrait, Commercial" />
               </div>
               <div className="flex justify-end space-x-2">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
+                <Button type="button" variant="outline" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
                 <Button type="submit">Create Model</Button>
               </div>
             </form>
