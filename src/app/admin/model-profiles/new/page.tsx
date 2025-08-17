@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/lib/use-toast";
 import { ModelProfileForm } from '@/components/admin/ModelProfileForm';
 import type { ModelProfileWithImages } from '@/lib/hero-sample-data';
+import { saveModelProfile } from '@/lib/model-profile-storage';
 
 const modelProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -20,14 +21,6 @@ const modelProfileSchema = z.object({
     position: z.number().min(1).max(10)
   })).max(10, "Maximum 10 carousel images allowed.")
 });
-
-// Mock function - implement according to your storage solution
-const saveModelProfile = (profile: ModelProfileWithImages) => {
-  if (typeof window === 'undefined') return;
-  const profiles = JSON.parse(localStorage.getItem('modelProfiles') || '[]');
-  profiles.push(profile);
-  localStorage.setItem('modelProfiles', JSON.stringify(profiles));
-};
 
 export default function NewModelProfilePage() {
   const router = useRouter();
@@ -48,8 +41,8 @@ export default function NewModelProfilePage() {
       const newProfile: ModelProfileWithImages = {
         id: `profile_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: values.name,
-        category: values.category,
-        description: values.description || null,
+        category: "Hero", // Default category
+        description: "", // Default description
         createdAt: new Date(),
         updatedAt: new Date(),
         images: [

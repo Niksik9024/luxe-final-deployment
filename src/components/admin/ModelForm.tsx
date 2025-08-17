@@ -3,11 +3,12 @@
 import React from 'react'
 import { useFormContext } from "react-hook-form"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Switch } from '../ui/switch'
+import { Instagram, Twitter } from 'lucide-react'
 
 export const ModelForm: React.FC = () => {
   const { control } = useFormContext()
@@ -22,17 +23,17 @@ export const ModelForm: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-6">
                 <FormField
-                control={control}
-                name="name"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Jane Doe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
+                    control={control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Model Name</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Jane Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
                 />
 
                 <FormField
@@ -42,8 +43,22 @@ export const ModelForm: React.FC = () => {
                         <FormItem>
                          <FormLabel>Bio / Description</FormLabel>
                         <FormControl>
-                            <Textarea placeholder='A brief bio for the model.' {...field} />
+                            <Textarea placeholder='A brief bio for the model.' {...field} rows={5}/>
                         </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={control}
+                    name="famousFor"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Famous For</FormLabel>
+                        <FormControl>
+                            <Textarea placeholder="e.g., Featured in Vogue Italia, known for..." {...field} rows={3}/>
+                        </FormControl>
+                        <FormDescription>A short summary of their notable work or features.</FormDescription>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -51,6 +66,69 @@ export const ModelForm: React.FC = () => {
             </CardContent>
         </Card>
 
+        <Card>
+            <CardHeader>
+                <CardTitle>Measurements</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <FormField control={control} name="height" render={({ field }) => (
+                    <FormItem><FormLabel>Height</FormLabel><FormControl><Input placeholder="e.g., 5'10&quot;" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={control} name="bust" render={({ field }) => (
+                    <FormItem><FormLabel>Bust</FormLabel><FormControl><Input placeholder="e.g., 34B" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={control} name="waist" render={({ field }) => (
+                    <FormItem><FormLabel>Waist</FormLabel><FormControl><Input placeholder="e.g., 24&quot;" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+                <FormField control={control} name="hips" render={({ field }) => (
+                    <FormItem><FormLabel>Hips</FormLabel><FormControl><Input placeholder="e.g., 35&quot;" {...field} /></FormControl><FormMessage /></FormItem>
+                )}/>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>Social Media</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={control}
+                    name="instagram"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Instagram Handle</FormLabel>
+                            <div className="relative">
+                                <Instagram className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <FormControl>
+                                    <Input placeholder="username" {...field} className="pl-9"/>
+                                </FormControl>
+                            </div>
+                            <FormDescription>Just the username, not the full URL.</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={control}
+                    name="twitter"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>X (Twitter) Handle</FormLabel>
+                            <div className="relative">
+                                <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <FormControl>
+                                    <Input placeholder="username" {...field} className="pl-9"/>
+                                </FormControl>
+                            </div>
+                            <FormDescription>Just the username, not the full URL.</FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </CardContent>
+        </Card>
+      </div>
+      <div className="space-y-8">
         <Card>
             <CardHeader>
                 <CardTitle>Media</CardTitle>
@@ -72,8 +150,6 @@ export const ModelForm: React.FC = () => {
                 />
             </CardContent>
         </Card>
-      </div>
-      <div className="space-y-8">
         <Card>
             <CardHeader>
                 <CardTitle>Settings</CardTitle>

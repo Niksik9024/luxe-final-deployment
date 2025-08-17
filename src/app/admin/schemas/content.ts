@@ -49,4 +49,11 @@ export const modelFormSchema = z.object({
   image: z.string().url("Please enter a valid image URL."),
   status: z.enum(['Published', 'Draft']),
   isFeatured: z.boolean().optional(),
+  instagram: z.string().optional(),
+  twitter: z.string().optional(),
+  height: z.string().optional(),
+  bust: z.string().optional(),
+  waist: z.string().optional(),
+  hips: z.string().optional(),
+  famousFor: z.string().optional(),
 });
